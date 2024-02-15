@@ -1,0 +1,108 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3d ด้วย A-Frame</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <link rel="stylesheet" href="{% static '/style.css' %}">
+</head>
+
+<body>
+
+    <script>
+        AFRAME.registerComponent('navigate-on-click', {
+            schema: {
+              url: {default: ''}
+            },
+        
+            init: function () {
+              var data = this.data;
+              var el = this.el;
+        
+              el.addEventListener('click', function () {
+                window.location.href = data.url;
+              });
+            }
+          });   
+
+        AFRAME.registerComponent('highlight-on-hover', {
+            init: function () {
+              var el = this.el;
+              var originalColors = {};
+
+              el.addEventListener('model-loaded', function () {
+                var model = el.getObject3D('mesh');
+                model.traverse(function (node) {
+                  if (node.isMesh) {
+                    originalColors[node.uuid] = node.material.color.clone();
+                  }
+                });
+              });
+
+              el.addEventListener('mouseenter', function (evt) {
+                el.setAttribute('material', 'color', 'red');
+                var model = el.getObject3D('mesh');
+                model.traverse(function (node) {
+                  if (node.isMesh) {
+                    node.material.color.set(0xff0000); 
+                  }
+                })
+              });
+              el.addEventListener('mouseleave', function (evt) {
+                el.setAttribute('material', 'color', 'white');
+                var model = el.getObject3D('mesh');
+                model.traverse(function (node) {
+                  if (node.isMesh) {
+                    node.material.color.copy(originalColors[node.uuid]); 
+                  }
+                })
+              });
+            }
+          });
+
+    </script>
+
+    <a-scene >
+        <a-entity camera="" look-controls cursor="rayOrigin: mouse"></a-entity>
+
+        <a-entity position="0 3 -3">
+            <a-circle
+                geometry="radius: 2; segments-radial: 6" 
+                material="src: url({% static '/Screenshot 2024-02-15 183817.png' %});"
+                position="0 0 -1"
+                mouse-over
+                cursor-listener
+                highlight-on-hover
+                raycaster="objects: .clickable"
+                navigate-on-click="url: http://127.0.0.1:8000/sign_up"
+                
+            ></a-circle>
+        </a-entity>
+        
+        <a-entity position="0 0 0">
+            <a-circle
+                <a-entity gltf-model="url({% static '/bedroom.glb' %})"highlight-on-hover 
+                raycaster="objects: .clickable"
+                class="clickable"
+                navigate-on-click="url: http://127.0.0.1:8000/sign_in"></a-entity >
+            ></a-circle>
+        </a-entity>
+
+
+        <a-entity position="7 0 0">
+            <a-entity gltf-model="url({% static '/old_crt_monitor_model.glb' %})"highlight-on-hover
+            class="clickable"
+            navigate-on-click="url: http://127.0.0.1:8000/evaluate/create_plo">
+        </a-entity>
+
+
+        <a-camera position="0 3 0"></a-camera>
+        <a-sky src="url({% static '/zqww2qjnc3e51.jpg' %})">
+        <a-light type="ambient" intensity="0.5"></a-light   >
+        <a-light type="directional" intensity="0.8" position="-1 1 0"></a-light>
+    </a-scene>
+
+</body>
+</html>

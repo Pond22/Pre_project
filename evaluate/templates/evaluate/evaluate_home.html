@@ -1,0 +1,15 @@
+<!-- evaluate_home.html -->
+
+{% block title %}Evaluate Home{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Welcome to the Evaluation Home Page</h1>
+    <p>This is a placeholder text for the Evaluation Home Page.</p>
+
+    {% for i in plo%}
+        <p>{{ i.create }}<br> {{ i.text }}</p>
+    {% endfor %}
+    </form>
+</div>
+{% endblock %}

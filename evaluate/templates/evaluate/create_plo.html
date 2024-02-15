@@ -1,0 +1,16 @@
+{% block title %}
+    ทดสอบการบันทึกข้อมูล PLOs
+{% endblock %}
+
+{% block content %}
+<div class= "container"> 
+    <h1>สร้าง PLOs</h1>
+    <form method="post" action="{% url 'create_plo' %}">
+        {% csrf_token %}
+        
+        <label for="text">ป้อน PLO:</label>
+        <input type="text" name="text" required><br>
+
+        <input type="submit" value="เพิ่มข้อมูล">
+</div>
+{%endblock%}
