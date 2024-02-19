@@ -4,5 +4,8 @@ from . import views
 
 urlpatterns = [
     path('evaluate/', views.eva_home, name='eva_home'),
-    path('evaluate/create_plo', views.create_plo, name='create_plo')
+    path('evaluate/create_plo', views.create_plo, name='create_plo'),
+    path('evaluate/create_form', views.create_form, name='create_form'),
+    path('form/form_detail', views.form_detail, name='form_detail'),
+    path('evaluate/create_clo/<int:form_id>/', views.create_clo, name='create_clo'),
 ]

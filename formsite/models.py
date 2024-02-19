@@ -19,10 +19,17 @@ class Answer(models.Model):
 '''
 
 # Create your models here.
+
+class form(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    create = models.DateTimeField(auto_now_add=True)
+    
 class clo(models.Model):
     text = models.CharField(max_length=255)
+    form = models.ForeignKey(form, on_delete=models.CASCADE)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    id = models.IntegerField(primary_key=True)
+    id = models.BigAutoField(primary_key=True)
     create = models.DateTimeField(auto_now_add=True)
     update = models.DateTimeField(auto_now=True)
     

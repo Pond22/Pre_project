@@ -20,7 +20,7 @@
             init: function () {
               var data = this.data;
               var el = this.el;
-        
+              
               el.addEventListener('click', function () {
                 window.location.href = data.url;
               });
@@ -61,12 +61,66 @@
               });
             }
           });
+          
+          AFRAME.registerComponent('check', {
+            init: function () {
+              var el = this.el;
+              el.addEventListener('model-loaded', function () {
+                var model = el.getObject3D('mesh');
+                model.traverse(function (node) {
+                  console.log('Object name:', node.name);
+                  console.log('Object ID:', node.uuid);
+                  console.log('');
+                });
+              });
+            }
+          });
+
+          AFRAME.registerComponent('highlight', {
+            init: function () {
+              var el = this.el;
+              var originalColors = {};
+
+              el.addEventListener('model-loaded', function () {
+                var model = el.getObject3D('mesh');
+                model.traverse(function (node) {
+                  if (node.isMesh) {
+                    originalColors[node.uuid] = node.material.color.clone();
+                  }
+                });
+              });
+
+              el.addEventListener('mouseenter', function (evt) {
+                el.setAttribute('material', 'color', 'red');
+                var model = el.getObject3D('mesh');
+                model.traverse(function (node) {
+                  if (node.name === 'Wallshelf') {
+                    node.material.color.set(0x00ff00);
+                    
+                  }
+                })
+              });
+              el.addEventListener('mouseleave', function (evt) {
+                el.setAttribute('material', 'color', 'white');
+                var model = el.getObject3D('mesh');
+                model.traverse(function (node) {
+                  if (node.isMesh) {
+                    node.material.color.copy(originalColors[node.uuid]); 
+                  }
+                })
+              });
+            }
+          });
+
+          
 
     </script>
 
     <a-scene >
         <a-entity camera="" look-controls cursor="rayOrigin: mouse"></a-entity>
+        <a-entity id="raycaster" raycaster="objects: .clickable;"></a-entity>
 
+        <!-- button to sign_up ja -->
         <a-entity position="0 3 -3">
             <a-circle
                 geometry="radius: 2; segments-radial: 6" 
@@ -81,28 +135,68 @@
             ></a-circle>
         </a-entity>
         
+        <!-- bedroom -->
         <a-entity position="0 0 0">
             <a-circle
-                <a-entity gltf-model="url({% static '/bedroom.glb' %})"highlight-on-hover 
+                <a-entity gltf-model="url({% static '/bedroom.glb' %})"
+                highlight-on-hover
                 raycaster="objects: .clickable"
                 class="clickable"
                 navigate-on-click="url: http://127.0.0.1:8000/sign_in"></a-entity >
             ></a-circle>
         </a-entity>
 
-
+        <!-- TV -->
         <a-entity position="7 0 0">
             <a-entity gltf-model="url({% static '/old_crt_monitor_model.glb' %})"highlight-on-hover
             class="clickable"
             navigate-on-click="url: http://127.0.0.1:8000/evaluate/create_plo">
         </a-entity>
 
+          <!-- ลอง -->
+          <a-entity position="8.5 0 0">
+            <a-gltf-model src="{% static '/bedroom.glb' %}" id="bedroom-model" 
+            raycaster="objects: .clickable"
+            class="clickable"
+            highlight
+            ></a-gltf-model>
+        </a-entity>
+        
 
         <a-camera position="0 3 0"></a-camera>
         <a-sky src="url({% static '/zqww2qjnc3e51.jpg' %})">
         <a-light type="ambient" intensity="0.5"></a-light   >
         <a-light type="directional" intensity="0.8" position="-1 1 0"></a-light>
     </a-scene>
+
+    <script>
+      document.querySelector('#bedroom-model').addEventListener('model-loaded', function() {
+
+        var model = this.getObject3D('mesh');
+    
+        var obj = document.querySelector('#bedroom-model').getObject3D('mesh');
+
+        if (obj !== undefined) {
+          console.log("เจอ")
+          obj.traverse(function(node) {
+            if (node.isMesh) {
+              //console.log(node.name)
+              if (node.name === 'Wallshelf') {
+                //node.material.color.set(0x00ff00);
+              }
+            }
+          });
+
+        } else {
+          console.log("ไม่เจอ")
+        }
+      });
+      
+      //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+      
+    </script>
 
 </body>
 </html>

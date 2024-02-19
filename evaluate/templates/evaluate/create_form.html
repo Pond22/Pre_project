@@ -1,0 +1,14 @@
+
+{% block title %}
+Create PLOs
+{% endblock %}
+
+{% block content %}
+<div class="container"> 
+    <h1>สร้าง PLOs</h1>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="action" value="create">Create</button>
+    </form>
+</div>
+{% endblock %}
