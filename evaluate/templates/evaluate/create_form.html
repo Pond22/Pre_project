@@ -1,13 +1,14 @@
 
 {% block title %}
-Create PLOs
+Create Form
 {% endblock %}
 
 {% block content %}
 <div class="container"> 
-    <h1>สร้าง PLOs</h1>
+    <h1>สร้าง FORM</h1>
     <form method="post">
         {% csrf_token %}
+        {{new_form.as_p }}
         <button type="submit" name="action" value="create">Create</button>
     </form>
 </div>

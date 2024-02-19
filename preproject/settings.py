@@ -85,7 +85,7 @@ DATABASES = {
     #}
     'default': {
         'ENGINE': 'django.db.backends.mysql', 
-        'NAME': 'form',
+        'NAME': 'm1',
         'USER': 'root',
         'PASSWORD': 'pond22',
         'HOST': 'localhost',

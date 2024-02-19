@@ -1,7 +1,9 @@
 <form method="POST" >
     {% csrf_token %}
-    {% for i in form_instance%}
-        <p>{{ i.created_by }}<br></p>
+    {% for form_instance in forms %}
+    <p>Created_by:{{ form_instance.created_by }}<br>Form ID: {{ form_instance.id }}<br>Form Name: {{ form_instance.name }}<br>class_code: {{ form_instance.class_code }}
+        <a href="{% url 'view_form' form_id=form_instance.id %}">View Form</a></p>
     {% endfor %}
+
     <button type="submit">Create</button>
 </form>

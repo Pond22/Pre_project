@@ -1,0 +1,11 @@
+
+{% block title %}
+Main_Form_NAJA! Form ID: {{ form_instance.id }}
+{% endblock %}
+
+<p>Main Form ID: {{ form_instance.name }}</p>
+
+<!-- เข้าถึง clo_form โดยตรง -->
+{% for i in clo_form %}
+    <p>{{ forloop.counter }}_CLO : {{ i.text }}</p>
+{% endfor %}

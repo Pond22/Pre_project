@@ -10,7 +10,7 @@
     <form method="post" action="{% url 'create_clo' form_id=context.form_id %}">
         {% csrf_token %}
         <!--{{context.form.as_p }} -->
-        <label for="text">ป้อน PLO:</label>
+        <label for="text">ป้อน CLO:</label>
         <input type="text" name="text" required><br>
         <!-- เพิ่มฟิลด์ซ่อนเพื่อส่งค่า form_id -->
         <input type="hidden" name="form_id" value="{{ form_id }}">

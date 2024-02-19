@@ -9,7 +9,7 @@ class PLOsForm(forms.ModelForm):
 class Form(forms.ModelForm):
     class Meta:
         model = form
-        fields = ['created_by'] 
+        fields = ['name', 'class_code', 'school_year', 'section', 'year_number'] 
         
 class ClosForm(forms.ModelForm):
     class Meta:
