@@ -7,7 +7,7 @@
     <h1>สร้าง PLOs</h1>
     <form method="post" action="{% url 'create_plo' %}">
         {% csrf_token %}
-        {{form.as_p }}
+        
         <label for="text">ป้อน PLO:</label>
         <input type="text" name="text" required><br>
 

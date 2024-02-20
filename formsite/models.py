@@ -21,6 +21,10 @@ class Answer(models.Model):
 
 # Create your models here.
 
+class students(models.Model):
+    students_id = models.CharField(max_length=10, primary_key=True)
+    name = models.CharField(max_length=80)
+
 class form(models.Model):
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=100)
@@ -66,5 +70,4 @@ class PLOs(models.Model):
     
     def __str__(self):
         return self.text
-
 

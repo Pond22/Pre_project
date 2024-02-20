@@ -43,10 +43,31 @@ def sign_up(request: HttpResponse):
     if request.method == "POST":
         form = RegisterForm(request.POST)
         if form.is_valid():
+            user = form.save(commit=False)
+            
+            user.username = user.email[:10] if user.email else ''  
+            user.save()
             form.save()
-            return redirect('/')
+            return redirect('/index')
     else:
         form = RegisterForm()
             
     context = {'form': form}
     return render(request, 'member/sign_up.html', context)
+
+'''
+แนวคิด
+
+def import_users_from_csv(file_path):
+    with open(file_path, 'r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            email = row[0] + '@payap.ac.th'  
+            password = row[0]  # ใช้คอลัมน์ที่ 0 เป็นรหัสผ่าน
+            user = User.objects.create_user(username=email, email=email, password=password)
+            user.groups.add(2)  # เพิ่มเข้ากลุ่มที่ 2
+
+import_users_from_csv('/path/to/your/csv/file.csv') เรียกใช้
+
+แบบนี้จะกำหนดกลุ่มผู้ใช้ (นักศึกษา) ทั้งหมดในทีเดียวโดยที่แต่ละฟอร์มที่เอามาลงจะสามารถตรวจสอบได้ว่านักศึกษาคนไหนมีสิทธิ์ในการประเมินแบบฟอร์มนี้และเป็นการสร้างผู้ใช้ใหม่ไปในตัว
+'''
