@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import PLOs,clo,UserEvaluation,form, students
+from .models import PLOs,clo,UserEvaluation,form, students, AuthorizedUser
 # Register your models here.
 print("Hello from admin.py")
 
@@ -11,5 +11,6 @@ admin.site.register(clo)
 admin.site.register(UserEvaluation)
 admin.site.register(form, FormAdmin)
 admin.site.register(students)
+admin.site.register(AuthorizedUser)
 
 

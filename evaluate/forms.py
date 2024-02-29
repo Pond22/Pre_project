@@ -1,9 +1,13 @@
 from django import forms
-from formsite.models import PLOs, form, clo
+from formsite.models import PLOs, form, clo, AuthorizedUser
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 import re
 
+class Aut(forms.ModelForm):
+    class Meta:
+        model = AuthorizedUser
+        fields = []
 class PLOsForm(forms.ModelForm):
     class Meta:
         model = PLOs
@@ -14,7 +18,7 @@ class Form(forms.ModelForm):
         model = form
         fields = ['name', 'class_code', 'school_year', 'section', 'year_number'] 
         
-class ClosForm(UserCreationForm):
+class ClosForm(forms.ModelForm):
     class Meta:
         model = clo
         fields = ['text']

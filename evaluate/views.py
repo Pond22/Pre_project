@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http.response import HttpResponse
 from django.contrib.auth.decorators import login_required
-from formsite.models import PLOs, clo
+from formsite.models import PLOs, clo, AuthorizedUser
 from formsite.models import form as form_model
-from .forms import PLOsForm, Form, ClosForm, CSVUploadForm
+from .forms import PLOsForm, Form, ClosForm, CSVUploadForm, Aut
 from django.contrib.auth.models import User, Group
 from django.http import JsonResponse
 from rest_framework.views import APIView
@@ -72,12 +72,28 @@ def form_detail(request):
     forms = form_model.objects.filter(created_by=user)
     context = {'forms': forms}
     return render(request, 'evaluate/form_detail.html', context)
-                
+
+def test(num1, num2):
+    progress_percent = (num1 / num2) * 100
+    return (progress_percent)
+
+def progress_api(request):
+    processed_records = request.GET.get('processed_records')
+    num_rows = request.GET.get('num_rows')
+
+    # เรียกใช้ฟังก์ชัน test เพื่อคำนวณ progress_percent
+    progress_percent = test(int(processed_records), int(num_rows))
+
+    # ส่งค่า progress_percent กลับไปในรูปแบบ JSON
+    return JsonResponse({'progress_percent': progress_percent})
+
 @login_required(login_url="sign_in")   
 def view_form(request, form_id):
     if request.method == 'POST':
         #form = RegisterForm(request.POST)
         form = CSVUploadForm(request.POST, request.FILES)
+        use_aut = Aut(request.POST)
+        id_form = get_object_or_404(form_model, id=form_id)
         if form.is_valid():
             csv_file = request.FILES['csv_file']
             if csv_file.name.endswith('.csv'):
@@ -98,6 +114,8 @@ def view_form(request, form_id):
                     user = User.objects.create_user(username=name, email=email, password=str(password))
                     group = Group.objects.get(name='นักศึกษา')
                     user.groups.add(group)  # เพิ่มเข้ากลุ่มที่ 2
+                    
+                    AuthorizedUser.objects.create(form=id_form, stu_list=row[0])
                     processed_records +=1
                 
     form_instance = get_object_or_404(form_model, pk=form_id)
@@ -106,6 +124,7 @@ def view_form(request, form_id):
     csv_1 = CSVUploadForm()
     context = {'form_instance': form_instance, 'clo_form': clo_form, 'csv_1': csv_1}
     return render(request, 'evaluate/main_form.html', context)
+
 
 '''
 แนวคิด

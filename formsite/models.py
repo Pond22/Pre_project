@@ -44,6 +44,12 @@ class form(models.Model):
         help_text='ใส่ตัวเลขปี 4 ตัว',
         validators=[MinValueValidator(1999), MaxValueValidator(3100)]
     )
+
+class AuthorizedUser(models.Model):
+    form = models.ForeignKey(form, on_delete=models.CASCADE)
+    stu_list = models.CharField(max_length=10)
+    def __str__(self):
+        return self.stu_list
     
 class clo(models.Model):    
     text = models.TextField()
@@ -70,4 +76,5 @@ class PLOs(models.Model):
     
     def __str__(self):
         return self.text
+
 
