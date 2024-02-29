@@ -17,5 +17,5 @@ class RegisterForm(UserCreationForm):
     def clean_email(self):
         email = self.cleaned_data.get('email')
         if not validate_email(email):
-            raise forms.ValidationError("Invalid email format. Please enter a valid email address.")
+            raise forms.ValidationError("Invalid email format. Please enter a valid email address with domain payap.ac.th.")
         return email

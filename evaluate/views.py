@@ -3,8 +3,12 @@ from django.http.response import HttpResponse
 from django.contrib.auth.decorators import login_required
 from formsite.models import PLOs, clo
 from formsite.models import form as form_model
-from .forms import PLOsForm, Form, ClosForm
-from django.core.exceptions import ValidationError
+from .forms import PLOsForm, Form, ClosForm, CSVUploadForm
+from django.contrib.auth.models import User, Group
+from django.http import JsonResponse
+from rest_framework.views import APIView
+from rest_framework.response import Response
+import pandas as pd
 # Create your views here.
 
 @login_required(login_url="sign_in")   
@@ -68,14 +72,56 @@ def form_detail(request):
     forms = form_model.objects.filter(created_by=user)
     context = {'forms': forms}
     return render(request, 'evaluate/form_detail.html', context)
-
+                
 @login_required(login_url="sign_in")   
 def view_form(request, form_id):
+    if request.method == 'POST':
+        #form = RegisterForm(request.POST)
+        form = CSVUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            csv_file = request.FILES['csv_file']
+            if csv_file.name.endswith('.csv'):
+                #csv_data = csv_file.read().decode('utf-8')
+                try:
+                    csv_data = pd.read_csv(csv_file, encoding='utf-8')
+                except UnicodeDecodeError:
+                    csv_data = pd.read_csv(csv_file, encoding='latin1')
+                #csv_data = StringIO(csv_data)
+                #reader = csv.reader(csv_data)
+                num_rows = len(csv_data)
+                processed_records =0
+                for index, row in csv_data.iterrows():
+                    print(row)
+                    name = row[1]
+                    password = row[0]  # ใช้คอลัมน์ที่ 0 เป็นรหัสผ่าน
+                    email = str(row[0]) + '@payap.ac.th'
+                    user = User.objects.create_user(username=name, email=email, password=str(password))
+                    group = Group.objects.get(name='นักศึกษา')
+                    user.groups.add(group)  # เพิ่มเข้ากลุ่มที่ 2
+                    processed_records +=1
+                
     form_instance = get_object_or_404(form_model, pk=form_id)
     clo_form = clo.objects.filter(form=form_id)
-    print(form_id)
-    context = {'form_instance': form_instance, 'clo_form': clo_form}
+    print("form_id = ",form_id)
+    csv_1 = CSVUploadForm()
+    context = {'form_instance': form_instance, 'clo_form': clo_form, 'csv_1': csv_1}
     return render(request, 'evaluate/main_form.html', context)
 
+'''
+แนวคิด
 
+def import_users_from_csv(file_path):
+    with open(file_path, 'r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            email = row[0] + '@payap.ac.th'  
+            password = row[0]  # ใช้คอลัมน์ที่ 0 เป็นรหัสผ่าน
+            user = User.objects.create_user(username=email, email=email, password=password)
+            group = Group.objects.get(name='นักศึกษา')
+            user.groups.add(group)  # เพิ่มเข้ากลุ่มที่ 2
+
+import_users_from_csv('/path/to/your/csv/file.csv') เรียกใช้
+
+แบบนี้จะกำหนดกลุ่มผู้ใช้ (นักศึกษา) ทั้งหมดในทีเดียวโดยที่แต่ละฟอร์มที่เอามาลงจะสามารถตรวจสอบได้ว่านักศึกษาคนไหนมีสิทธิ์ในการประเมินแบบฟอร์มนี้และเป็นการสร้างผู้ใช้ใหม่ไปในตัว
+'''
 

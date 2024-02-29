@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.http.response import HttpResponse
 from django.contrib.auth import authenticate, login, logout
 from member.forms import RegisterForm
+from django.contrib.auth.models import Group
 # Create your views here.
 def member(request):
     return HttpResponse("คน")
@@ -17,7 +18,6 @@ def sign_in(request):
         )
 
         if user is not None:
-            # Log user in
             login(request, user)
             return redirect('/')
             
@@ -44,8 +44,9 @@ def sign_up(request: HttpResponse):
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            
-            user.username = user.email[:10] if user.email else ''  
+            x = user.email
+            user.username = x[:x.index("@")]
+           #user.username = user.email[:10] if user.email else ''  
             user.save()
             form.save()
             return redirect('/index')
@@ -65,7 +66,8 @@ def import_users_from_csv(file_path):
             email = row[0] + '@payap.ac.th'  
             password = row[0]  # ใช้คอลัมน์ที่ 0 เป็นรหัสผ่าน
             user = User.objects.create_user(username=email, email=email, password=password)
-            user.groups.add(2)  # เพิ่มเข้ากลุ่มที่ 2
+            group = Group.objects.get(name='นักศึกษา')
+            user.groups.add(group)  # เพิ่มเข้ากลุ่มที่ 2
 
 import_users_from_csv('/path/to/your/csv/file.csv') เรียกใช้
 

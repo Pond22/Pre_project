@@ -1,4 +1,25 @@
 
+<style>
+    #progress-bar-container {
+        width: 100%;
+        background-color: #f2f2f2;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+    }
+
+    #progress-bar {
+        height: 30px;
+        background-color: #4caf50;
+        width: 0; /* ความคืบหน้าเริ่มต้นที่ 0% */
+        border-radius: 5px;
+    }
+
+    h2 {
+        margin-bottom: 5px;
+    }
+</style>
+
 {% block title %}
 Main_Form_NAJA! Form ID: {{ form_instance.id }}
 {% endblock %}
@@ -9,3 +30,37 @@ Main_Form_NAJA! Form ID: {{ form_instance.id }}
 {% for i in clo_form %}
     <p>{{ forloop.counter }}_CLO : {{ i.text }}</p>
 {% endfor %}
+
+<body>
+    <h2>Upload CSV File</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ csv_1.as_p }}
+        <button type="submit" id="import">Submit</button>
+    </form>
+    <div id="progress-bar-container">
+        <h2>Progress</h2>
+        <div id="progress-bar" style="width: 2.5;"></div>
+    </div>
+</body>
+
+<script>
+    /*
+    document.getElementById('import').onclick = function() {
+        setInterval(function() {
+            fetch('/progress_api/')
+            .then(response => response.json())
+            .then(data => {
+                updateProgressBar(data.progress_percent);
+                console.log(data.progress_percent);
+            });
+        }, 1000); //1วิ
+    };
+    
+    
+    function updateProgressBar(progress) {
+        const progressBar = document.getElementById('progress-bar');
+        progressBar.style.width = `${progress}%`;
+    }
+*/
+</script>

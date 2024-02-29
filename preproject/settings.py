@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'formsite',
     'member',
     'evaluate',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
