@@ -107,14 +107,15 @@ def view_form(request, form_id):
                 num_rows = len(csv_data)
                 processed_records =0
                 for index, row in csv_data.iterrows():
-                    print(row)
-                    name = row[1]
-                    password = row[0]  # ใช้คอลัมน์ที่ 0 เป็นรหัสผ่าน
-                    email = str(row[0]) + '@payap.ac.th'
-                    user = User.objects.create_user(username=name, email=email, password=str(password))
-                    group = Group.objects.get(name='นักศึกษา')
-                    user.groups.add(group)  # เพิ่มเข้ากลุ่มที่ 2
-                    
+                    try:
+                        name = row[1]
+                        password = row[0]  # ใช้คอลัมน์ที่ 0 เป็นรหัสผ่าน
+                        email = str(row[0]) + '@payap.ac.th'
+                        user = User.objects.create_user(username=name, email=email, password=str(password))
+                        group = Group.objects.get(name='นักศึกษา')
+                        user.groups.add(group)  # เพิ่มเข้ากลุ่มที่ 2
+                    except :
+                        print("ซ้ำ")
                     AuthorizedUser.objects.create(form=id_form, stu_list=row[0])
                     processed_records +=1
                 

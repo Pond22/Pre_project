@@ -4,5 +4,6 @@ from formsite import views
 
 urlpatterns = [
     path('home', views.home, name='home'),
-    path('index', views.index, name='index')
+    path('index', views.index, name='index'),
+    path('test', views.view_form, name='view_form')
 ]
