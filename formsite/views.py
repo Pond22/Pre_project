@@ -124,35 +124,32 @@ class CSV_API(viewsets.ViewSet):
 
 def create_plo(request):
     if request.method == "POST":
-        # ดึงค่า length จากแบบฟอร์ม
-        length = request.POST.get('length')
-        print(length)
-        # ตรวจสอบว่าค่า length มีค่าหรือไม่ ถ้าไม่มีกำหนดค่าเป็น 1
-        if length is None:
-            length = 0
         
-        # แปลงค่า length เป็น integer
-        length = int(length)   
+        le = request.POST.get('length')
+        if le is None:
+            le = 1
+        else:
+            le = int(le)
 
-        # ดึงค่า main_field จากแบบฟอร์ม
-        main_fields = request.POST.getlist('main_field[]')
-
-        # สร้าง main PLOs และ sub PLOs จากข้อมูลที่รับมาจากแบบฟอร์ม
-        for main_field in main_fields:
-            main_plo = PLOs.objects.create(text=main_field) # สร้าง main PLOs
-    
-            for i in range(length):
-                sub_field_name = f"sub_field_{i+1}[]"
-                sub_field_value = request.POST.get(sub_field_name)  
-                print(sub_field_value)
+        print(le)
+          
+        for i in range(0, le+1):
+            name_main = 'main_field' + str(i)
                 
-                if sub_field_value:
-                    PLOs.objects.create(text=sub_field_value, parent=main_plo) # สร้าง sub PLOs
-                else: None
+            main_fields = request.POST.get(name_main)  # รับข้อมูลจากฟิลด์แม่
+            print(main_fields)
+            main_field = PLOs.objects.create(text=main_fields)
+            
+            name_sub = 'sub_field_' + str(name_main)
+            sub_fields = request.POST.getlist(name_sub)
+            print(sub_fields)
+            print(name_sub)
+            PLOs.objects.create(text=sub_fields, parent=main_field)
 
         return HttpResponse("Data saved successfully!")
 
     return render(request, 'create_plos.html')
+
 
 def manage_plos(request):
     plos = PLOs.objects.filter(parent__isnull=True)  # เลือกเฉพาะฟิลด์แม่โดยกรองให้ parent เป็น None
