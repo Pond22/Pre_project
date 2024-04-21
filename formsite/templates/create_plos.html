@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Fields Dynamically</title>
+</head>
+<body>
+    <form id="ploForm" method="post">
+        {% csrf_token %}
+        <div id="fieldsContainer" > 
+            <!-- ฟิลด์แรกของแม่ -->
+            <div class="field">
+                <input type="text" name="main_field[]" placeholder="Main Field">
+                <button type="button" class="addSubField">+</button>
+                <div class="subFields"></div>
+            </div>
+        </div>
+        <button type="submit">Submit</button>
+        <!-- ปุุ่มเพิ่มแม่ -->
+        <button type="button" class="add_main_Field">+</button>
+    </form>
+
+    <script>
+        let dynamicFieldCounter = 1; // เริ่มต้นนับแถวที่ 0
+
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("ploForm").addEventListener("click", function (event) {
+                if (event.target.classList.contains("addSubField")) {
+                    var parentField = event.target.closest(".field");
+                    var subFieldsContainer = parentField.querySelector(".subFields");
+                    var subFieldInput = document.createElement("input");
+                    subFieldInput.type = "text";
+                    subFieldInput.name = "sub_field_"+dynamicFieldCounter+"[]" ;
+                    subFieldInput.placeholder = "Sub Field";
+                    subFieldsContainer.appendChild(subFieldInput);
+                    
+                    
+                    var hiddenInput = document.createElement("input");
+                    hiddenInput.type = "hidden";
+                    hiddenInput.name = "length"; // ตั้งชื่อฟิลด์
+                    hiddenInput.value = dynamicFieldCounter;
+                    document.getElementById("ploForm").appendChild(hiddenInput);
+
+                    dynamicFieldCounter++
+                }
+            });
+        });
+    
+
+        function clearFieldValues(container) {
+            var mainFieldInput = container.querySelector("input[name='main_field[]']");
+            mainFieldInput.value = "";  
+        
+            var subFieldInputs = container.querySelectorAll(".subFields input[type='text']");
+            subFieldInputs.forEach(function(subFieldInput) {
+                subFieldInput.value = "";  
+            });
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("ploForm").addEventListener("click", function (event) {
+                if (event.target.classList.contains("add_main_Field")) {
+                    var fieldsContainer = document.getElementById("fieldsContainer");
+                    var clonedField = fieldsContainer.firstElementChild.cloneNode(true);
+                    clearFieldValues(clonedField)
+                    fieldsContainer.appendChild(clonedField);
+
+                }
+            });
+        });
+    </script>
+</body>
+</html>

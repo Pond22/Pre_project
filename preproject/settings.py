@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,7 +28,18 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+#เพิ่มเอง
 DATA_UPLOAD_MAX_NUMBER_FIELDS = None
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication'
+    ]
+}
+
+# settings.py
+#เพิ่มเอง
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -42,6 +54,8 @@ INSTALLED_APPS = [
     'member',
     'evaluate',
     'rest_framework',
+    'channels',
+    
 ]
 
 MIDDLEWARE = [
@@ -60,7 +74,9 @@ ROOT_URLCONF = 'preproject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'evaluate', 'templates')
+            ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

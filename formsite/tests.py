@@ -8,7 +8,7 @@ def test1(num):
     driver.get(url)
 
     file_input = driver.find_element("name", "csv_file")
-    file_path = r"C:\Users\pondb\Downloads\(3)DataSet_UTF-8.csv"  
+    file_path = r"C:\Users\pondb\Downloads\TEST_DATA\(3)DataSet_UTF-8.csv"  
     file_input.send_keys(file_path)
 
     submit_button = driver.find_element("name", "import")
@@ -16,13 +16,10 @@ def test1(num):
     
 if __name__ == "__main__":
     processes = []
-    for i in range(50):
+    for i in range(20):
         p = multiprocessing.Process(target=test1, args=(i,))
         p.start()
-        processes.append(p)
-
-    for p in processes:
-        p.join()
+ 
 
 
 

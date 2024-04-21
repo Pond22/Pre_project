@@ -3,7 +3,7 @@ from django.http.response import HttpResponse
 from django.contrib.auth.decorators import login_required
 from formsite.models import PLOs, clo, AuthorizedUser
 from formsite.models import form as form_model
-from .forms import PLOsForm, Form, ClosForm, CSVUploadForm, Aut
+from .forms import PLOsForm, Form, ClosForm, CSVUploadForm, Aut, PLOstest
 from django.contrib.auth.models import User, Group
 from django.http import JsonResponse
 from rest_framework.views import APIView
@@ -73,22 +73,18 @@ def form_detail(request):
     context = {'forms': forms}
     return render(request, 'evaluate/form_detail.html', context)
 
-def test(num1, num2):
-    progress_percent = (num1 / num2) * 100
-    return (progress_percent)
-
-def progress_api(request):
-    processed_records = request.GET.get('processed_records')
-    num_rows = request.GET.get('num_rows')
-
+def progress_api(num1, num2):
     # เรียกใช้ฟังก์ชัน test เพื่อคำนวณ progress_percent
-    progress_percent = test(int(processed_records), int(num_rows))
+    progress_percent = (num1 / num2) * 100
 
     # ส่งค่า progress_percent กลับไปในรูปแบบ JSON
     return JsonResponse({'progress_percent': progress_percent})
 
 @login_required(login_url="sign_in")   
 def view_form(request, form_id):
+    y = get_object_or_404(form_model, id=form_id)
+    if request.user.username != str(y.created_by) :
+        return redirect('http://127.0.0.1:8000/form/form_detail')
     if request.method == 'POST':
         #form = RegisterForm(request.POST)
         form = CSVUploadForm(request.POST, request.FILES)
@@ -117,6 +113,7 @@ def view_form(request, form_id):
                     except :
                         print("ซ้ำ")
                     AuthorizedUser.objects.create(form=id_form, stu_list=row[0])
+                    progress_api(processed_records, num_rows)
                     processed_records +=1
                 
     form_instance = get_object_or_404(form_model, pk=form_id)
@@ -126,22 +123,21 @@ def view_form(request, form_id):
     context = {'form_instance': form_instance, 'clo_form': clo_form, 'csv_1': csv_1}
     return render(request, 'evaluate/main_form.html', context)
 
-
-'''
-แนวคิด
-
-def import_users_from_csv(file_path):
-    with open(file_path, 'r') as file:
-        reader = csv.reader(file)
-        for row in reader:
-            email = row[0] + '@payap.ac.th'  
-            password = row[0]  # ใช้คอลัมน์ที่ 0 เป็นรหัสผ่าน
-            user = User.objects.create_user(username=email, email=email, password=password)
-            group = Group.objects.get(name='นักศึกษา')
-            user.groups.add(group)  # เพิ่มเข้ากลุ่มที่ 2
-
-import_users_from_csv('/path/to/your/csv/file.csv') เรียกใช้
-
-แบบนี้จะกำหนดกลุ่มผู้ใช้ (นักศึกษา) ทั้งหมดในทีเดียวโดยที่แต่ละฟอร์มที่เอามาลงจะสามารถตรวจสอบได้ว่านักศึกษาคนไหนมีสิทธิ์ในการประเมินแบบฟอร์มนี้และเป็นการสร้างผู้ใช้ใหม่ไปในตัว
-'''
-
+def dy (request):
+    if request.method == 'POST':
+        length = request.POST.get('length')
+        if length is None:
+            length = 1
+        length = int(length)
+        new_PLOstest = PLOstest(request.POST)
+        if new_PLOstest.is_valid():
+            for i in range(length):
+                str1 = "text_"+ str(i+1)
+                if request.POST.get(str1):
+                    text = request.POST.get(str1)
+                    print(text)
+                    user1 = request.user
+                    PLOs.objects.create(created_by=user1, text=text)
+                else:
+                    print("NULL")
+    return render(request, 'evaluate/Dynamic_Form.html', {'form':PLOstest})

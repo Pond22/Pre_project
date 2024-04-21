@@ -11,7 +11,7 @@
     #progress-bar {
         height: 30px;
         background-color: #4caf50;
-        width: 0; /* ความคืบหน้าเริ่มต้นที่ 0% */
+        width: 0; \
         border-radius: 5px;
     }
 
@@ -21,8 +21,8 @@
 </style>
 
 {% block title %}
-Main_Form_NAJA! Form ID: {{ form_instance.id }}
-{% endblock %}
+Main_Form_NAJA! Form ID: {{ form_istance.id }}
+{% endblock %}n
 
 <p>Main Form ID: {{ form_instance.name }}</p>
 
@@ -35,8 +35,8 @@ Main_Form_NAJA! Form ID: {{ form_instance.id }}
     <h2>Upload CSV File</h2>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ csv_1.as_p }}
-        <button type="submit" id="import">Submit</button>
+        <input type="file" name="csv_file" id="csv_file">
+        <button type="submit" name="import" id="import">Submit</button>
     </form>
     <div id="progress-bar-container">
         <h2>Progress</h2>
@@ -46,6 +46,30 @@ Main_Form_NAJA! Form ID: {{ form_instance.id }}
 
 <script>
     /*
+    document.getElementById('import').onclick = function() {
+        setInterval(function() {
+            fetch('/items/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    progress: 50,  // ตัวอย่างข้อมูลที่คุณอาจต้องการส่งไปยัง API
+                    num: 100       // ตัวอย่างข้อมูลที่คุณอาจต้องการส่งไปยัง API
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // ดำเนินการอัปเดตข้อมูลหน้าเว็บของคุณด้วยข้อมูลที่คืนมาจาก API
+                console.log(data); // ตัวอย่างการแสดงค่าข้อมูลที่คืนมาในคอนโซล
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+        }, 1000); // ร้อยละ 1วิ
+    };
+    
+    
     document.getElementById('import').onclick = function() {
         setInterval(function() {
             fetch('/progress_api/')

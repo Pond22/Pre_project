@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head> 
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dynamic Fields</title>
+  </head>
+  <body>
+    <form method="post" id="FORM">
+      <div id="dynamicFields">
+        {% csrf_token %}
+        <!-- เริ่มต้นด้วยฟิลด์เริ่มต้นที่นี่ -->
+        <div>
+          <input type="text" name="text_1">
+
+          <button onclick="removeDynamicField(this)">ลบ</button>
+        </div>
+      </div>
+
+      <button type ="button" onclick="addDynamicField()">เพิ่มฟิลด์</button>
+      <button type="submit" name="import" id="import">Submit</button>
+    </form>
+
+    <script>
+      let dynamicFieldCounter = 1; // เริ่มต้นนับแถวที่ 0
+
+      function addDynamicField() {
+        dynamicFieldCounter++; // เพิ่มค่า counter ทุกครั้งที่เพิ่มฟิลด์
+
+
+        var hiddenInput = document.createElement("input");
+        hiddenInput.type = "hidden";
+        hiddenInput.name = "length"; // ตั้งชื่อฟิลด์
+        hiddenInput.value = dynamicFieldCounter; // กำหนดค่าจาก dynamicFieldCounter
+    
+        // เพิ่ม hiddenInput ลงใน form
+        document.getElementById("FORM").appendChild(hiddenInput);
+
+        // สร้าง element input ใหม่
+        var input = document.createElement("input");
+        input.type = "text";
+        input.name = "text_" + dynamicFieldCounter;
+        input.id = "input_" + dynamicFieldCounter; // ตั้งค่า ID ของ input
+
+        // สร้างปุ่มลบแถว
+        var deleteButton = document.createElement("button");
+        deleteButton.textContent = "ลบ";
+        deleteButton.onclick = function () {
+          removeDynamicField(input.id); // เรียกใช้ฟังก์ชันลบแถวโดยส่ง ID ของ input
+        };
+
+        // สร้าง div เพื่อครอบ input และปุ่มลบ
+        var divWrapper = document.createElement("div");
+        divWrapper.appendChild(input);
+        divWrapper.appendChild(deleteButton);
+
+        // เพิ่ม divWrapper ลงใน div ที่มี id เป็น "dynamicFields"
+        document.getElementById("dynamicFields").appendChild(divWrapper);
+      }
+
+      function removeDynamicField(inputId) {
+        var dynamicField = document.getElementById(inputId);
+        if (dynamicField) {
+          dynamicField.parentNode.parentNode.removeChild(
+            dynamicField.parentNode
+          ); // ลบ div ที่ครอบ input และปุ่มลบ
+        }
+      }
+    </script>
+  </body>
+</html>
+
+{% comment %}
+
+<div id="container">
+  <div class="input-container">{{form.as_p}}</div>
+</div>
+<button onclick="cloneInput()">โคลน</button>
+<input type="button" value="เพิ่มข้อมูล" />
+
+<script>
+  function cloneInput() {
+    var originalInputContainer = document.querySelector(".input-container");
+    var clonedInputContainer = originalInputContainer.cloneNode(true);
+    var container = document.getElementById("container");
+    container.appendChild(clonedInputContainer);
+  }
+</script>
+{% endcomment %}

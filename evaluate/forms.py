@@ -11,7 +11,13 @@ class Aut(forms.ModelForm):
 class PLOsForm(forms.ModelForm):
     class Meta:
         model = PLOs
-        fields = ['text']  
+        fields = ['text']
+        
+class PLOstest(forms.ModelForm):
+    class Meta:
+        model = PLOs
+        fields = []
+        #widgets = {'test': forms.TextInput(attrs={'class': 'form-control'})}  
         
 class Form(forms.ModelForm):
     class Meta:

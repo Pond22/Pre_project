@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Show PLOs</title>
+</head>
+<body>
+    <h1>PLOs</h1>
+    <ul>
+        {% for plo in plos %}
+            <li>{{ plo.text }}</li>
+            {% if plo.sub_items.all %}
+                <ul>
+                    {% for sub_item in plo.sub_items.all %}
+                        <li>{{ sub_item.text }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</body>
+</html>

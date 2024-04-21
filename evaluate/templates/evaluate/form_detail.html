@@ -1,3 +1,22 @@
+<style>
+    #butlink {
+        background-color: #4CAF50; 
+        border: none;
+        color: white; 
+        padding: 15px 32px; 
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 8px; 
+    }
+    #butlink:hover {
+        background-color: #45a049; 
+    }
+</style>
+
 <form method="POST" >
     {% csrf_token %}
     {% for form_instance in forms %}
@@ -5,5 +24,5 @@
         <a href="{% url 'view_form' form_id=form_instance.id %}">View Form</a></p>
     {% endfor %}
 
-    <button type="submit">Create</button>
+    <a id='butlink' href="http://127.0.0.1:8000/evaluate/create_form">Go to Create Form</a>
 </form>

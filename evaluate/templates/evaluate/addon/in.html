@@ -1,0 +1,25 @@
+<form>
+    <div class="row">
+        <div class="col-4 col-md-3">
+            <label for="{{ form.text.id_for_label}}">{{ form.text.label }}</label>
+            {{ form.text}}
+        </div>
+
+        <div class='col-3 align-self-end'>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+
+        <div class='my4' id='main'>
+
+            <form method="post">
+                
+                <label for="text">ป้อน PLO:</label>
+                <input type="text" name="text" required><br>
+        
+                <input type="submit" value="เพิ่มข้อมูล">
+            </form>
+            
+            <button type="submit" class="btn btn-success me-2">Add More</button>
+        </div>  
+    </div>
+</form>

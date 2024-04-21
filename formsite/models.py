@@ -69,7 +69,9 @@ class UserEvaluation(models.Model):
 
 
 class PLOs(models.Model):
-    text = models.TextField()
+    id = models.BigAutoField(primary_key=True)
+    text = models.TextField(null=False, blank=False)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='sub_items')
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     create = models.DateTimeField(auto_now_add=True)
     update = models.DateTimeField(auto_now=True)

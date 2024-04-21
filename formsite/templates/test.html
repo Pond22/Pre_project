@@ -1,13 +1,121 @@
-{% block title %}
-ทดสอบ
-{% endblock %}
+<style>
+  #progress-bar-container {
+      width: 100%;
+      background-color: #f2f2f2;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 10px;
+  }
 
-{% block content %}
-<div class="container"> 
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input type="file" name="csv_file" id="csv_file">
-        <button type="submit" name="import" id="import">Submit</button>
-    </form>
+  #progress-bar {
+      height: 30px;
+      background-color: #4caf50;
+      width: 0; \
+      border-radius: 5px;
+  }
+
+  h2 {
+      margin-bottom: 5px;
+  }
+</style>
+<!--method="post" action="{% url 'view_form' %}"-->
+{% block title %} ทดสอบ {% endblock %} {% block content %} {% csrf_token %}
+<div class="container">
+  <form id="upload" enctype="multipart/form-data" method="post" action="{% url 'view_form' %}">
+    {% csrf_token %}
+    <input type="file" name="csv_file" id="csv_file" /> 
+    <button type="submit" name="import" id="import">Submit</button>
+  </form>
+  <div id="progress-bar-container">
+    <h2>Progress</h2>
+    <div id="progress-bar" style="width: 2.5"></div>
+  </div>
 </div>
 {% endblock %}
+
+<script>
+  /*
+    $.ajax({
+        method: "GET",
+        url: "/progress/",
+        success: function(response) {
+            data = response.data
+            console.log(data)
+        }
+    })
+*/
+  /*
+    fetch('http://127.0.0.1:8000/test', {
+        method: 'POST',
+        headers: {
+            "X-CSRFToken": csrftoken
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        var progress_percent = data.progress_percent;
+        console.log(progress_percent);
+    })
+    .catch(error => {
+        console.log("ERROR")
+    });
+*/
+  /*
+    document.getElementById('upload').addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        const formData = new FormData();
+        const csvFile = document.getElementById('csv_file').files[0];
+        formData.append('csv_file', csvFile);
+        fetch('/csv/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                "X-CSRFToken": csrftoken
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            console.log("k");
+        })
+        .catch(error => {
+            console.log("ERROR")
+        });
+    });
+
+   function updateProgressBar(progress) {
+    const progressBar = document.getElementById('progress-bar');
+    progressBar.style.width = `${progress}%`;
+    }*/
+
+  //ใช้จริงข้างล่างนี้
+  /*
+    function getCookie(cname) {
+        var name = cname + "=";
+        var ca = document.cookie.split(';');
+        for(var i=0; i<ca.length; i++) {
+           var c = ca[i];
+           while (c.charAt(0)==' ') c = c.substring(1); //ก๊อปมาของโคตรดี
+           if(c.indexOf(name) == 0)
+              return c.substring(name.length,c.length);
+        }
+        return "";
+   }      
+
+    const csrftoken = getCookie('csrftoken');
+    
+document.getElementById('upload').addEventListener('submit', function(event) {
+   fetch('/csv/',{
+    method: 'POST',
+    headers: {
+        "X-CSRFToken": csrftoken
+    },
+    body: new FormData(this)
+   })
+    .then(response => response.text())
+    .then(data => {
+        console.log(data.sum);
+    })
+})*/
+</script>
