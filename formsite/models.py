@@ -69,11 +69,22 @@ class UserEvaluation(models.Model):
 
 
 class PLOs(models.Model):
+    school_year_choices =(
+        (1, '1'),
+        (2, '2'),
+        (3, '3')
+    )
     id = models.BigAutoField(primary_key=True)
     text = models.TextField(null=False, blank=False)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='sub_items')
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     create = models.DateTimeField(auto_now_add=True)
+    school_year = models.IntegerField(choices=school_year_choices)
+    year_number = models.IntegerField(
+        verbose_name='ปี', 
+        help_text='ใส่ตัวเลขปี 4 ตัว',
+        validators=[MinValueValidator(1999), MaxValueValidator(3100)]
+    )
     update = models.DateTimeField(auto_now=True)
     
     def __str__(self):
