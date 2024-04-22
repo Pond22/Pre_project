@@ -5,11 +5,121 @@ Create Form
 
 {% block content %}
 <div class="container"> 
-    <h1>สร้าง FORM</h1>
+    <h1>สร้าง FORM and CLOs</h1>
     <form method="post">
         {% csrf_token %}
         {{new_form.as_p }}
+
+        <div id="parent">
+            <!-- div แม่ -->
+            <!-- ฟิลด์แรกของแม่ -->
+            <div class="main_field0">
+              <!-- div ลูก -->
+              <input type="text" name="main_field0" placeholder="Main Field" />
+              <button type="button" class="addSubField" onclick="addSubField(this)">
+                +
+              </button>
+              <div class="subFields"></div>
+            </div>
+            <button type="button" class="add_main_Field" onclick="addMainField()">
+              +
+            </button>
+            <!-- ปุุ่มเพิ่มแม่ -->
+          </div>
+
         <button type="submit" name="action" value="create">Create</button>
     </form>
 </div>
+
 {% endblock %}
+<script>
+    let dynamicFieldCounter = 1;
+
+    function addSubField(button) {
+      var parentDiv = button.parentElement;
+      var divName = button.parentNode.className;
+      // สร้างฟิลด์ลูกใหม่
+      var subField = document.createElement("input");
+      subField.type = "text";
+      subField.name = "sub_field_" + divName;
+      subField.placeholder = "Sub Field";
+
+      var divName = button.parentNode.className;
+      console.log(divName);
+      console.log(subField.name);
+
+      // สร้างปุ่มลบฟิลด์ลูก
+      var deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.textContent = "-";
+      deleteButton.onclick = function () {
+        // ลบฟิลด์ลูกเมื่อคลิกปุ่มลบ
+        parentDiv.removeChild(subField);
+        parentDiv.removeChild(deleteButton);
+      };
+
+      // เพิ่มฟิลด์ลูกและปุ่มลบลงในแม่
+      parentDiv.querySelector(".subFields").appendChild(subField);
+      parentDiv.querySelector(".subFields").appendChild(deleteButton);
+    }
+
+    function addMainField() {
+      // สร้างฟิลด์แม่ใหม่
+      var parentDiv = document.getElementById("parent");
+      var mainFieldDiv = document.createElement("div");
+      mainFieldDiv.classList.add("main_field" + dynamicFieldCounter);
+
+      var mainField = document.createElement("input");
+      mainField.type = "text";
+      mainField.name = "main_field" + dynamicFieldCounter;
+      mainField.className = "main_field" + dynamicFieldCounter;
+      mainField.placeholder = "Main Field";
+
+      console.log(dynamicFieldCounter);
+
+      var addButton = document.createElement("button");
+      addButton.type = "button";
+      addButton.textContent = "+";
+      addButton.onclick = function () {
+        addSubField(addButton);
+      };
+
+      var subFieldsDiv = document.createElement("div");
+      subFieldsDiv.classList.add("subFields");
+
+      // เพิ่มฟิลด์แม่และปุ่มเพิ่มฟิลด์ลูกลงในแม่
+      mainFieldDiv.appendChild(mainField);
+      mainFieldDiv.appendChild(addButton);
+      mainFieldDiv.appendChild(subFieldsDiv);
+      parentDiv.insertBefore(mainFieldDiv, parentDiv.lastElementChild);
+
+      var hiddenInput = document.createElement("input");
+      hiddenInput.type = "hidden";
+      hiddenInput.name = "length"; // ตั้งชื่อฟิลด์
+      hiddenInput.value = dynamicFieldCounter; // กำหนดค่าจาก dynamicFieldCounter
+
+      // เพิ่ม hiddenInput ลงใน form
+      document.getElementById("ploForm").appendChild(hiddenInput);
+
+      document
+        .getElementById("ploForm")
+        .addEventListener("change", function (event) {
+          // กันคนแก้ไขจากหน้า html
+          if (event.target.name === "length") {
+            // หากมีการแก้ไขฟิลด์ hidden ให้สร้าง hidden input ใหม่
+            var newHiddenInput = document.createElement("input");
+            newHiddenInput.type = "hidden";
+            newHiddenInput.name = "length";
+            newHiddenInput.value = dynamicFieldCounter;
+
+            // ลบอันเก่าออก
+            event.target.parentNode.removeChild(event.target);
+
+            // เพิ่มใหม่
+            document.getElementById("ploForm").appendChild(newHiddenInput);
+          }
+        });
+
+      dynamicFieldCounter++;
+    }
+  </script>

@@ -36,15 +36,37 @@ def create_plo(request):
 @login_required(login_url="sign_in")
 def create_form(request):
     if request.method == 'POST':
+        le = int(request.POST.get('length', 0))  # ใช้การให้ค่าเริ่มต้นที่ 0 ในกรณีที่หาไม่เจอ
+
         new_form = Form(request.POST)
         if new_form.is_valid():
             new_in = new_form.save(commit=False)
             new_in.created_by = request.user
             new_in.save()
-            return redirect('create_clo', new_in.id) 
+
+            if 'main_field0' in request.POST:
+                for i in range(le + 1):
+                    create_form = get_object_or_404(form_model, id=new_in.id)
+                    name_main = 'main_field' + str(i)
+                    main_fields = request.POST.get(name_main, '')  # ใช้ค่าว่างในกรณีที่ไม่พบค่า
+                    print('main_fields =', main_fields)
+                    main_field = clo.objects.create(text=main_fields, form=create_form, created_by=request.user)
+                    
+                    name_sub = 'sub_field_' + str(name_main)
+                    sub_fields = request.POST.getlist(name_sub)
+                    print(sub_fields)
+                    print('name_sub =', name_sub)
+            
+                    for sub_field_text in sub_fields:
+                        sub_field = clo.objects.create(text=sub_field_text, parent=main_field, form=create_form, created_by=request.user)
+
+                return HttpResponse("Data saved successfully!")
+            else:
+                return HttpResponse("Error: No data for 'main_field0'")  
     else:
         new_form = Form()
         return render(request, 'evaluate/create_form.html', {'new_form': new_form})
+
     
 @login_required(login_url="sign_in")  
 def create_clo(request, form_id):
