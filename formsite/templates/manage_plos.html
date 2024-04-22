@@ -3,20 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Show PLOs</title>
+    <title>Show and Edit PLOs</title>
+    <script>
+        function toggleEditForm(subItemId) {
+            var form = document.getElementById('editForm_' + subItemId);
+            if (form.style.display === 'none' || form.style.display === '') {
+                form.style.display = 'block';
+            } else {
+                form.style.display = 'none';
+            }
+        }
+    </script>
 </head>
 <body>
     <h1>PLOs</h1>
     <ul>
         {% for plo in plos %}
-            <li>{{ plo.text }}</li>
-            {% if plo.sub_items.all %}
-                <ul>
-                    {% for sub_item in plo.sub_items.all %}
-                        <li>{{ sub_item.text }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
+            <li>
+                ID: {{ plo.id }}
+                {{ plo.text }}
+                <button type="button" onclick="toggleEditForm('plo_{{ plo.id }}')">Edit PLO</button>
+                <form id="editForm_plo_{{ plo.id }}" method="post" style="display: none;">
+                    {% csrf_token %}
+                    <input type="hidden" name="plo_id" value="{{ plo.id }}">
+                    <input type="text" name="main_text" value="{{ plo.text }}" required>
+                    <button type="submit">Save PLO</button>
+                </form>
+                {% if plo.sub_items.all %}
+                    <ul>
+                        {% for sub_item in plo.sub_items.all %}
+                            <li>
+                                {{ forloop.parentloop.counter }}.{{ forloop.counter }} ID: {{ sub_item.id }} {{ sub_item.text }}
+                                <button type="button" onclick="toggleEditForm('sub_{{ sub_item.id }}')">Edit Sub-item</button>
+                                <form id="editForm_sub_{{ sub_item.id }}" method="post" style="display: none;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="sub_item_id" value="{{ sub_item.id }}">
+                                    <input type="text" name="sub_text" value="{{ sub_item.text }}" required>
+                                    <button type="submit">Save Sub-item</button>
+                                </form>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </li>
         {% endfor %}
     </ul>
 </body>

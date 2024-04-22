@@ -144,7 +144,11 @@ def create_plo(request):
             sub_fields = request.POST.getlist(name_sub)
             print(sub_fields)
             print(name_sub)
-            PLOs.objects.create(text=sub_fields, parent=main_field)
+            #PLOs.objects.create(text=sub_fields, parent=main_field)
+       
+            # วนลูปผ่านฟิลด์ลูกและสร้าง PLO ลูก
+            for sub_field_text in sub_fields:
+                sub_field = PLOs.objects.create(text=sub_field_text, parent=main_field)
 
         return HttpResponse("Data saved successfully!")
 
@@ -152,5 +156,46 @@ def create_plo(request):
 
 
 def manage_plos(request):
-    plos = PLOs.objects.filter(parent__isnull=True)  # เลือกเฉพาะฟิลด์แม่โดยกรองให้ parent เป็น None
-    return render(request, 'manage_plos.html', {'plos': plos})
+    if request.method == 'POST':
+        plo_id = request.POST.get('plo_id')
+        new_text = request.POST.get('main_text')
+        sub_item_id = request.POST.get('sub_item_id')
+        sub_text = request.POST.get('sub_text')
+
+        try:
+            if plo_id:  
+                plo = get_object_or_404(PLOs, id=plo_id)
+                plo.text = new_text
+                plo.save()
+                return redirect('manage_plos')
+            elif sub_item_id:  
+                sub_plo = get_object_or_404(PLOs, id=sub_item_id)
+                sub_plo.text = sub_text
+                sub_plo.save()
+                return redirect('manage_plos')
+            else:
+                return HttpResponse("Invalid form data.")
+        except PLOs.DoesNotExist:
+            return HttpResponse("PLO or sub-item does not exist.")
+    else:
+        plos = PLOs.objects.filter(parent__isnull=True)
+        return render(request, 'manage_plos.html', {'plos': plos})
+
+'''
+def manage_plos(request):
+    if request.method == 'POST':
+        plo_id = request.POST.get('plo_id')
+        new_text = request.POST.get('main_text')
+   
+        # ตรวจสอบว่ามี PLOs ในฐานข้อมูลหรือไม่ ถ้าไม่มีจะให้กลับไปที่หน้าเดิม
+        plo = get_object_or_404(PLOs, id=plo_id)
+
+        # อัปเดตข้อมูล PLO ในฐานข้อมูล
+        plo.text = new_text
+        plo.save()
+
+        return redirect('manage_plos')
+
+    else:
+        plos = PLOs.objects.filter(parent__isnull=True)
+        return render(request, 'manage_plos.html', {'plos': plos})'''

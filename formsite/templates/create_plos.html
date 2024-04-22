@@ -94,6 +94,24 @@
       // เพิ่ม hiddenInput ลงใน form
       document.getElementById("ploForm").appendChild(hiddenInput);
 
+     
+    document.getElementById("ploForm").addEventListener("change", function(event) {
+        // กันคนแก้ไขจากหน้า html
+        if (event.target.name === "length") {
+          // หากมีการแก้ไขฟิลด์ hidden ให้สร้าง hidden input ใหม่
+          var newHiddenInput = document.createElement("input");
+          newHiddenInput.type = "hidden";
+          newHiddenInput.name = "length";
+          newHiddenInput.value = dynamicFieldCounter;
+  
+          // ลบอันเก่าออก
+          event.target.parentNode.removeChild(event.target);
+  
+          // เพิ่มใหม่
+          document.getElementById("ploForm").appendChild(newHiddenInput);
+        }
+    });
+
       dynamicFieldCounter++;
     }
   </script>
