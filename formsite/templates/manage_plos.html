@@ -4,6 +4,142 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Show and Edit PLOs</title>
+    <style>
+        /* Reset default styles */
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+        
+        /* Body styles */
+        body {
+          font-family: Arial, sans-serif;
+          background-color: #f0f0f0;
+          padding: 20px;
+        }
+        
+        /* Container styles */
+        .container {
+          max-width: 800px;
+          margin: 20px auto;
+          padding: 20px;
+          background-color: #fff;
+          border-radius: 8px;
+          box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+        
+        /* Form styles */
+        form {
+          margin-bottom: 20px;
+          padding: 20px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+          width: 100%;
+        }
+        
+        label {
+          display: block;
+          margin-bottom: 10px;
+          font-weight: bold;
+          color: #333;
+        }
+        
+        input[type="number"],
+        select {
+          width: 100%;
+          padding: 10px;
+          margin-bottom: 15px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          box-sizing: border-box;
+        }
+        
+        button[type="submit"] {
+          background-color: #007bff;
+          color: #fff;
+          border: none;
+          border-radius: 4px;
+          padding: 12px 24px;
+          cursor: pointer;
+          font-size: 16px;
+          transition: background-color 0.3s ease;
+        }
+        
+        button[type="submit"]:hover {
+          background-color: #0056b3;
+        }
+        
+        /* List styles */
+        ul {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+        }
+        
+        li {
+          padding: 10px;
+          border-bottom: 1px solid #ccc;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+        
+        li:last-child {
+          border-bottom: none;
+        }
+        
+        /* Edit form styles */
+        .edit-form {
+          display: none;
+          padding: 20px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+          width: 100%;
+        }
+        
+        .edit-form.show {
+          display: block;
+        }
+        
+        /* Button styles */
+        .edit-button {
+          background-color: transparent;
+          border: none;
+          padding: 0;
+          margin: 0;
+          cursor: pointer;
+          font-size: 16px;
+          color: #007bff;
+          display: flex;
+          align-items: center;
+        }
+        
+        .edit-button:hover {
+          text-decoration: underline;
+        }
+        
+        /* Input styles */
+        .edit-input {
+          width: 100%;
+          padding: 10px;
+          margin-bottom: 15px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          box-sizing: border-box;
+          margin-left: 10px;
+        }
+        
+        .edit-input:focus {
+          outline: none;
+          box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+    </style>
     <script>
         function toggleEditForm(subItemId) {
             var form = document.getElementById('editForm_' + subItemId);
@@ -15,8 +151,25 @@
         }
     </script>
 </head>
+
+<body>
+
 <body>
     <h1>PLOs</h1>
+    <!-- Form to search for PLOs -->
+    <form id="searchForm" action="/manage_plos" method="get">
+        <label for="year_number">ปีพุทธศักราช:</label>
+        <input type="number" name="year_number" id="year_number" required min="2567" max="2570">
+        <label for="school_year">ภาคการศึกษา:</label>
+        <select name="school_year" id="school_year" required>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+        </select>
+        <button type="submit">Search</button>
+    </form>
+
+    <!-- Display PLOs here -->
     <ul>
         {% for plo in plos %}
             <li>
@@ -50,3 +203,52 @@
     </ul>
 </body>
 </html>
+
+
+    <!-- Form to create new PLO -->
+    <form id="createPLOForm" action="/create_plo">
+        {% csrf_token %}
+        <label for="year_number">ปี:</label>
+        <input type="number" name="year_number" id="year_number" required min="2567" max="2570" >
+        <label for="school_year">ภาคการศึกษา:</label>
+        <select name="school_year" id="school_year" required>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+        </select>
+        <button type="submit">Create PLO</button>
+    </form>
+</body>
+</html>
+
+<script>
+    document.getElementById('createPLOForm').addEventListener('submit', function(event) {
+        // ตรวจสอบว่ามี input hidden ของฟิลด์ year_number หรือไม่
+        var yearNumberInput = document.querySelector('input[name="year_number"]');
+        if (!yearNumberInput) {
+            // ดึงค่าปีจากฟอร์ม
+            var yearNumber = document.getElementById('year_number').value;
+            // สร้าง input hidden เพื่อเก็บค่าปี
+            yearNumberInput = document.createElement('input');
+            yearNumberInput.type = 'hidden';
+            yearNumberInput.name = 'year_number';
+            yearNumberInput.value = yearNumber;
+            // เพิ่ม input hidden ลงในฟอร์ม
+            this.appendChild(yearNumberInput);
+        }
+
+        // ตรวจสอบว่ามี input hidden ของฟิลด์ school_year หรือไม่
+        var schoolYearInput = document.querySelector('input[name="school_year"]');
+        if (schoolYearInputs.length === 0) {
+            // หากยังไม่มีให้สร้างฟิลด์ "school_year"
+            var schoolYear = document.getElementById('school_year').value;
+            var schoolYearInput = document.createElement('input');
+            schoolYearInput.type = 'hidden';
+            schoolYearInput.name = 'school_year';
+            schoolYearInput.value = schoolYear;
+            this.appendChild(schoolYearInput);
+        }
+    });
+
+    
+</script>

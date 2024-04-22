@@ -83,8 +83,9 @@ class PLOs(models.Model):
     year_number = models.IntegerField(
         verbose_name='ปี', 
         help_text='ใส่ตัวเลขปี 4 ตัว',
-        validators=[MinValueValidator(1999), MaxValueValidator(3100)]
+        validators=[MinValueValidator(2567), MaxValueValidator(2570)]
     )
+    active = models.BooleanField(default=False)
     update = models.DateTimeField(auto_now=True)
     
     def __str__(self):

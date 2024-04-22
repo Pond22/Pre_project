@@ -124,31 +124,33 @@ class CSV_API(viewsets.ViewSet):
 
 def create_plo(request):
     if request.method == "POST":
-        
+        school = request.POST.get('school_year')
+        year = request.POST.get('year_number')
         le = request.POST.get('length')
         if le is None:
-            le = 1
+            le = 0
         else:
             le = int(le)
 
         print(le)
-          
+        print('school = '+school)
+        print('year = '+year)
         for i in range(0, le+1):
             name_main = 'main_field' + str(i)
                 
             main_fields = request.POST.get(name_main)  # รับข้อมูลจากฟิลด์แม่
-            print(main_fields)
-            main_field = PLOs.objects.create(text=main_fields)
+            print('main_fields = '+str(main_fields))
+            main_field = PLOs.objects.create(text=main_fields, school_year=school, year_number=year)
             
             name_sub = 'sub_field_' + str(name_main)
             sub_fields = request.POST.getlist(name_sub)
             print(sub_fields)
-            print(name_sub)
+            print('name_sub = '+str(name_sub))
             #PLOs.objects.create(text=sub_fields, parent=main_field)
        
             # วนลูปผ่านฟิลด์ลูกและสร้าง PLO ลูก
             for sub_field_text in sub_fields:
-                sub_field = PLOs.objects.create(text=sub_field_text, parent=main_field)
+                sub_field = PLOs.objects.create(text=sub_field_text, parent=main_field, school_year=school, year_number=year)
 
         return HttpResponse("Data saved successfully!")
 
@@ -182,7 +184,13 @@ def manage_plos(request):
                 return HttpResponse("Sub PLO does not exist.")
         else:
             return HttpResponse("Invalid form data.")
+    
+    elif request.method == 'GET':
+        year_number = request.GET.get('year_number')
+        school_year = request.GET.get('school_year')
+        plos = PLOs.objects.filter(year_number=year_number, school_year=school_year, parent__isnull=True)
+        return render(request, 'manage_plos.html', {'plos': plos})
     else:
-        plos = PLOs.objects.filter(parent__isnull=True)
+        #plos = PLOs.objects.filter(parent__isnull=True)
         return render(request, 'manage_plos.html', {'plos': plos})
 
