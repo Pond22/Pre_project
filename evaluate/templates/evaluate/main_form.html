@@ -1,35 +1,39 @@
-
 <style>
-    #progress-bar-container {
-        width: 100%;
-        background-color: #f2f2f2;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        padding: 10px;
+    /* CSS สำหรับ tag ul, li, และ a */
+    ul {
+        list-style-type: none; /* เอา bullet point ออก */
+        padding: 0;
     }
 
-    #progress-bar {
-        height: 30px;
-        background-color: #4caf50;
-        width: 0; \
-        border-radius: 5px;
+    li {
+        margin-bottom: 10px; /* เว้นระยะห่างระหว่างรายการ */
     }
 
-    h2 {
-        margin-bottom: 5px;
+    a {
+        text-decoration: none; /* เอา underline ออก */
+        color: #007bff; /* เปลี่ยนสีข้อความลิงก์ */
+        transition: color 0.3s ease; /* เพิ่ม transition เมื่อ hover */
+    }
+
+    a:hover {
+        color: #0056b3; /* เปลี่ยนสีข้อความลิงก์เมื่อ hover */
+    }
+
+    /* CSS สำหรับปุ่มแก้ไข */
+    .edit-button {
+        background-color: #007bff; /* สีพื้นหลังปุ่ม */
+        color: #fff; /* สีข้อความ */
+        border: none; /* เอาเส้นขอบออก */
+        border-radius: 5px; /* เพิ่มมุมขอบ */
+        padding: 5px 10px; /* ขนาดของปุ่ม */
+        cursor: pointer; /* เปลี่ยน pointer เมื่อ hover */
+        transition: background-color 0.3s ease; /* เพิ่ม transition เมื่อ hover */
+    }
+
+    .edit-button:hover {
+        background-color: #0056b3; /* เปลี่ยนสีพื้นหลังปุ่มเมื่อ hover */
     }
 </style>
-
-{% block title %}
-Main_Form_NAJA! Form ID: {{ form_istance.id }}
-{% endblock %}n
-
-<p>Main Form ID: {{ form_instance.name }}</p>
-
-<!-- เข้าถึง clo_form โดยตรง -->
-{% for i in clo_form %}
-    <p>{{ forloop.counter }}_CLO : {{ i.text }}</p>
-{% endfor %}
 
 <body>
     <h2>Upload CSV File</h2>
@@ -40,11 +44,52 @@ Main_Form_NAJA! Form ID: {{ form_istance.id }}
     </form>
     <div id="progress-bar-container">
         <h2>Progress</h2>
-        <div id="progress-bar" style="width: 2.5;"></div>
+        <div id="progress-bar" style="width: 2.5%;"></div>
     </div>
+
+    <ul>
+        {% for clo in clo_form %}
+            <li>
+                ID: {{ clo.id }}
+                {{ clo.text }}
+                <a href="#" onclick="toggleEditForm('editForm_clo_{{ clo.id }}')" class="edit-button">Edit CLO</a>
+                <form id="editForm_clo_{{ clo.id }}" method="post" style="display: none;">
+                    {% csrf_token %}
+                    <input type="hidden" name="clo_id" value="{{ clo.id }}">
+                    <input type="text" name="main_text" value="{{ clo.text }}" required>
+                    <button type="submit" class="edit-button">Save CLO</button>
+                </form>
+                {% if clo.sub_items.all %}
+                    <ul>
+                        {% for sub_item in clo.sub_items.all %}
+                            <li>
+                                {{ forloop.parentloop.counter }}.{{ forloop.counter }} ID: {{ sub_item.id }} {{ sub_item.text }}
+                                <a href="#" onclick="toggleEditForm('editForm_sub_{{ sub_item.id }}')" class="edit-button">Edit Sub-item</a>
+                                <form id="editForm_sub_{{ sub_item.id }}" method="post" style="display: none;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="sub_item_id" value="{{ sub_item.id }}">
+                                    <input type="text" name="sub_text" value="{{ sub_item.text }}" required>
+                                    <button type="submit" class="edit-button">Save Sub-item</button>
+                                </form>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+    
 </body>
 
 <script>
+    function toggleEditForm(formId) {
+        var form = document.getElementById(formId);
+        if (form.style.display === "none") {
+            form.style.display = "block";
+        } else {
+            form.style.display = "none";
+        }
+    }
     /*
     document.getElementById('import').onclick = function() {
         setInterval(function() {

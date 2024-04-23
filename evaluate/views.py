@@ -36,27 +36,34 @@ def create_plo(request):
 @login_required(login_url="sign_in")
 def create_form(request):
     if request.method == 'POST':
-        le = int(request.POST.get('length', 0))  # ใช้การให้ค่าเริ่มต้นที่ 0 ในกรณีที่หาไม่เจอ
+        le = request.POST.get('length')
+        if le is None:
+            le = 0
+        else:
+            le = int(le)
+        print(le)
 
         new_form = Form(request.POST)
         if new_form.is_valid():
             new_in = new_form.save(commit=False)
             new_in.created_by = request.user
             new_in.save()
-
+            
+            #somthing = 'main_field0'
+            
             if 'main_field0' in request.POST:
                 for i in range(le + 1):
                     create_form = get_object_or_404(form_model, id=new_in.id)
                     name_main = 'main_field' + str(i)
-                    main_fields = request.POST.get(name_main, '')  # ใช้ค่าว่างในกรณีที่ไม่พบค่า
-                    print('main_fields =', main_fields)
+                    main_fields = request.POST.get(name_main)  # ใช้ค่าว่างในกรณีที่ไม่พบค่า
+                    print('main_fields =', name_main)
                     main_field = clo.objects.create(text=main_fields, form=create_form, created_by=request.user)
                     
                     name_sub = 'sub_field_' + str(name_main)
                     sub_fields = request.POST.getlist(name_sub)
                     print(sub_fields)
                     print('name_sub =', name_sub)
-            
+
                     for sub_field_text in sub_fields:
                         sub_field = clo.objects.create(text=sub_field_text, parent=main_field, form=create_form, created_by=request.user)
 
@@ -102,48 +109,93 @@ def progress_api(num1, num2):
     # ส่งค่า progress_percent กลับไปในรูปแบบ JSON
     return JsonResponse({'progress_percent': progress_percent})
 
+
+
 @login_required(login_url="sign_in")   
 def view_form(request, form_id):
-    y = get_object_or_404(form_model, id=form_id)
-    if request.user.username != str(y.created_by) :
+    name_who_created = get_object_or_404(form_model, id=form_id)
+    if request.user.username != str(name_who_created.created_by):
         return redirect('http://127.0.0.1:8000/form/form_detail')
+
     if request.method == 'POST':
-        #form = RegisterForm(request.POST)
-        form = CSVUploadForm(request.POST, request.FILES)
-        use_aut = Aut(request.POST)
-        id_form = get_object_or_404(form_model, id=form_id)
-        if form.is_valid():
-            csv_file = request.FILES['csv_file']
-            if csv_file.name.endswith('.csv'):
-                #csv_data = csv_file.read().decode('utf-8')
-                try:
-                    csv_data = pd.read_csv(csv_file, encoding='utf-8')
-                except UnicodeDecodeError:
-                    csv_data = pd.read_csv(csv_file, encoding='latin1')
-                #csv_data = StringIO(csv_data)
-                #reader = csv.reader(csv_data)
-                num_rows = len(csv_data)
-                processed_records =0
-                for index, row in csv_data.iterrows():
-                    try:
-                        name = row[1]
-                        password = row[0]  # ใช้คอลัมน์ที่ 0 เป็นรหัสผ่าน
-                        email = str(row[0]) + '@payap.ac.th'
-                        user = User.objects.create_user(username=name, email=email, password=str(password))
-                        group = Group.objects.get(name='นักศึกษา')
-                        user.groups.add(group)  # เพิ่มเข้ากลุ่มที่ 2
-                    except :
-                        print("ซ้ำ")
-                    AuthorizedUser.objects.create(form=id_form, stu_list=row[0])
-                    progress_api(processed_records, num_rows)
-                    processed_records +=1
-                
+        if handle_csv_upload(request, form_id):
+            print("handle_csv_upload")
+        elif handle_clo_update(request):
+            print("handle_clo_update")
+        elif handle_sub_clo_update(request):
+            print("handle_sub_clo_update")
+        else:
+            return HttpResponse("Invalid form data.")
+    
     form_instance = get_object_or_404(form_model, pk=form_id)
-    clo_form = clo.objects.filter(form=form_id)
-    print("form_id = ",form_id)
+    clo_form = clo.objects.filter(form=form_id, parent__isnull=True)
     csv_1 = CSVUploadForm()
     context = {'form_instance': form_instance, 'clo_form': clo_form, 'csv_1': csv_1}
     return render(request, 'evaluate/main_form.html', context)
+
+def handle_csv_upload(request, form_id):
+    form = CSVUploadForm(request.POST, request.FILES)
+    use_aut = Aut(request.POST)
+    if not form.is_valid():
+        return False
+
+    id_form = get_object_or_404(form_model, id=form_id)
+    csv_file = request.FILES['csv_file']
+    if not csv_file.name.endswith('.csv'):
+        return False
+
+    try:
+        csv_data = pd.read_csv(csv_file, encoding='utf-8')
+    except UnicodeDecodeError:
+        csv_data = pd.read_csv(csv_file, encoding='latin1')
+    num_rows = len(csv_data)
+    processed_records = 0
+
+    for index, row in csv_data.iterrows():
+        try:
+            name = row[1]
+            password = row[0]  # ใช้คอลัมน์ที่ 0 เป็นรหัสผ่าน
+            email = str(row[0]) + '@payap.ac.th'
+            user = User.objects.create_user(username=name, email=email, password=str(password))
+            group = Group.objects.get(name='นักศึกษา')
+            user.groups.add(group)  # เพิ่มเข้ากลุ่มที่ 2
+        except Exception as e:
+            print("Error:", e)
+            print("ซ้ำ")
+        AuthorizedUser.objects.create(form=id_form, stu_list=row[0])
+        progress_api(processed_records, num_rows)
+        processed_records += 1
+
+    return True
+
+def handle_clo_update(request):
+    if 'main_text' not in request.POST or 'clo_id' not in request.POST:
+        return False
+    
+    clo_id = request.POST.get('clo_id')
+    new_text = request.POST.get('main_text')
+    try:
+        plo = get_object_or_404(clo, id=clo_id)
+        plo.text = new_text
+        plo.save()
+        return True
+    except PLOs.DoesNotExist:
+        return False
+
+def handle_sub_clo_update(request):
+    if 'sub_text' not in request.POST or 'sub_item_id' not in request.POST:
+        return False
+    
+    sub_item_id = request.POST.get('sub_item_id')
+    sub_text = request.POST.get('sub_text')
+    try:
+        sub_plo = get_object_or_404(clo, id=sub_item_id)
+        sub_plo.text = sub_text
+        sub_plo.save()
+        return True
+    except PLOs.DoesNotExist:
+        return False
+
 
 def dy (request):
     if request.method == 'POST':
@@ -163,3 +215,55 @@ def dy (request):
                 else:
                     print("NULL")
     return render(request, 'evaluate/Dynamic_Form.html', {'form':PLOstest})
+
+
+
+
+
+
+#สำหรับการบันทึก 2 รอบรอบแรกจะเป็น form สำหรับนักศึกษาที่มีสิทธ์ประเมินรายวิชานั้นๆ รอบที่ 2 จะบันทึกสำหรับอาจารย์
+'''
+@login_required(login_url="sign_in")
+def create_form(request):
+    if request.method == 'POST':
+        for i in range(2):
+            
+            le = request.POST.get('length')
+            if le is None:
+                le = 0
+            else:
+                le = int(le)
+
+            new_form = Form(request.POST)
+            if new_form.is_valid():
+                new_in = new_form.save(commit=False)
+                new_in.created_by = request.user
+                if i==1 :
+                    new_in.Active = True
+                new_in.save()
+                
+                #somthing = 'main_field0'
+                
+                if 'main_field0' in request.POST:
+                    for i in range(le + 1):
+                        create_form = get_object_or_404(form_model, id=new_in.id)
+                        name_main = 'main_field' + str(i)
+                        main_fields = request.POST.get(name_main)  # ใช้ค่าว่างในกรณีที่ไม่พบค่า
+                        print('main_fields =', name_main)
+                        main_field = clo.objects.create(text=main_fields, form=create_form, created_by=request.user)
+                        
+                        name_sub = 'sub_field_' + str(name_main)
+                        sub_fields = request.POST.getlist(name_sub)
+                        print(sub_fields)
+                        print('name_sub =', name_sub)
+
+                        for sub_field_text in sub_fields:
+                            sub_field = clo.objects.create(text=sub_field_text, parent=main_field, form=create_form, created_by=request.user)
+
+                    return HttpResponse("Data saved successfully!")
+                else:
+                    return HttpResponse("Error: No data for 'main_field0'")  
+    else:
+        new_form = Form()
+        return render(request, 'evaluate/create_form.html', {'new_form': new_form})
+        '''

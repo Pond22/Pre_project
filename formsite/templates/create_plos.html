@@ -10,7 +10,7 @@
         background-color: #f0f0f0;
         padding: 20px;
       }
-      
+
       #ploForm {
         max-width: 800px;
         margin: 20px auto;
@@ -19,13 +19,13 @@
         border-radius: 8px;
         box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
       }
-      
+
       .main_field0 {
         margin-bottom: 20px;
         padding: 10px;
         border-bottom: 1px solid #ccc;
       }
-      
+
       .main_field0 input[type="text"] {
         width: 100%;
         padding: 10px;
@@ -34,7 +34,7 @@
         border-radius: 4px;
         box-sizing: border-box;
       }
-      
+
       .addSubField {
         background-color: #007bff;
         color: #fff;
@@ -45,15 +45,15 @@
         font-size: 16px;
         transition: background-color 0.3s ease;
       }
-      
+
       .addSubField:hover {
         background-color: #0056b3;
       }
-      
+
       .subFields {
         margin-top: 10px;
       }
-      
+
       .subFields input[type="text"] {
         width: 100%;
         padding: 10px;
@@ -62,7 +62,7 @@
         border-radius: 4px;
         box-sizing: border-box;
       }
-      
+
       .subFields button[type="button"] {
         background-color: #007bff;
         color: #fff;
@@ -73,11 +73,11 @@
         font-size: 16px;
         transition: background-color 0.3s ease;
       }
-      
+
       .subFields button[type="button"]:hover {
         background-color: #0056b3;
       }
-      
+
       .add_main_Field {
         background-color: #007bff;
         color: #fff;
@@ -88,11 +88,11 @@
         font-size: 16px;
         transition: background-color 0.3s ease;
       }
-      
+
       .add_main_Field:hover {
         background-color: #0056b3;
       }
-      
+
       button[type="submit"] {
         background-color: #007bff;
         color: #fff;
@@ -103,7 +103,7 @@
         font-size: 16px;
         transition: background-color 0.3s ease;
       }
-      
+
       button[type="submit"]:hover {
         background-color: #0056b3;
       }
@@ -157,8 +157,8 @@
         deleteButton.textContent = "-";
         deleteButton.onclick = function () {
           // ลบฟิลด์ลูกเมื่อคลิกปุ่มลบ
-          parentDiv.removeChild(subField);
-          parentDiv.removeChild(deleteButton);
+          subField.remove();
+          deleteButton.remove();
         };
 
         // เพิ่มฟิลด์ลูกและปุ่มลบลงในแม่
@@ -243,6 +243,25 @@
       schoolYearInput.name = "school_year";
       schoolYearInput.value = schoolYear;
       document.getElementById("ploForm").appendChild(schoolYearInput);
+
+      document
+        .getElementById("main")
+        .addEventListener("change", function (event) {
+          // กันคนแก้ไขจากหน้า html
+          if (event.target.name === "length") {
+            // หากมีการแก้ไขฟิลด์ hidden ให้สร้าง hidden input ใหม่
+            var newHiddenInput = document.createElement("input");
+            newHiddenInput.type = "hidden";
+            newHiddenInput.name = "length";
+            newHiddenInput.value = dynamicFieldCounter;
+
+            // ลบอันเก่าออก
+            event.target.parentNode.removeChild(event.target);
+
+            // เพิ่มใหม่
+            document.getElementById("main").appendChild(newHiddenInput);
+          }
+        });
     </script>
   </body>
 </html>

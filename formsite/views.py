@@ -159,7 +159,7 @@ def create_plo(request):
 
 def manage_plos(request):
     if request.method == 'POST':
-        
+        #แก้ไข
         if 'main_text' in request.POST and 'plo_id' in request.POST:
             
             plo_id = request.POST.get('plo_id')
@@ -184,6 +184,7 @@ def manage_plos(request):
                 return HttpResponse("Sub PLO does not exist.")
         else:
             return HttpResponse("Invalid form data.")
+        #แก้ไข
     
     elif request.method == 'GET':
         year_number = request.GET.get('year_number')
@@ -191,6 +192,6 @@ def manage_plos(request):
         plos = PLOs.objects.filter(year_number=year_number, school_year=school_year, parent__isnull=True)
         return render(request, 'manage_plos.html', {'plos': plos})
     else:
-        #plos = PLOs.objects.filter(parent__isnull=True)
+        plos = PLOs.objects.filter(parent__isnull=True)
         return render(request, 'manage_plos.html', {'plos': plos})
 
