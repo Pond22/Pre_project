@@ -135,7 +135,7 @@ def create_plo(request):
         print(le)
         print('school = '+school)
         print('year = '+year)
-        for i in range(0, le+1):
+        for i in range(0, le):
             name_main = 'main_field' + str(i)
                 
             main_fields = request.POST.get(name_main)  # รับข้อมูลจากฟิลด์แม่

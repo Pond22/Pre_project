@@ -124,6 +124,11 @@ def view_form(request, form_id):
             print("handle_clo_update")
         elif handle_sub_clo_update(request):
             print("handle_sub_clo_update")
+        elif handle_clo_delete(request):
+            print("handle_clo_delete")
+        elif handle_sub_clo_delete(request):
+            print("handle_sub_clo_delete")
+            
         else:
             return HttpResponse("Invalid form data.")
     
@@ -196,6 +201,29 @@ def handle_sub_clo_update(request):
     except PLOs.DoesNotExist:
         return False
 
+def handle_clo_delete(request):
+    if 'clo_id' not in request.POST:
+        return False
+    
+    clo_id = request.POST.get('clo_id')
+    try:
+        clo_obj = get_object_or_404(clo, id=clo_id)
+        clo_obj.delete()
+        return True
+    except clo.DoesNotExist:
+        return False
+
+def handle_sub_clo_delete(request):
+    if 'sub_item_id' not in request.POST:
+        return False
+    
+    sub_item_id = request.POST.get('sub_item_id')
+    try:
+        sub_clo_obj = get_object_or_404(clo, id=sub_item_id)
+        sub_clo_obj.delete()
+        return True
+    except clo.DoesNotExist:
+        return False
 
 def dy (request):
     if request.method == 'POST':

@@ -24,11 +24,12 @@
     <button type="submit" name="action" value="create">Create</button>
   </form>
 </div>
-
 {% endblock %}
+
 <script>
   let dynamicFieldCounter = 1;
   let num = 0;
+
   function addSubField(button) {
     var parentDiv = button.parentElement;
     var divName = button.parentNode.className;
@@ -83,11 +84,70 @@
     var subFieldsDiv = document.createElement("div");
     subFieldsDiv.classList.add("subFields");
 
+    //ทำปุ่มลบฟิลด์แม่
+    var deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.textContent = "-";
+    deleteButton.onclick = function () {
+      mainField.remove();
+      deleteButton.remove();
+    };
+
+    //ทำปุ่มลบฟิลด์แม่
+    /*
+    var deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.textContent = "-";
+    deleteButton.onclick = function () {
+      mainField.remove();
+      deleteButton.remove();
+      addButton.remove();
+      dynamicFieldCounter--;
+    };*/
+
     // เพิ่มฟิลด์แม่และปุ่มเพิ่มฟิลด์ลูกลงในแม่
     mainFieldDiv.appendChild(mainField);
     mainFieldDiv.appendChild(addButton);
     mainFieldDiv.appendChild(subFieldsDiv);
     parentDiv.insertBefore(mainFieldDiv, parentDiv.lastElementChild);
+
+    //ทำปุ่มลบฟิลด์แม่
+    var deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.textContent = "-";
+    deleteButton.onclick = function () {
+
+      //สำคัญสำหรับการลบ ห้ามแก้ ถ้าไม่มีมันตอนกด - ชื่อของฟิลด์ตอนหลังบ้านรับ POST จะผิด
+      var tem = dynamicFieldCounter;
+      console.log(dynamicFieldCounter);
+      tem--;
+
+      var nextField = document.querySelector(".main_field" + tem);
+      var subclass = nextField.querySelector(".subFields");
+      console.log(subclass);
+
+      if (nextField) {
+        var inputElement = nextField.querySelector("input"); // เลือก input ภายใน div
+
+        tem--;
+        var name = "main_field" + tem;
+        var name_sub = "sub_field_main_field" + tem;
+        var subFields = subclass.querySelectorAll("input");
+        console.log(subFields);
+        nextField.className = name; // แก้ชื่อ div
+        inputElement.setAttribute("name", name); // แก้ชื่อ
+        inputElement.setAttribute("class", name); // แก้คลาส
+        // วนลูปทุก subField และตั้งค่า name ของแต่ละตัว
+        for (var i = 0; i < subFields.length; i++)
+          subFields[i].setAttribute("name", name_sub); // แก้ชื่อ sub
+      }
+
+      //สำคัญสำหรับการลบ ห้ามแก้
+
+      dynamicFieldCounter--;
+      mainFieldDiv.remove();
+    };
+    mainFieldDiv.appendChild(deleteButton);
 
     var hiddenInput = document.createElement("input");
     hiddenInput.type = "hidden";
@@ -115,5 +175,7 @@
           document.getElementById("main").appendChild(newHiddenInput);
         }
       });
+
+    dynamicFieldCounter++;
   }
 </script>
