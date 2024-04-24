@@ -6,7 +6,8 @@ class Form(forms.ModelForm):
         model = form
         fields = ("name", "id")
 
-class PLOsForm(forms.ModelForm):
+class Plo_form(forms.ModelForm):
     class Meta:
-        model = PLOs
-        fields = ['text']
+        model =Form_plos
+        fields = ("school_year", "year_number")
+

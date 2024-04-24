@@ -63,36 +63,42 @@ class clo(models.Model):
     def __str__(self):
         return self.text
 
-class UserEvaluation(models.Model):
-    name = models.CharField(max_length=100)
-    evaluation_date = models.DateField(auto_now_add=True)
-    question = models.ForeignKey(clo, on_delete=models.CASCADE)
-
-
-class form_plos(models.Model):
+class FormResponse(models.Model):
+    form = models.ForeignKey(form, on_delete=models.CASCADE)
+    respondent = models.ForeignKey(User, on_delete=models.CASCADE)
+    response_date = models.DateTimeField(auto_now_add=True)
+    clo_item  = models.ForeignKey(clo, on_delete=models.CASCADE)
+    response_clo = models.IntegerField(choices=[(1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5')])
+    
+    def __str__(self):
+        return self.clo_item
+    
+class Form_plos(models.Model):
     id = models.BigAutoField(primary_key=True)
-
-class PLOs(models.Model):
-    school_year_choices =(
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    create = models.DateTimeField(auto_now_add=True)
+    school_year_choices = (
         (1, '1'),
         (2, '2'),
         (3, '3')
     )
-    id = models.BigAutoField(primary_key=True)
-    text = models.TextField(null=False, blank=False)
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='sub_items')
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    create = models.DateTimeField(auto_now_add=True)
     school_year = models.IntegerField(choices=school_year_choices)
     year_number = models.IntegerField(
         verbose_name='ปี', 
         help_text='ใส่ตัวเลขปี 4 ตัว',
         validators=[MinValueValidator(2567), MaxValueValidator(2570)]
     )
+
+class PLOs(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    text = models.TextField(null=False, blank=False)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='sub_items')
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    create = models.DateTimeField(auto_now_add=True)
     active = models.BooleanField(default=False)
     update = models.DateTimeField(auto_now=True)
+    form = models.ForeignKey(Form_plos, on_delete=models.CASCADE)
     
     def __str__(self):
         return self.text
-
 

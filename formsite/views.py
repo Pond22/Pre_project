@@ -4,12 +4,13 @@ from .models import *
 from .models import form as form_id
 import time
 import pandas as pd
+from .forms import Plo_form
 from evaluate.forms import PLOsForm, Form, ClosForm, CSVUploadForm, Aut
 from django.contrib.auth.models import User, Group
 from rest_framework import routers, serializers, viewsets, status
 from rest_framework.response import Response
 from .serializers import CSVUploadForm as CSV_API
-from .models import PLOs
+from .models import PLOs, Form_plos
 # Create your views here.
 
 #def index(request):
@@ -127,21 +128,30 @@ def create_plo(request):
         school = request.POST.get('school_year')
         year = request.POST.get('year_number')
         le = request.POST.get('length')
+        
+        form = Plo_form(request.POST)
+        if form.is_valid():
+            plo_form_instance = form.save(commit=False)
+            plo_form_instance.created_by = request.user
+            plo_form_instance.year_number = year
+            plo_form_instance.school_year = school
+            plo_form_instance.save()
         if le is None:
             le = 0
         else:
             le = int(le)
-
+        
         print(le)
-        print('school = '+school)
+        print('ไอดี = ',id)
         print('year = '+year)
+        
         for i in range(0, le):
             name_main = 'main_field' + str(i)
-                
+            create_form = get_object_or_404(Form_plos, id=plo_form_instance.id) #หา id ของ PLO_FORM
             main_fields = request.POST.get(name_main)  # รับข้อมูลจากฟิลด์แม่
             print('main_fields = '+str(main_fields))
-            main_field = PLOs.objects.create(text=main_fields, school_year=school, year_number=year)
-            
+            main_field = PLOs.objects.create(text=main_fields, form=create_form)
+            print('ไอดี = ',id)
             name_sub = 'sub_field_' + str(name_main)
             sub_fields = request.POST.getlist(name_sub)
             print(sub_fields)
@@ -150,7 +160,7 @@ def create_plo(request):
        
             # วนลูปผ่านฟิลด์ลูกและสร้าง PLO ลูก
             for sub_field_text in sub_fields:
-                sub_field = PLOs.objects.create(text=sub_field_text, parent=main_field, school_year=school, year_number=year)
+                sub_field = PLOs.objects.create(text=sub_field_text, parent=main_field,form=create_form)
 
         return HttpResponse("Data saved successfully!")
 
@@ -189,9 +199,9 @@ def manage_plos(request):
     elif request.method == 'GET':
         year_number = request.GET.get('year_number')
         school_year = request.GET.get('school_year')
-        plos = PLOs.objects.filter(year_number=year_number, school_year=school_year, parent__isnull=True)
-        return render(request, 'manage_plos.html', {'plos': plos})
+        plos_form = PLOs.objects.filter(created_by=request.user)
+        return render(request, 'manage_plos.html', {'plos': plos_form})
     else:
-        plos = PLOs.objects.filter(parent__isnull=True)
-        return render(request, 'manage_plos.html', {'plos': plos})
+        plos_form = PLOs.objects.filter(parent__isnull=True)
+        return render(request, 'manage_plos.html', {'plos': plos_form})
 

@@ -1,16 +1,60 @@
-{% block title %}
-    ทดสอบการบันทึกข้อมูล PLOs
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assessment Form</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+  <div class="container mx-auto">
+    <div class="flex justify-center px-6 py-8 mt-8 bg-white shadow-md overflow-hidden sm:w-full sm:max-w-md md:w-full md:max-w-md lg:w-full lg:max-w-md xl:w-full xl:max-w-md">
+      <div>
+        <img class="mx-auto h-12 w-auto" src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg" alt="Workflow">
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          แบบประเมินทวนสอบรายวิชา SE000
+        </h2>
+        <p class="mt-2 text-center text-sm text-gray-500">
+          โดยอาจารย์ Username จัดการ
+        </p>
 
-{% block content %}
-<div class= "container"> 
-    <h1>สร้าง PLOs</h1>
-    <form method="post" action="{% url 'create_plo' %}">
-        {% csrf_token %}
-        
-        <label for="text">ป้อน PLO:</label>
-        <input type="text" name="text" required><br>
+        <div class="mt-8 space-y-6">
+          <div class="rounded-md shadow-sm -space-y-px">
+            <div>
+              <label for="goals" class="sr-only">1. วัตถุประสงค์ของรายวิชา (0)</label>
+              <input id="goals" name="goals" type="text" autocomplete="goals" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="1.1 กำหนดวัตถุประสงค์การเรียนรู้จตามเนื้อหาสาระในคำาอธิบายกระบวนวิชา">
+            </div>
+            <div>
+              <label for="goals-details" class="sr-only">Goals Details</label>
+              <textarea id="goals-details" name="goals-details" rows="4" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="1.2 เขียบวัตถุประสงค์การเรียนรู้..."></textarea>
+            </div>
+          </div>
 
-        <input type="submit" value="เพิ่มข้อมูล">
-</div>
-{%endblock%}
+          <div class="rounded-md shadow-sm -space-y-px">
+            <div>
+              <label for="plan" class="sr-only">2. แผนการสอน/เนื้อหาสาระ (C)</label>
+              <input id="plan" name="plan" type="text" autocomplete="plan" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="2.1 แบ่งหัวข้อเนื้อหาสาระได้เหมาะสม">
+            </div>
+            <div>
+              <label for="plan-details" class="sr-only">Plan Details</label>
+              <textarea id="plan-details" name="plan-details" rows="4" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="2.2 ระบุรายละเอียดเนื้อหาสาระได้เหมาะสม..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+              <!-- Heroicon name: solid/lock-closed -->
+              <svg class="h-5 w-5 text-indigo-500 group-hover:text-indigo-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" />
+              </svg>
+            </span>
+            Submit
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
