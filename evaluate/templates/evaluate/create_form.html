@@ -112,40 +112,67 @@
     parentDiv.insertBefore(mainFieldDiv, parentDiv.lastElementChild);
 
     //ทำปุ่มลบฟิลด์แม่
+    //let tem = dynamicFieldCounter;
+
     var deleteButton = document.createElement("button");
     deleteButton.type = "button";
     deleteButton.textContent = "-";
     deleteButton.onclick = function () {
-
       //สำคัญสำหรับการลบ ห้ามแก้ ถ้าไม่มีมันตอนกด - ชื่อของฟิลด์ตอนหลังบ้านรับ POST จะผิด
-      var tem = dynamicFieldCounter;
-      console.log(dynamicFieldCounter);
-      tem--;
 
-      var nextField = document.querySelector(".main_field" + tem);
-      var subclass = nextField.querySelector(".subFields");
-      console.log(subclass);
+      thename = mainField.name;
+      mainFieldDiv.remove();
+      var number = thename.match(/\d+$/)[0]; // ดึงตัวเลขข้างหลังสุดออกมา
+      console.log("TEM = " + tem);
+      var value = number;
+      var tem = number;
+      tem++;
 
-      if (nextField) {
-        var inputElement = nextField.querySelector("input"); // เลือก input ภายใน div
+      var hiddenInput = document.createElement("input");
+      hiddenInput.type = "hidden";
+      hiddenInput.name = "length"; // ตั้งชื่อฟิลด์
+      hiddenInput.value = dynamicFieldCounter; // กำหนดค่าจาก dynamicFieldCounter
 
-        tem--;
-        var name = "main_field" + tem;
-        var name_sub = "sub_field_main_field" + tem;
-        var subFields = subclass.querySelectorAll("input");
-        console.log(subFields);
-        nextField.className = name; // แก้ชื่อ div
-        inputElement.setAttribute("name", name); // แก้ชื่อ
-        inputElement.setAttribute("class", name); // แก้คลาส
-        // วนลูปทุก subField และตั้งค่า name ของแต่ละตัว
-        for (var i = 0; i < subFields.length; i++)
-          subFields[i].setAttribute("name", name_sub); // แก้ชื่อ sub
+      // เพิ่ม hiddenInput ลงใน form
+      document.getElementById("main").appendChild(hiddenInput);
+      for (v = tem; v < dynamicFieldCounter; v++) {
+        //หาclass
+
+        console.log("ค่า v" + value);
+        var nextField = document.querySelector(".main_field" + v);
+        console.log("ชื่อมัน" + nextField.className);
+        var subclass = nextField.querySelector(".subFields");
+        //console.log(subclass.className);
+
+        if (nextField) {
+          var inputElement = nextField.querySelector("input"); // เลือก input ภายใน div
+          console.log("ste", value);
+          var name = "main_field" + value;
+          var name_sub = "sub_field_main_field" + value;
+          var subFields = subclass.querySelectorAll("input");
+          console.log(subFields);
+
+          nextField.className = name; // แก้ชื่อ div
+          console.log("แก้ชื่อ" + nextField.className);
+
+          inputElement.setAttribute("name", name); // แก้ชื่อ
+          inputElement.setAttribute("class", name); // แก้คลาส
+
+          // วนลูปทุก subField และตั้งค่า name ของแต่ละตัว
+          for (var i = 0; i < subFields.length; i++) {
+            subFields[i].setAttribute("name", name_sub); // แก้ชื่อ sub
+          }
+          //mainFieldDiv.remove();
+        }
+        value++;
+        hiddenInput.value = value;
+        document.getElementById("main").appendChild(hiddenInput);
       }
 
       //สำคัญสำหรับการลบ ห้ามแก้
 
       dynamicFieldCounter--;
-      mainFieldDiv.remove();
+      //mainFieldDiv.remove();
     };
     mainFieldDiv.appendChild(deleteButton);
 

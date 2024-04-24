@@ -69,6 +69,9 @@ class UserEvaluation(models.Model):
     question = models.ForeignKey(clo, on_delete=models.CASCADE)
 
 
+class form_plos(models.Model):
+    id = models.BigAutoField(primary_key=True)
+
 class PLOs(models.Model):
     school_year_choices =(
         (1, '1'),
