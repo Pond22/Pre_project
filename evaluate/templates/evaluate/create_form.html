@@ -1,15 +1,163 @@
-{% block title %} Create Form {% endblock %} {% block content %}
+<style>
+  .popup {
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0, 0, 0); /* Fallback color */
+    background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+  }
+
+  .popup-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+  }
+
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .template_item,
+  .template_item {
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+
+  .template_item:hover,
+  .template_item:hover {
+    background-color: #f0f0f0;
+  }
+</style>
+
+<script>
+  //pop-up
+  function showPopup(inputId) {
+    document.getElementById("popup").style.display = "block";
+
+    sessionStorage.setItem('currentInputId', inputId);
+    sessionStorage.setItem('currentSubId', 'sub_field_'+inputId);
+  }
+
+  function closePopup() {
+    document.getElementById("popup").style.display = "none";
+  }
+
+  function showTemplateDetails() {
+    // โค้ดที่แสดงข้อมูลแม่แบบ
+    var templateDetailsDiv = document.getElementById("template_details");
+    templateDetailsDiv.innerHTML = "<p>ข้อมูลแม่แบบที่เลือก</p>";
+    templateDetailsDiv.style.display = "block";
+  }
+
+  
+  function selectTemplate(id, text, event) {
+    if (event) {
+        event.stopPropagation();  // ป้องกัน event bubbling
+    }
+    var templateDetailsDiv = document.getElementById("template_details");
+    templateDetailsDiv.innerHTML = "<p>แม่แบบที่เลือก: " + text + "</p>";
+    templateDetailsDiv.style.display = "block";
+
+    // โอนข้อความไปยังฟิลด์เ
+    var inputId = sessionStorage.getItem('currentInputId');
+    var targetInput = document.getElementById(inputId);
+    var gg = targetInput.querySelector("input[type='text'][name='" + inputId + "']"); //gg อย่าหาทำ
+    console.log(gg);
+    if (targetInput) {
+        gg.value = text;  // กำหนดข้อความให้กับฟิลด์ input *** ระวังไม่ให้มันไปเซ็ต Value ผิดที่
+        gg.autocomplete="off"
+    }
+}
+
+function set_subField(text, event){
+  event.stopPropagation();  // ป้องกัน event bubbling
+
+  var divId = sessionStorage.getItem('currentInputId'); // ไอดีของ div หลักที่ต้องการเพิ่ม input
+  var sub_id_to_add = sessionStorage.getItem('currentSubId'); // ไอดีสำหรับใช้ใน input ใหม่
+  var parentDiv = document.getElementById(divId); // หา div หลัก
+
+  var newInput = document.createElement('input');
+  newInput.type = 'text';
+  newInput.value = text;  
+  newInput.id = sub_id_to_add;  
+  newInput.className = sub_id_to_add;  
+  newInput.placeholder = "Sub Field";
+  console.log(sub_id_to_add)
+  console.log(parentDiv)
+
+  if (parentDiv) {
+    parentDiv.querySelector(".subFields").appendChild(newInput); // เพิ่ม input ใหม่ใน div หลัก
+  } else {
+    console.error('Parent division not found for sub ID:', sub_id_to_add);
+  }
+}
+
+</script>
+
+{% block title %} Create Form By {{user_now}}{% endblock %} {% block content %}
 <div class="container">
   <h1>สร้าง FORM and CLOs</h1>
   <form method="post" id="main">
     {% csrf_token %} {{new_form.as_p }}
+
+    <!-- ป๊อปอัพ แม่แบบ-->
+    <div id="popup" class="popup" style="display: none">
+      <div class="popup-content">
+          <span class="close" onclick="closePopup()">&times;</span>
+          <div id="form_select_template">
+              <label for="template_select">เลือกแม่แบบ:</label>
+              <div id="template_list">
+                  {% for template, items in template_data.items %}
+                      {% for item in items %}
+                        {%if not item.parent%}
+
+                        <div class="template_main_item">
+                          <input type="radio" id="item_{{ item.id }}" name="template_choice" value="{{ item.id }}" onchange="selectTemplate('{{ item.id }}', '{{ item.text }}', event)">
+                          <label for="item_{{ item.id }}">&nbsp;&nbsp;{{ forloop.parentloop.counter }} : {{ item.text }}</label>
+
+                      </div>
+
+                        {% for sub in item.sub_items.all %}
+                            <!-- โค้ดสำหรับ sub-items -->
+                            <div class="template_sub_item">
+                              <input type="radio" id="sub_{{ sub.id }}" name="template_choice" value="{{ sub.id }}" onchange="set_subField('{{ sub.text }}', event)">
+                              <label for="sub_{{ sub.id }}">: {{ sub.text }}</label>
+                            </div>
+                        {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                  {% endfor %}
+              </div>
+          </div>
+          <div id="template_details" style="display: none">
+              <!-- Details will be shown here -->
+          </div>
+      </div>
+  </div>
+  
 
     <div id="parent">
       <!-- div แม่ -->
       <!-- ฟิลด์แรกของแม่ -->
       <div class="main_field0">
         <!-- div ลูก -->
-        <input type="text" name="main_field0" placeholder="Main Field" />
+        <input type="text" id = '22'name="main_field0" placeholder="Main Field" />
         <button type="button" class="addSubField" onclick="addSubField(this)">
           +
         </button>
@@ -64,12 +212,14 @@
     // สร้างฟิลด์แม่ใหม่
     var parentDiv = document.getElementById("parent");
     var mainFieldDiv = document.createElement("div");
+    mainFieldDiv.id  = "main_field" + dynamicFieldCounter;
     mainFieldDiv.classList.add("main_field" + dynamicFieldCounter);
 
     var mainField = document.createElement("input");
     mainField.type = "text";
     mainField.name = "main_field" + dynamicFieldCounter;
     mainField.className = "main_field" + dynamicFieldCounter;
+    mainField.id = "main_field" + dynamicFieldCounter
     mainField.placeholder = "Main Field";
 
     console.log(dynamicFieldCounter);
@@ -92,9 +242,17 @@
       mainField.remove();
       deleteButton.remove();
     };
+    // ทำปุ่มแสดง popup
+    var popupButton = document.createElement("button");
+    popupButton.type = "button";
+    popupButton.textContent = "เลือกแม่แบบ";
+    popupButton.onclick = function () {
+      showPopup(mainField.id);
+    };
 
     // เพิ่มฟิลด์แม่และปุ่มเพิ่มฟิลด์ลูกลงในแม่
     mainFieldDiv.appendChild(mainField);
+    mainFieldDiv.appendChild(popupButton);
     mainFieldDiv.appendChild(addButton);
     mainFieldDiv.appendChild(subFieldsDiv);
     parentDiv.insertBefore(mainFieldDiv, parentDiv.lastElementChild);

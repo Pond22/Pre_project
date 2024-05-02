@@ -1,5 +1,5 @@
 from django import forms
-from formsite.models import PLOs, form, clo, AuthorizedUser
+from formsite.models import TemplateData, Form, AssessmentItem, AuthorizedUser
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 import re
@@ -10,23 +10,23 @@ class Aut(forms.ModelForm):
         fields = []
 class PLOsForm(forms.ModelForm):
     class Meta:
-        model = PLOs
+        model = TemplateData
         fields = ['text']
         
 class PLOstest(forms.ModelForm):
     class Meta:
-        model = PLOs
+        model = TemplateData
         fields = []
         #widgets = {'test': forms.TextInput(attrs={'class': 'form-control'})}  
         
-class Form(forms.ModelForm):
+class Assessment_Form(forms.ModelForm):
     class Meta:
-        model = form
-        fields = ['name', 'class_code', 'school_year', 'section', 'year_number'] 
+        model = Form
+        fields = ['name', 'class_code', 'semester', 'section', 'year_number'] 
         
 class ClosForm(forms.ModelForm):
     class Meta:
-        model = clo
+        model = AssessmentItem
         fields = ['text']
         
 def validate_email(email):

@@ -6,7 +6,7 @@ import re
 
 class Form(serializers.ModelSerializer):
     class Meta:
-        model = form
+        model = Form
         fields = ("name", "id")
         
         

@@ -1,104 +1,96 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AbstractUser
 import datetime
 from django.core.validators import MinValueValidator, MaxValueValidator
-
-'''
 # Create your models here.
-class Question(models.Model):
-    text = models.CharField(max_length=255)
-    create = models.DateTimeField(auto_now_add=True)
-    update = models.DateTimeField(auto_now=True)
-    
-    def __str__(self):
-        return self.text
-
-class Answer(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    user_response = models.TextField
-
 '''
+user_fields = User._meta.fields
 
-# Create your models here.
+for field in user_fields:
+    print(field.name)
+'''
+class LineTokens(models.Model): # เพิ่มฟิลด์ line_token 
+    line_token = models.CharField(max_length=30, blank=True, null=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
 
-class students(models.Model):
-    students_id = models.CharField(max_length=10, primary_key=True)
-    name = models.CharField(max_length=80)
-
-class form(models.Model):
+class Form(models.Model):
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=100)
     class_code = models.CharField(max_length=10)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     create = models.DateTimeField(auto_now_add=True)
-    school_year_choices =(
+    is_teacher_form = models.BooleanField(default=False)
+    semester_choices =(
         #("Undefined","Undefined"),
         (1, '1'),
         (2, '2'),
         (3, '3')
     )
-    school_year = models.IntegerField(choices=school_year_choices)
+    semester = models.IntegerField(choices=semester_choices)
     section = models.CharField(max_length=2)
     year_number = models.IntegerField(
         verbose_name='ปี', 
         help_text='ใส่ตัวเลขปี 4 ตัว',
         validators=[MinValueValidator(1999), MaxValueValidator(3100)]
     )
+    start_date = models.DateTimeField(null=True, blank=True)
+    end_date = models.DateTimeField(null=True, blank=True)
+    expired = models.BooleanField(default=False) #เก็บว่าแบบฟอร์มนั้นครบกำหนดเวลาหรือยัง
+     
+    def __str__(self):
+        return f"{self.class_code} ตอนที่ {self.section} ปีการศึกษา {self.year_number} ภาคเรียนที่ {self.semester} เวลาสิ้นสุด {self.end_date}"
 
 class AuthorizedUser(models.Model):
-    form = models.ForeignKey(form, on_delete=models.CASCADE)
-    stu_list = models.CharField(max_length=10)
+    form = models.ForeignKey(Form, on_delete=models.CASCADE)
+    user_name = models.CharField(max_length=10)
     def __str__(self):
-        return self.stu_list
+        return self.form
     
-class clo(models.Model):    
+class AssessmentItem(models.Model):    
     text = models.TextField()
-    form = models.ForeignKey(form, on_delete=models.CASCADE)
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    form = models.ForeignKey(Form, on_delete=models.CASCADE)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='sub_items')
     id = models.BigAutoField(primary_key=True)
-    create = models.DateTimeField(auto_now_add=True)
+    create_date = models.DateTimeField(auto_now_add=True)
     update = models.DateTimeField(auto_now=True)
     
     def __str__(self):
         return self.text
 
-class FormResponse(models.Model):
-    form = models.ForeignKey(form, on_delete=models.CASCADE)
+class AssessmentResponse(models.Model):
     respondent = models.ForeignKey(User, on_delete=models.CASCADE)
     response_date = models.DateTimeField(auto_now_add=True)
-    clo_item  = models.ForeignKey(clo, on_delete=models.CASCADE)
-    response_clo = models.IntegerField(choices=[(1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5')])
-    
+    assessment_item  = models.ForeignKey(AssessmentItem, on_delete=models.CASCADE)
+    response = models.IntegerField(choices=[(1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5')])
+    response_comment = models.CharField(max_length=100, blank=True, null=True)
+
     def __str__(self):
-        return self.clo_item
+        return self.assessment_item
     
-class Form_plos(models.Model):
+class Teamplates(models.Model):
     id = models.BigAutoField(primary_key=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     create = models.DateTimeField(auto_now_add=True)
-    school_year_choices = (
+    is_active = models.BooleanField(default=False)
+    semester_choices = (
         (1, '1'),
         (2, '2'),
         (3, '3')
     )
-    school_year = models.IntegerField(choices=school_year_choices)
+    semester = models.IntegerField(choices=semester_choices)
     year_number = models.IntegerField(
         verbose_name='ปี', 
         help_text='ใส่ตัวเลขปี 4 ตัว',
         validators=[MinValueValidator(2567), MaxValueValidator(2570)]
     )
 
-class PLOs(models.Model):
+class TemplateData(models.Model):
     id = models.BigAutoField(primary_key=True)
     text = models.TextField(null=False, blank=False)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='sub_items')
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     create = models.DateTimeField(auto_now_add=True)
-    active = models.BooleanField(default=False)
     update = models.DateTimeField(auto_now=True)
-    form = models.ForeignKey(Form_plos, on_delete=models.CASCADE)
+    form = models.ForeignKey(Teamplates, on_delete=models.CASCADE)
     
     def __str__(self):
         return self.text
-

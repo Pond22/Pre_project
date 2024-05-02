@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http.response import HttpResponse
 from .models import *
-from .models import form as form_id
+from .models import Form as form_id
 import time
 import pandas as pd
 from .forms import Plo_form
@@ -10,7 +10,7 @@ from django.contrib.auth.models import User, Group
 from rest_framework import routers, serializers, viewsets, status
 from rest_framework.response import Response
 from .serializers import CSVUploadForm as CSV_API
-from .models import PLOs, Form_plos
+from .models import TemplateData, Teamplates
 # Create your views here.
 
 #def index(request):
@@ -18,7 +18,7 @@ from .models import PLOs, Form_plos
 
 def home(request):
     #x = form.objects.filter(id__range=(1,4), name__in=("วิชาภาษาไทย", "วิชาภาษาซี"))
-    x  = form.objects.filter(class_code__in=("se211", "SE5555"))
+    x  = Form.objects.filter(class_code__in=("se211", "SE5555"))
     return render(request, 'home.html', {'data': x})
 
 def index(request):
@@ -134,7 +134,7 @@ def create_plo(request):
             plo_form_instance = form.save(commit=False)
             plo_form_instance.created_by = request.user
             plo_form_instance.year_number = year
-            plo_form_instance.school_year = school
+            plo_form_instance.semester = school
             plo_form_instance.save()
         if le is None:
             le = 0
@@ -147,20 +147,20 @@ def create_plo(request):
         
         for i in range(0, le):
             name_main = 'main_field' + str(i)
-            create_form = get_object_or_404(Form_plos, id=plo_form_instance.id) #หา id ของ PLO_FORM
+            create_form = get_object_or_404(Teamplates, id=plo_form_instance.id) #หา id ของ PLO_FORM
             main_fields = request.POST.get(name_main)  # รับข้อมูลจากฟิลด์แม่
             print('main_fields = '+str(main_fields))
-            main_field = PLOs.objects.create(text=main_fields, form=create_form)
+            main_field = TemplateData.objects.create(text=main_fields, form=create_form)
             print('ไอดี = ',id)
             name_sub = 'sub_field_' + str(name_main)
             sub_fields = request.POST.getlist(name_sub)
             print(sub_fields)
             print('name_sub = '+str(name_sub))
-            #PLOs.objects.create(text=sub_fields, parent=main_field)
+            #TemplateData.objects.create(text=sub_fields, parent=main_field)
        
             # วนลูปผ่านฟิลด์ลูกและสร้าง PLO ลูก
             for sub_field_text in sub_fields:
-                sub_field = PLOs.objects.create(text=sub_field_text, parent=main_field,form=create_form)
+                sub_field = TemplateData.objects.create(text=sub_field_text, parent=main_field,form=create_form)
 
         return HttpResponse("Data saved successfully!")
 
@@ -175,22 +175,22 @@ def manage_plos(request):
             plo_id = request.POST.get('plo_id')
             new_text = request.POST.get('main_text')
             try:
-                plo = get_object_or_404(PLOs, id=plo_id)
+                plo = get_object_or_404(TemplateData, id=plo_id)
                 plo.text = new_text
                 plo.save()
                 return redirect('manage_plos')
-            except PLOs.DoesNotExist:
+            except TemplateData.DoesNotExist:
                 return HttpResponse("PLO does not exist.")
         elif 'sub_text' in request.POST and 'sub_item_id' in request.POST:
             
             sub_item_id = request.POST.get('sub_item_id')
             sub_text = request.POST.get('sub_text')
             try:
-                sub_plo = get_object_or_404(PLOs, id=sub_item_id)
+                sub_plo = get_object_or_404(TemplateData, id=sub_item_id)
                 sub_plo.text = sub_text
                 sub_plo.save()
                 return redirect('manage_plos')
-            except PLOs.DoesNotExist:
+            except TemplateData.DoesNotExist:
                 return HttpResponse("Sub PLO does not exist.")
         else:
             return HttpResponse("Invalid form data.")
@@ -199,9 +199,9 @@ def manage_plos(request):
     elif request.method == 'GET':
         year_number = request.GET.get('year_number')
         school_year = request.GET.get('school_year')
-        plos_form = PLOs.objects.filter(created_by=request.user)
+        plos_form = TemplateData.objects.filter(created_by=request.user)
         return render(request, 'manage_plos.html', {'plos': plos_form})
     else:
-        plos_form = PLOs.objects.filter(parent__isnull=True)
+        plos_form = TemplateData.objects.filter(parent__isnull=True)
         return render(request, 'manage_plos.html', {'plos': plos_form})
 

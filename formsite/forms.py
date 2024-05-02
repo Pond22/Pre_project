@@ -3,11 +3,11 @@ from .models import *
 
 class Form(forms.ModelForm):
     class Meta:
-        model = form
+        model = Form
         fields = ("name", "id")
 
 class Plo_form(forms.ModelForm):
     class Meta:
-        model =Form_plos
-        fields = ("school_year", "year_number")
+        model =Teamplates
+        fields = ("semester", "year_number")
 

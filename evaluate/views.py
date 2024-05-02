@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http.response import HttpResponse
 from django.contrib.auth.decorators import login_required
-from formsite.models import PLOs, clo, AuthorizedUser
-from formsite.models import form as form_model
-from .forms import PLOsForm, Form, ClosForm, CSVUploadForm, Aut, PLOstest
+from formsite.models import TemplateData, AssessmentItem, AuthorizedUser, Teamplates
+from formsite.models import Form as form_model
+from .forms import PLOsForm, Assessment_Form, ClosForm, CSVUploadForm, Aut, PLOstest
 from django.contrib.auth.models import User, Group
 from django.http import JsonResponse
 from rest_framework.views import APIView
@@ -13,10 +13,10 @@ import pandas as pd
 
 @login_required(login_url="sign_in")   
 def eva_home(request):
-    x = PLOs.objects.all().order_by("id")
+    x = TemplateData.objects.all().order_by("id")
     return render(request, 'evaluate/evaluate_home.html', {'plo':x})
     
-@login_required(login_url="sign_in")   
+@login_required(login_url="sign_in")   #Not used here
 def create_plo(request):
     if request.method == "POST":
         form = PLOsForm(request.POST)  # สร้าง ModelForm จากข้อมูลที่ผู้ใช้ส่งมา
@@ -43,7 +43,7 @@ def create_form(request):
             le = int(le)
         print(le)
 
-        new_form = Form(request.POST)
+        new_form = Assessment_Form(request.POST)
         if new_form.is_valid():
             new_in = new_form.save(commit=False)
             new_in.created_by = request.user
@@ -51,13 +51,13 @@ def create_form(request):
             
             #somthing = 'main_field0'
             
-            if 'main_field0' in request.POST:
+            if 'main_field0' in request.POST:  
                 for i in range(le + 1):
                     create_form = get_object_or_404(form_model, id=new_in.id)
                     name_main = 'main_field' + str(i)
                     main_fields = request.POST.get(name_main)  # ใช้ค่าว่างในกรณีที่ไม่พบค่า
                     print('main_fields =', name_main)
-                    main_field = clo.objects.create(text=main_fields, form=create_form, created_by=request.user)
+                    main_field = AssessmentItem.objects.create(text=main_fields, form=create_form)
                     
                     name_sub = 'sub_field_' + str(name_main)
                     sub_fields = request.POST.getlist(name_sub)
@@ -65,18 +65,26 @@ def create_form(request):
                     print('name_sub =', name_sub)
 
                     for sub_field_text in sub_fields:
-                        sub_field = clo.objects.create(text=sub_field_text, parent=main_field, form=create_form, created_by=request.user)
+                        sub_field = AssessmentItem.objects.create(text=sub_field_text, parent=main_field)
 
                 return HttpResponse("Data saved successfully!")
             else:
                 return HttpResponse("Error: No data for 'main_field0'")  
     else:
-        new_form = Form()
-        return render(request, 'evaluate/create_form.html', {'new_form': new_form})
+        active_forms = Teamplates.objects.filter(is_active=True).prefetch_related('templatedata_set')
+        template_data = {}
+
+        for form in active_forms:
+            template_data[form] = list(form.templatedata_set.all())
+                    
+        print(template_data)
+        new_form = Assessment_Form()
+        user_now = request.user.username
+        return render(request, 'evaluate/create_form.html', {'new_form': new_form, 'template_data': template_data, 'user_now':user_now})
 
     
 @login_required(login_url="sign_in")  
-def create_clo(request, form_id):
+def create_clo(request, form_id): #Not use here
     create_form = get_object_or_404(form_model, id=form_id)
     if request.method == "POST":
         form = ClosForm(request.POST)
@@ -95,20 +103,13 @@ def create_clo(request, form_id):
     context = {'form': form, 'form_id': form_id}
     return render(request, 'evaluate/create_clo.html', {'context': context})
 
+
 @login_required(login_url="sign_in")    
 def form_detail(request):
     user = request.user
     forms = form_model.objects.filter(created_by=user)
-    context = {'forms': forms}
+    context = {'forms': forms, 'user':user}
     return render(request, 'evaluate/form_detail.html', context)
-
-def progress_api(num1, num2):
-    # เรียกใช้ฟังก์ชัน test เพื่อคำนวณ progress_percent
-    progress_percent = (num1 / num2) * 100
-
-    # ส่งค่า progress_percent กลับไปในรูปแบบ JSON
-    return JsonResponse({'progress_percent': progress_percent})
-
 
 
 @login_required(login_url="sign_in")   
@@ -133,7 +134,7 @@ def view_form(request, form_id):
             return HttpResponse("Invalid form data.")
     
     form_instance = get_object_or_404(form_model, pk=form_id)
-    clo_form = clo.objects.filter(form=form_id, parent__isnull=True)
+    clo_form = AssessmentItem.objects.filter(form=form_id, parent__isnull=True)
     csv_1 = CSVUploadForm()
     context = {'form_instance': form_instance, 'clo_form': clo_form, 'csv_1': csv_1}
     return render(request, 'evaluate/main_form.html', context)
@@ -154,7 +155,6 @@ def handle_csv_upload(request, form_id):
     except UnicodeDecodeError:
         csv_data = pd.read_csv(csv_file, encoding='latin1')
     num_rows = len(csv_data)
-    processed_records = 0
 
     for index, row in csv_data.iterrows():
         try:
@@ -168,8 +168,6 @@ def handle_csv_upload(request, form_id):
             print("Error:", e)
             print("ซ้ำ")
         AuthorizedUser.objects.create(form=id_form, stu_list=row[0])
-        progress_api(processed_records, num_rows)
-        processed_records += 1
 
     return True
 
@@ -180,11 +178,11 @@ def handle_clo_update(request):
     clo_id = request.POST.get('clo_id')
     new_text = request.POST.get('main_text')
     try:
-        plo = get_object_or_404(clo, id=clo_id)
+        plo = get_object_or_404(AssessmentItem, id=clo_id)
         plo.text = new_text
         plo.save()
         return True
-    except PLOs.DoesNotExist:
+    except TemplateData.DoesNotExist:
         return False
 
 def handle_sub_clo_update(request):
@@ -194,11 +192,11 @@ def handle_sub_clo_update(request):
     sub_item_id = request.POST.get('sub_item_id')
     sub_text = request.POST.get('sub_text')
     try:
-        sub_plo = get_object_or_404(clo, id=sub_item_id)
+        sub_plo = get_object_or_404(AssessmentItem, id=sub_item_id)
         sub_plo.text = sub_text
         sub_plo.save()
         return True
-    except PLOs.DoesNotExist:
+    except TemplateData.DoesNotExist:
         return False
 
 def handle_clo_delete(request):
@@ -207,10 +205,10 @@ def handle_clo_delete(request):
     
     clo_id = request.POST.get('clo_id')
     try:
-        clo_obj = get_object_or_404(clo, id=clo_id)
+        clo_obj = get_object_or_404(AssessmentItem, id=clo_id)
         clo_obj.delete()
         return True
-    except clo.DoesNotExist:
+    except AssessmentItem.DoesNotExist:
         return False
 
 def handle_sub_clo_delete(request):
@@ -219,10 +217,10 @@ def handle_sub_clo_delete(request):
     
     sub_item_id = request.POST.get('sub_item_id')
     try:
-        sub_clo_obj = get_object_or_404(clo, id=sub_item_id)
+        sub_clo_obj = get_object_or_404(AssessmentItem, id=sub_item_id)
         sub_clo_obj.delete()
         return True
-    except clo.DoesNotExist:
+    except AssessmentItem.DoesNotExist:
         return False
 
 def dy (request):
@@ -239,7 +237,7 @@ def dy (request):
                     text = request.POST.get(str1)
                     print(text)
                     user1 = request.user
-                    PLOs.objects.create(created_by=user1, text=text)
+                    TemplateData.objects.create(created_by=user1, text=text)
                 else:
                     print("NULL")
     return render(request, 'evaluate/Dynamic_Form.html', {'form':PLOstest})
@@ -278,7 +276,7 @@ def create_form(request):
                         name_main = 'main_field' + str(i)
                         main_fields = request.POST.get(name_main)  # ใช้ค่าว่างในกรณีที่ไม่พบค่า
                         print('main_fields =', name_main)
-                        main_field = clo.objects.create(text=main_fields, form=create_form, created_by=request.user)
+                        main_field = AssessmentItem.objects.create(text=main_fields, form=create_form, created_by=request.user)
                         
                         name_sub = 'sub_field_' + str(name_main)
                         sub_fields = request.POST.getlist(name_sub)
@@ -286,7 +284,7 @@ def create_form(request):
                         print('name_sub =', name_sub)
 
                         for sub_field_text in sub_fields:
-                            sub_field = clo.objects.create(text=sub_field_text, parent=main_field, form=create_form, created_by=request.user)
+                            sub_field = AssessmentItem.objects.create(text=sub_field_text, parent=main_field, form=create_form, created_by=request.user)
 
                     return HttpResponse("Data saved successfully!")
                 else:
