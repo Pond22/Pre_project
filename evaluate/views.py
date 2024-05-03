@@ -48,12 +48,12 @@ def create_form(request):
             new_in = new_form.save(commit=False)
             new_in.created_by = request.user
             new_in.save()
-            
+            print('main_item_form_template_id',request.POST.getlist('main_field0'))
             #somthing = 'main_field0'
-            
+            create_form = get_object_or_404(form_model, id=new_in.id)
             if 'main_field0' in request.POST:  
                 for i in range(le + 1):
-                    create_form = get_object_or_404(form_model, id=new_in.id)
+                    #create_form = get_object_or_404(form_model, id=new_in.id)
                     name_main = 'main_field' + str(i)
                     main_fields = request.POST.get(name_main)  # ใช้ค่าว่างในกรณีที่ไม่พบค่า
                     print('main_fields =', name_main)
@@ -65,8 +65,18 @@ def create_form(request):
                     print('name_sub =', name_sub)
 
                     for sub_field_text in sub_fields:
-                        sub_field = AssessmentItem.objects.create(text=sub_field_text, parent=main_field)
-
+                        sub_field = AssessmentItem.objects.create(text=sub_field_text, parent=main_field, form=create_form)
+                    
+                if 'main_item_form_template_id' in request.POST:
+                    create_form = get_object_or_404(form_model, id=new_in.id)
+                    main_template_fields = request.POST.get('main_item_form_template_id')
+                    template_data = TemplateData.objects.get(id=main_template_fields)
+                    template_main_field = AssessmentItem.objects.create(template_select=template_data, form=create_form)
+                        
+                    sub_template_fields =request.POST.getlist('sub_item_form_template_id')
+                    for sub_template_field_id in sub_template_fields:
+                        sub_template_data = TemplateData.objects.get(id=sub_template_field_id)
+                        AssessmentItem.objects.create(template_select=sub_template_data, parent=template_main_field, form=create_form)
                 return HttpResponse("Data saved successfully!")
             else:
                 return HttpResponse("Error: No data for 'main_field0'")  
@@ -77,7 +87,7 @@ def create_form(request):
         for form in active_forms:
             template_data[form] = list(form.templatedata_set.all())
                     
-        print(template_data)
+
         new_form = Assessment_Form()
         user_now = request.user.username
         return render(request, 'evaluate/create_form.html', {'new_form': new_form, 'template_data': template_data, 'user_now':user_now})
@@ -134,9 +144,14 @@ def view_form(request, form_id):
             return HttpResponse("Invalid form data.")
     
     form_instance = get_object_or_404(form_model, pk=form_id)
-    clo_form = AssessmentItem.objects.filter(form=form_id, parent__isnull=True)
+    clo_form = AssessmentItem.objects.filter(form=form_id, parent__isnull=True, template_select__isnull=True)
+    
+    a = AssessmentItem.objects.filter(form=form_id, parent__isnull=True, template_select__isnull=False)
+    assessment_template_item = TemplateData.objects.filter(id__in=a.values_list('template_select__id', flat=True))
+
+    
     csv_1 = CSVUploadForm()
-    context = {'form_instance': form_instance, 'clo_form': clo_form, 'csv_1': csv_1}
+    context = {'form_instance': form_instance, 'clo_form': clo_form, 'csv_1': csv_1, 'assessment_template_item': assessment_template_item}
     return render(request, 'evaluate/main_form.html', context)
 
 def handle_csv_upload(request, form_id):

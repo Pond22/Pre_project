@@ -47,16 +47,6 @@
 
 <script>
   //pop-up
-  function showPopup(inputId) {
-    document.getElementById("popup").style.display = "block";
-
-    sessionStorage.setItem('currentInputId', inputId);
-    sessionStorage.setItem('currentSubId', 'sub_field_'+inputId);
-  }
-
-  function closePopup() {
-    document.getElementById("popup").style.display = "none";
-  }
 
   function showTemplateDetails() {
     // โค้ดที่แสดงข้อมูลแม่แบบ
@@ -74,37 +64,103 @@
     templateDetailsDiv.innerHTML = "<p>แม่แบบที่เลือก: " + text + "</p>";
     templateDetailsDiv.style.display = "block";
 
-    // โอนข้อความไปยังฟิลด์เ
-    var inputId = sessionStorage.getItem('currentInputId');
-    var targetInput = document.getElementById(inputId);
-    var gg = targetInput.querySelector("input[type='text'][name='" + inputId + "']"); //gg อย่าหาทำ
-    console.log(gg);
+    // โอนข้อความไปยังฟิลด์
+    var targetInput = document.getElementById('Plo_div');
+
+    var newInput = document.createElement('input');
+    newInput.type = 'text';
+    newInput.value = text;  
+    newInput.id = 'main_item_form_template';  
+    newInput.className = 'main_item_form_template';
+    
+    var hiddenInput = document.createElement('input');
+    hiddenInput.type = 'hidden';
+    hiddenInput.name = 'main_item_form_template_id';  // ตั้งชื่อฟิลด์ที่ต้องการส่งไปยังหลังบ้าน
+    hiddenInput.value = id;  // ใส่ค่าไอดีที่ต้องการส่ง
+    hiddenInput.id = 'main_item_form_template_id';
+
+    console.log(targetInput);
     if (targetInput) {
-        gg.value = text;  // กำหนดข้อความให้กับฟิลด์ input *** ระวังไม่ให้มันไปเซ็ต Value ผิดที่
-        gg.autocomplete="off"
+      targetInput.querySelector(".Main_item").appendChild(newInput);
+      targetInput.querySelector(".Main_item").appendChild(hiddenInput);
     }
 }
 
-function set_subField(text, event){
-  event.stopPropagation();  // ป้องกัน event bubbling
+let sub_count = 0;
 
-  var divId = sessionStorage.getItem('currentInputId'); // ไอดีของ div หลักที่ต้องการเพิ่ม input
-  var sub_id_to_add = sessionStorage.getItem('currentSubId'); // ไอดีสำหรับใช้ใน input ใหม่
-  var parentDiv = document.getElementById(divId); // หา div หลัก
+function set_subField(id, text, event) {
+  event.stopPropagation(); // ป้องกัน event bubbling
+
+  var parentDiv = document.getElementById('Plo_div'); // หา div หลัก
 
   var newInput = document.createElement('input');
   newInput.type = 'text';
-  newInput.value = text;  
-  newInput.id = sub_id_to_add;  
-  newInput.className = sub_id_to_add;  
-  newInput.placeholder = "Sub Field";
-  console.log(sub_id_to_add)
-  console.log(parentDiv)
+  newInput.value = text;
+  newInput.id = 'sub_item_form_template_' + id;
+  newInput.className = 'sub_item_form_template';
+
+  var hiddenInput = document.createElement('input');
+  hiddenInput.type = 'hidden';
+  hiddenInput.name = 'sub_item_form_template_id';  // ตั้งชื่อฟิลด์ที่ต้องการส่งไปยังหลังบ้าน
+  hiddenInput.value = id;  // ใส่ค่าไอดีที่ต้องการส่ง
+  hiddenInput.id = 'main_item_form_template_id';
+
+  /*if (parentDiv) {
+    var existingField = parentDiv.querySelector("#sub_item_form_template_" + sub_count);
+
+    if ( id < sub_count) {
+      
+      console.log(existingField)
+      parentDiv.querySelector(".subFields").insertBefore(newInput, existingField);
+      sub_count = id
+    } else {
+      sub_count = id;
+      parentDiv.querySelector(".subFields").appendChild(newInput); // เพิ่ม input ใหม่ใน div หลัก
+    }
+  } else {
+    console.error('Parent division not found');
+  }*/
 
   if (parentDiv) {
-    parentDiv.querySelector(".subFields").appendChild(newInput); // เพิ่ม input ใหม่ใน div หลัก
-  } else {
-    console.error('Parent division not found for sub ID:', sub_id_to_add);
+    parentDiv.querySelector(".subFields").appendChild(newInput);
+    parentDiv.querySelector(".subFields").appendChild(hiddenInput);  
+  }
+}
+
+function openPopup() {
+  var popup = document.getElementById("popup");
+  popup.style.display = "block";
+}
+
+function closePopup() {
+  var popup = document.getElementById("popup");
+  popup.style.display = "none";
+}
+
+function checkboxHandle(checkboxId, id, text, event, status) {
+  if (event) {
+    event.stopPropagation();  // ป้องกัน event bubbling
+}
+
+
+  console.log(status)
+  var checkbox = document.getElementById(checkboxId);
+  console.log(checkboxId)
+  if (checkbox.checked && status == 'main') {
+    selectTemplate(id, text, event);
+  }
+  else if (checkbox.checked && status == 'sub') {
+    set_subField(id, text, event);
+  }
+  else if (!checkbox.checked && status == 'main'){
+    var targetInput = document.getElementById('main_item_form_template');
+    targetInput.parentNode.removeChild(targetInput);
+    
+  }
+  else if (!checkbox.checked && status == 'sub'){
+    var targetInput = document.getElementById('sub_item_form_template_'+ id);
+    targetInput.parentNode.removeChild(targetInput);
+  
   }
 }
 
@@ -112,10 +168,11 @@ function set_subField(text, event){
 
 {% block title %} Create Form By {{user_now}}{% endblock %} {% block content %}
 <div class="container">
+  {% csrf_token %}
   <h1>สร้าง FORM and CLOs</h1>
   <form method="post" id="main">
     {% csrf_token %} {{new_form.as_p }}
-
+    
     <!-- ป๊อปอัพ แม่แบบ-->
     <div id="popup" class="popup" style="display: none">
       <div class="popup-content">
@@ -128,7 +185,7 @@ function set_subField(text, event){
                         {%if not item.parent%}
 
                         <div class="template_main_item">
-                          <input type="radio" id="item_{{ item.id }}" name="template_choice" value="{{ item.id }}" onchange="selectTemplate('{{ item.id }}', '{{ item.text }}', event)">
+                          <input type="checkbox" id="item_{{ item.id }}" name="template_choice" value="{{ item.id }}" onchange="checkboxHandle('item_{{ item.id }}', '{{ item.id }}', '{{ item.text }}', event, 'main')">
                           <label for="item_{{ item.id }}">&nbsp;&nbsp;{{ forloop.parentloop.counter }} : {{ item.text }}</label>
 
                       </div>
@@ -136,7 +193,7 @@ function set_subField(text, event){
                         {% for sub in item.sub_items.all %}
                             <!-- โค้ดสำหรับ sub-items -->
                             <div class="template_sub_item">
-                              <input type="radio" id="sub_{{ sub.id }}" name="template_choice" value="{{ sub.id }}" onchange="set_subField('{{ sub.text }}', event)">
+                              <input type="checkbox" id="sub_{{ sub.id }}" name="template_choice" value="{{ sub.id }}" onchange="checkboxHandle('sub_{{ sub.id  }}', '{{ sub.id }}', '{{ sub.text }}', event, 'sub')">
                               <label for="sub_{{ sub.id }}">: {{ sub.text }}</label>
                             </div>
                         {% endfor %}
@@ -157,7 +214,7 @@ function set_subField(text, event){
       <!-- ฟิลด์แรกของแม่ -->
       <div class="main_field0">
         <!-- div ลูก -->
-        <input type="text" id = '22'name="main_field0" placeholder="Main Field" />
+        <input type="text" name="main_field0" placeholder="Main Field" />
         <button type="button" class="addSubField" onclick="addSubField(this)">
           +
         </button>
@@ -167,6 +224,12 @@ function set_subField(text, event){
         +
       </button>
       <!-- ปุุ่มเพิ่มแม่ -->
+    </div>
+
+    <div id="Plo_div" class="Plo_div">
+      <button type="button" onclick="openPopup()">เลือกแม่แบบ</button>
+      <div class="Main_item"></div>
+      <div class="subFields"></div>
     </div>
 
     <button type="submit" name="action" value="create">Create</button>
@@ -243,16 +306,17 @@ function set_subField(text, event){
       deleteButton.remove();
     };
     // ทำปุ่มแสดง popup
+    /*
     var popupButton = document.createElement("button");
     popupButton.type = "button";
     popupButton.textContent = "เลือกแม่แบบ";
     popupButton.onclick = function () {
       showPopup(mainField.id);
-    };
+    };*/
 
     // เพิ่มฟิลด์แม่และปุ่มเพิ่มฟิลด์ลูกลงในแม่
     mainFieldDiv.appendChild(mainField);
-    mainFieldDiv.appendChild(popupButton);
+    //mainFieldDiv.appendChild(popupButton);
     mainFieldDiv.appendChild(addButton);
     mainFieldDiv.appendChild(subFieldsDiv);
     parentDiv.insertBefore(mainFieldDiv, parentDiv.lastElementChild);

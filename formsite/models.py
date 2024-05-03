@@ -12,13 +12,46 @@ for field in user_fields:
 class LineTokens(models.Model): # เพิ่มฟิลด์ line_token 
     line_token = models.CharField(max_length=30, blank=True, null=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    
+
+class Teamplates(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    create = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=False)
+    semester_choices = (
+        (1, '1'),
+        (2, '2'),
+        (3, '3')
+    )
+    semester = models.IntegerField(choices=semester_choices)
+    year_number = models.IntegerField(
+        verbose_name='ปี', 
+        help_text='ใส่ตัวเลขปี 4 ตัว',
+        validators=[MinValueValidator(2567), MaxValueValidator(2570)]
+    )
+    
+    
+
+class TemplateData(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    text = models.TextField(null=False, blank=False)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='sub_items')
+    create = models.DateTimeField(auto_now_add=True)
+    update = models.DateTimeField(auto_now=True)
+    form = models.ForeignKey(Teamplates, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return self.text, self.id   
+    
 
 class Form(models.Model):
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=100)
     class_code = models.CharField(max_length=10)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    create = models.DateTimeField(auto_now_add=True)
+    create = models.DateTimeField(max_length=300, null=True, blank=True)
+    description = models.CharField(max_length=200, null=True, blank=True)
     is_teacher_form = models.BooleanField(default=False)
     semester_choices =(
         #("Undefined","Undefined"),
@@ -49,13 +82,14 @@ class AuthorizedUser(models.Model):
 class AssessmentItem(models.Model):    
     text = models.TextField()
     form = models.ForeignKey(Form, on_delete=models.CASCADE)
+    template_select = models.ForeignKey(TemplateData, on_delete=models.CASCADE,null=True, blank=True)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='sub_items')
     id = models.BigAutoField(primary_key=True)
     create_date = models.DateTimeField(auto_now_add=True)
     update = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return self.text
+        return {self.text} ,{self.template_select}
 
 class AssessmentResponse(models.Model):
     respondent = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -67,30 +101,11 @@ class AssessmentResponse(models.Model):
     def __str__(self):
         return self.assessment_item
     
-class Teamplates(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    create = models.DateTimeField(auto_now_add=True)
-    is_active = models.BooleanField(default=False)
-    semester_choices = (
-        (1, '1'),
-        (2, '2'),
-        (3, '3')
-    )
-    semester = models.IntegerField(choices=semester_choices)
-    year_number = models.IntegerField(
-        verbose_name='ปี', 
-        help_text='ใส่ตัวเลขปี 4 ตัว',
-        validators=[MinValueValidator(2567), MaxValueValidator(2570)]
-    )
-
-class TemplateData(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    text = models.TextField(null=False, blank=False)
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='sub_items')
+class Courese(models.Model):
+    teamplates = models.ForeignKey(Teamplates, on_delete=models.CASCADE)
+    section = models.CharField(max_length=2)
+    class_code = models.CharField(max_length=7)
     create = models.DateTimeField(auto_now_add=True)
     update = models.DateTimeField(auto_now=True)
-    form = models.ForeignKey(Teamplates, on_delete=models.CASCADE)
     
-    def __str__(self):
-        return self.text
+
