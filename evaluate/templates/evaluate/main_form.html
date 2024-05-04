@@ -36,12 +36,26 @@
   .delete-button:hover {
     background-color: #0056b3; /* เปลี่ยนสีพื้นหลังปุ่มเมื่อ hover */
   }
+
+  .custom-list {
+    list-style-type: none; /* เอาเครื่องหมายขีด ๆ ออก */
+    padding: 0;
+  }
+
+  .custom-list li {
+    padding: 5px 0; /* ปรับการเว้นระยะห่างของรายการ */
+    border-bottom: 1px solid #ccc; /* เพิ่มเส้นขอบด้านล่างของแต่ละรายการ */
+  }
+
+  .custom-list li:last-child {
+    border-bottom: none; /* ลบเส้นขอบสุดท้ายของรายการ */
+  }
 </style>
 
 <button onclick="toggleSections()">เปลี่ยน</button>
 
 <body>
-  <div id="upload-csv-section">
+  <div id="upload-csv-section" >
     <h2>Upload CSV File</h2>
     <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
@@ -54,7 +68,7 @@
     </div>
   </div>
 
-  <ul id="clo-section" style="display: none;">
+  <ul id="clo-section" style="display: none">
     {% for clo in clo_form %}
     <li>
       ID: {{ clo.id }} {{ clo.text }}
@@ -139,45 +153,109 @@
     {% endfor %}
   </ul>
 
+  <div class="PLO" id="PLO">
+    PLOs {% for item in assessment_template_item %}
+    <div>
+      {% if item.text %}
+        <p>ID.{{item.id}} |Normal assessment = {{ item.text }}</p>
+      {% else %}
+        <p>ID.{{ item.id}} |Template assessment = {{ item.template_select.text }}</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
 
-
-
-  
-  <ul id="assessment-template-section">
+  <ul id="assessment-template-section" class="assessment-template-section">
+    <div>PLO</div>
     {% for template_item in assessment_template_item %}
     <li>
       ID: {{ template_item.id }} {{ template_item.text }}
-      <a href="#" onclick="toggleEditForm('editForm_template_{{ template_item.id }}')" class="edit-button">Edit Template</a>
-      <a href="#" onclick="toggleDeleteForm('deleteForm_template_{{ template_item.id }}')" class="delete-button">Delete Template</a>
+      <a
+        href="#"
+        onclick="toggleEditForm('editForm_template_{{ template_item.id }}')"
+        class="edit-button"
+        >Edit Template</a
+      >
+      <a
+        href="#"
+        onclick="toggleDeleteForm('deleteForm_template_{{ template_item.id }}')"
+        class="delete-button"
+        >Delete Template</a
+      >
       <!-- Edit form -->
-      <form id="editForm_template_{{ template_item.id }}" method="post" style="display: none">
+      <form
+        id="editForm_template_{{ template_item.id }}"
+        method="post"
+        style="display: none"
+      >
         {% csrf_token %}
-        <input type="hidden" name="template_id" value="{{ template_item.id }}" />
-        <input type="text" name="template_text" value="{{ template_item.text }}" required />
+        <input
+          type="hidden"
+          name="template_id"
+          value="{{ template_item.id }}"
+        />
+        <input
+          type="text"
+          name="template_text"
+          value="{{ template_item.text }}"
+          required
+        />
         <button type="submit" class="edit-button">Save Template</button>
       </form>
       <!-- Delete form -->
-      <form id="deleteForm_template_{{ template_item.id }}" method="post" style="display: none">
+      <form
+        id="deleteForm_template_{{ template_item.id }}"
+        method="post"
+        style="display: none"
+      >
         {% csrf_token %}
-        <input type="hidden" name="template_id" value="{{ template_item.id }}" />
+        <input
+          type="hidden"
+          name="template_id"
+          value="{{ template_item.id }}"
+        />
         <button type="submit" class="delete-button">Confirm Delete</button>
       </form>
       {% if template_item.sub_items.all %}
       <ul>
         {% for sub_item in template_item.sub_items.all %}
         <li>
-          {{ forloop.parentloop.counter }}.{{ forloop.counter }} ID: {{ sub_item.id }} {{ sub_item.text }}
-          <a href="#" onclick="toggleEditForm('editForm_sub_{{ sub_item.id }}')" class="edit-button">Edit Sub-item</a>
-          <a href="#" onclick="toggleDeleteForm('deleteForm_sub_{{ sub_item.id }}')" class="delete-button">Delete Sub-item</a>
+          {{ forloop.parentloop.counter }}.{{ forloop.counter }} ID: {{
+          sub_item.id }} {{ sub_item.text }}
+          <a
+            href="#"
+            onclick="toggleEditForm('editForm_sub_{{ sub_item.id }}')"
+            class="edit-button"
+            >Edit Sub-item</a
+          >
+          <a
+            href="#"
+            onclick="toggleDeleteForm('deleteForm_sub_{{ sub_item.id }}')"
+            class="delete-button"
+            >Delete Sub-item</a
+          >
           <!-- Edit sub-item form -->
-          <form id="editForm_sub_{{ sub_item.id }}" method="post" style="display: none">
+          <form
+            id="editForm_sub_{{ sub_item.id }}"
+            method="post"
+            style="display: none"
+          >
             {% csrf_token %}
             <input type="hidden" name="sub_item_id" value="{{ sub_item.id }}" />
-            <input type="text" name="sub_text" value="{{ sub_item.text }}" required />
+            <input
+              type="text"
+              name="sub_text"
+              value="{{ sub_item.text }}"
+              required
+            />
             <button type="submit" class="edit-button">Save Sub-item</button>
           </form>
           <!-- Delete sub-item form -->
-          <form id="deleteForm_sub_{{ sub_item.id }}" method="post" style="display: none">
+          <form
+            id="deleteForm_sub_{{ sub_item.id }}"
+            method="post"
+            style="display: none"
+          >
             {% csrf_token %}
             <input type="hidden" name="sub_item_id" value="{{ sub_item.id }}" />
             <button type="submit" class="delete-button">Confirm Delete</button>
@@ -192,20 +270,20 @@
 </body>
 
 <script>
-    function toggleSections() {
-        var uploadCsvSection = document.getElementById('upload-csv-section');
-        var cloSection = document.getElementById('clo-section');
-        
-        if (uploadCsvSection.style.display === "none") {
-            uploadCsvSection.style.display = "block";
-            cloSection.style.display = "none";
-            uploadCsvSection.scrollIntoView({ behavior: 'smooth' });
-        } else {
-            uploadCsvSection.style.display = "none";
-            cloSection.style.display = "block";
-            cloSection.scrollIntoView({ behavior: 'smooth' });
-        }
+  function toggleSections() {
+    var uploadCsvSection = document.getElementById("upload-csv-section");
+    var cloSection = document.getElementById("clo-section");
+
+    if (uploadCsvSection.style.display === "none") {
+      uploadCsvSection.style.display = "block";
+      cloSection.style.display = "none";
+      uploadCsvSection.scrollIntoView({ behavior: "smooth" });
+    } else {
+      uploadCsvSection.style.display = "none";
+      cloSection.style.display = "block";
+      cloSection.scrollIntoView({ behavior: "smooth" });
     }
+  }
 
   function toggleEditForm(formId) {
     var form = document.getElementById(formId);

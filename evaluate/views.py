@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http.response import HttpResponse
 from django.contrib.auth.decorators import login_required
-from formsite.models import TemplateData, AssessmentItem, AuthorizedUser, Teamplates
+from formsite.models import TemplateData, AssessmentItem, Teamplates
 from formsite.models import Form as form_model
-from .forms import PLOsForm, Assessment_Form, ClosForm, CSVUploadForm, Aut, PLOstest
+from .forms import PLOsForm, Assessment_Form, ClosForm, CSVUploadForm, PLOstest
 from django.contrib.auth.models import User, Group
 from django.http import JsonResponse
 from rest_framework.views import APIView
@@ -36,61 +36,61 @@ def create_plo(request):
 @login_required(login_url="sign_in")
 def create_form(request):
     if request.method == 'POST':
-        le = request.POST.get('length')
-        if le is None:
-            le = 0
-        else:
-            le = int(le)
-        print(le)
-
-        new_form = Assessment_Form(request.POST)
-        if new_form.is_valid():
-            new_in = new_form.save(commit=False)
-            new_in.created_by = request.user
-            new_in.save()
-            print('main_item_form_template_id',request.POST.getlist('main_field0'))
-            #somthing = 'main_field0'
-            create_form = get_object_or_404(form_model, id=new_in.id)
-            if 'main_field0' in request.POST:  
-                for i in range(le + 1):
-                    #create_form = get_object_or_404(form_model, id=new_in.id)
-                    name_main = 'main_field' + str(i)
-                    main_fields = request.POST.get(name_main)  # ใช้ค่าว่างในกรณีที่ไม่พบค่า
-                    print('main_fields =', name_main)
-                    main_field = AssessmentItem.objects.create(text=main_fields, form=create_form)
-                    
-                    name_sub = 'sub_field_' + str(name_main)
-                    sub_fields = request.POST.getlist(name_sub)
-                    print(sub_fields)
-                    print('name_sub =', name_sub)
-
-                    for sub_field_text in sub_fields:
-                        sub_field = AssessmentItem.objects.create(text=sub_field_text, parent=main_field, form=create_form)
-                    
-                if 'main_item_form_template_id' in request.POST:
-                    create_form = get_object_or_404(form_model, id=new_in.id)
-                    main_template_fields = request.POST.get('main_item_form_template_id')
-                    template_data = TemplateData.objects.get(id=main_template_fields)
-                    template_main_field = AssessmentItem.objects.create(template_select=template_data, form=create_form)
-                        
-                    sub_template_fields =request.POST.getlist('sub_item_form_template_id')
-                    for sub_template_field_id in sub_template_fields:
-                        sub_template_data = TemplateData.objects.get(id=sub_template_field_id)
-                        AssessmentItem.objects.create(template_select=sub_template_data, parent=template_main_field, form=create_form)
-                return HttpResponse("Data saved successfully!")
+        for d in range(2):
+            le = request.POST.get('length')
+            if le is None:
+                le = 0
             else:
-                return HttpResponse("Error: No data for 'main_field0'")  
+                le = int(le)
+            print(le)
+
+            new_form = Assessment_Form(request.POST)
+            if new_form.is_valid():
+                new_in = new_form.save(commit=False)
+                new_in.created_by = request.user
+                if d == 1:  # Check if it's the second loop iteration
+                    new_in.is_teacher_form = True
+                new_in.save()
+                print('main_item_form_template_id', request.POST.getlist('main_field0'))
+
+                create_form = get_object_or_404(form_model, id=new_in.id)
+                if 'main_field0' in request.POST:  
+                    for i in range(le + 1):
+                        name_main = 'main_field' + str(i)
+                        main_fields = request.POST.get(name_main, '')  # Use empty string if no value is found
+                        print('main_fields =', name_main)
+                        main_field = AssessmentItem.objects.create(text=main_fields, form=create_form)
+                        
+                        name_sub = 'sub_field_' + str(name_main)
+                        sub_fields = request.POST.getlist(name_sub)
+                        print(sub_fields)
+                        print('name_sub =', name_sub)
+
+                        for sub_field_text in sub_fields:
+                            sub_field = AssessmentItem.objects.create(text=sub_field_text, parent=main_field, form=create_form)
+                        
+                    if 'main_item_form_template_id' in request.POST:
+                        main_template_fields = request.POST.get('main_item_form_template_id')
+                        template_data = TemplateData.objects.get(id=main_template_fields)
+                        template_main_field = AssessmentItem.objects.create(template_select=template_data, form=create_form)
+                            
+                        sub_template_fields = request.POST.getlist('sub_item_form_template_id')
+                        for sub_template_field_id in sub_template_fields:
+                            sub_template_data = TemplateData.objects.get(id=sub_template_field_id)
+                            AssessmentItem.objects.create(template_select=sub_template_data, parent=template_main_field, form=create_form)
+        return HttpResponse("Data saved successfully!")
+             
     else:
         active_forms = Teamplates.objects.filter(is_active=True).prefetch_related('templatedata_set')
         template_data = {}
 
         for form in active_forms:
             template_data[form] = list(form.templatedata_set.all())
+            print(template_data[form])
                     
-
         new_form = Assessment_Form()
         user_now = request.user.username
-        return render(request, 'evaluate/create_form.html', {'new_form': new_form, 'template_data': template_data, 'user_now':user_now})
+        return render(request, 'evaluate/create_form.html', {'new_form': new_form, 'template_data': template_data, 'user_now':user_now,'active_forms':active_forms})
 
     
 @login_required(login_url="sign_in")  
@@ -145,11 +145,8 @@ def view_form(request, form_id):
     
     form_instance = get_object_or_404(form_model, pk=form_id)
     clo_form = AssessmentItem.objects.filter(form=form_id, parent__isnull=True, template_select__isnull=True)
-    
-    a = AssessmentItem.objects.filter(form=form_id, parent__isnull=True, template_select__isnull=False)
-    assessment_template_item = TemplateData.objects.filter(id__in=a.values_list('template_select__id', flat=True))
-
-    
+    #assessment_template_item = AssessmentItem.objects.filter(form=form_id, template_select__isnull=False)
+    assessment_template_item = AssessmentItem.objects.filter(form=form_id)
     csv_1 = CSVUploadForm()
     context = {'form_instance': form_instance, 'clo_form': clo_form, 'csv_1': csv_1, 'assessment_template_item': assessment_template_item}
     return render(request, 'evaluate/main_form.html', context)
@@ -161,6 +158,7 @@ def handle_csv_upload(request, form_id):
         return False
 
     id_form = get_object_or_404(form_model, id=form_id)
+    existing_user = id_form.users.all
     csv_file = request.FILES['csv_file']
     if not csv_file.name.endswith('.csv'):
         return False
@@ -182,7 +180,8 @@ def handle_csv_upload(request, form_id):
         except Exception as e:
             print("Error:", e)
             print("ซ้ำ")
-        AuthorizedUser.objects.create(form=id_form, stu_list=row[0])
+        if not existing_user:
+            id_form.users.add(row[0])
 
     return True
 

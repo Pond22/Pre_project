@@ -43,6 +43,8 @@
   .template_item:hover {
     background-color: #f0f0f0;
   }
+
+  
 </style>
 
 <script>
@@ -164,10 +166,56 @@ function checkboxHandle(checkboxId, id, text, event, status) {
   }
 }
 
+function toggleSections() {
+  var uploadCsvSection = document.getElementById("upload-csv-section");
+  var container = document.getElementById("Main_display_page");
+
+  if (uploadCsvSection.style.display === "none") {
+    uploadCsvSection.style.display = "block";
+    container.style.display = "none";
+    uploadCsvSection.scrollIntoView({ behavior: "smooth" });
+  } else {
+    uploadCsvSection.style.display = "none";
+    container.style.display = "block";
+    container.scrollIntoView({ behavior: "smooth" });
+  }
+
+  document.getElementById('csv_file').addEventListener('change', function(event) {
+    // อ่านไฟล์ CSV
+    const file = event.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+      // แสดงข้อมูล CSV ในหน้าเว็บ
+      const csvData = e.target.result;
+      const displayElement = document.getElementById('csv_data_display');
+      displayElement.innerText = csvData;
+    };
+
+    reader.readAsText(file); // อ่านไฟล์เป็นข้อความ
+  });
+}
 </script>
 
 {% block title %} Create Form By {{user_now}}{% endblock %} {% block content %}
-<div class="container">
+
+  <!-- ช่องอัปโหลดไฟล์ CSV -->
+  <div id="upload-csv-section" style="display: none;">
+    <h2>Upload CSV File</h2>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="file" name="csv_file" id="csv_file" />
+      <button type="submit" name="import" id="import">Submit</button>
+    </form>
+    <div id="csv_data_display">
+      <h2>Progress</h2>
+      <div id="csv_data_display" style="width: 2.5%"></div>
+    </div>
+  </div>
+
+  <button type="button" onclick="toggleSections()">จัดการนักศึกษา</button>
+
+<div class="container" id= 'Main_display_page' style="display: !none">
   {% csrf_token %}
   <h1>สร้าง FORM and CLOs</h1>
   <form method="post" id="main">
@@ -207,7 +255,6 @@ function checkboxHandle(checkboxId, id, text, event, status) {
           </div>
       </div>
   </div>
-  
 
     <div id="parent">
       <!-- div แม่ -->

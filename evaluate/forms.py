@@ -1,13 +1,10 @@
 from django import forms
-from formsite.models import TemplateData, Form, AssessmentItem, AuthorizedUser
+from formsite.models import TemplateData, Form, AssessmentItem
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 import re
+from django.forms import DateTimeInput
 
-class Aut(forms.ModelForm):
-    class Meta:
-        model = AuthorizedUser
-        fields = []
 class PLOsForm(forms.ModelForm):
     class Meta:
         model = TemplateData
@@ -22,7 +19,18 @@ class PLOstest(forms.ModelForm):
 class Assessment_Form(forms.ModelForm):
     class Meta:
         model = Form
-        fields = ['name', 'class_code', 'semester', 'section', 'year_number'] 
+        fields = ['name', 'class_code', 'semester', 'section', 'year_number', 'start_date', 'end_date','template', 'description']
+        widgets = {
+            'semester': forms.Select(choices=((1, '1'), (2, '2'), (3, '3'))),
+            'year_number': forms.Select(choices=((2567, '2567'), (2568, '2568'), (2569, '2569'))),
+            'start_date': DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+            'end_date': DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+            
+        } 
+        
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.fields['template'].widget = forms.HiddenInput() 
         
 class ClosForm(forms.ModelForm):
     class Meta:

@@ -7,7 +7,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 user_fields = User._meta.fields
 
 for field in user_fields:
-    print(field.name)
+    print(field.name)       #related_name สำคัญ
 '''
 class LineTokens(models.Model): # เพิ่มฟิลด์ line_token 
     line_token = models.CharField(max_length=30, blank=True, null=True)
@@ -31,7 +31,13 @@ class Teamplates(models.Model):
         validators=[MinValueValidator(2567), MaxValueValidator(2570)]
     )
     
-    
+    def save(self, *args, **kwargs):
+        if self.is_active:
+            active_forms_count = Teamplates.objects.filter(is_active=True, semester=self.semester, year_number=self.year_number).count() #ตรวจ active
+            if active_forms_count > 0:
+                self.is_active = False
+        
+        return super().save(*args, **kwargs)
 
 class TemplateData(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -42,7 +48,7 @@ class TemplateData(models.Model):
     form = models.ForeignKey(Teamplates, on_delete=models.CASCADE)
     
     def __str__(self):
-        return self.text, self.id   
+        return str(self.text)
     
 
 class Form(models.Model):
@@ -52,6 +58,7 @@ class Form(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     create = models.DateTimeField(max_length=300, null=True, blank=True)
     description = models.CharField(max_length=200, null=True, blank=True)
+    template = models.ForeignKey(Teamplates, on_delete=models.CASCADE)
     is_teacher_form = models.BooleanField(default=False)
     semester_choices =(
         #("Undefined","Undefined"),
@@ -69,15 +76,16 @@ class Form(models.Model):
     start_date = models.DateTimeField(null=True, blank=True)
     end_date = models.DateTimeField(null=True, blank=True)
     expired = models.BooleanField(default=False) #เก็บว่าแบบฟอร์มนั้นครบกำหนดเวลาหรือยัง
+    users = models.ManyToManyField(User, related_name='forms') #ทำให้เกี่ยวกันกับ User แบบ M to N 
      
     def __str__(self):
-        return f"{self.class_code} ตอนที่ {self.section} ปีการศึกษา {self.year_number} ภาคเรียนที่ {self.semester} เวลาสิ้นสุด {self.end_date}"
-
+        return str(self.id)
+    '''
 class AuthorizedUser(models.Model):
-    form = models.ForeignKey(Form, on_delete=models.CASCADE)
+    form = models.ForeignKey(Form, on_delete=models.CASCADE)  ไม่ใช้  ใช้users = models.ManyToManyField(User, related_name='forms') แทน
     user_name = models.CharField(max_length=10)
     def __str__(self):
-        return self.form
+        return str(self.form)'''
     
 class AssessmentItem(models.Model):    
     text = models.TextField()
@@ -89,8 +97,11 @@ class AssessmentItem(models.Model):
     update = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return {self.text} ,{self.template_select}
-
+        if self.template_select:
+            return self.template_select.text
+        else:
+            return str(self.id)
+        
 class AssessmentResponse(models.Model):
     respondent = models.ForeignKey(User, on_delete=models.CASCADE)
     response_date = models.DateTimeField(auto_now_add=True)
@@ -99,7 +110,7 @@ class AssessmentResponse(models.Model):
     response_comment = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
-        return self.assessment_item
+        return str(self.assessment_item)
     
 class Courese(models.Model):
     teamplates = models.ForeignKey(Teamplates, on_delete=models.CASCADE)

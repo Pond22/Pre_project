@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import TemplateData,AssessmentItem,Form, AuthorizedUser, AssessmentResponse, Teamplates, LineTokens
+from .models import TemplateData,AssessmentItem,Form, AssessmentResponse, Teamplates, LineTokens
 # Register your models here.
 print("Hello from admin.py")
 
@@ -10,7 +10,6 @@ admin.site.register(TemplateData)
 admin.site.register(AssessmentItem)
 admin.site.register(Form, FormAdmin)
 admin.site.register(LineTokens)
-admin.site.register(AuthorizedUser)
 admin.site.register(AssessmentResponse)
 admin.site.register(Teamplates)
 

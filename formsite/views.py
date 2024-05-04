@@ -5,7 +5,7 @@ from .models import Form as form_id
 import time
 import pandas as pd
 from .forms import Plo_form
-from evaluate.forms import PLOsForm, Form, ClosForm, CSVUploadForm, Aut
+from evaluate.forms import PLOsForm, Form, ClosForm, CSVUploadForm
 from django.contrib.auth.models import User, Group
 from rest_framework import routers, serializers, viewsets, status
 from rest_framework.response import Response
@@ -61,7 +61,7 @@ def view_form(request):
                         user.groups.add(group) 
                     except :
                         None
-                    AuthorizedUser.objects.create(form = id_form, stu_list=row[0])
+                    #AuthorizedUser.objects.create(form = id_form, stu_list=row[0])
                     processed_records +=1
         end_time = time.time()
         execution_time = end_time - start_time
