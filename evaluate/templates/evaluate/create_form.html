@@ -1,31 +1,22 @@
 <style>
   .popup {
-    position: fixed;
-    /* Stay in place */
-    z-index: 1;
-    /* Sit on top */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
     left: 0;
     top: 0;
-    width: 100%;
-    /* Full width */
-    height: 100%;
-    /* Full height */
-    overflow: auto;
-    /* Enable scroll if needed */
-    background-color: rgb(0, 0, 0);
-    /* Fallback color */
-    background-color: rgba(0, 0, 0, 0.4);
-    /* Black w/ opacity */
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0, 0, 0); /* Fallback color */
+    background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
   }
 
   .popup-content {
     background-color: #fefefe;
-    margin: 15% auto;
-    /* 15% from the top and centered */
+    margin: 15% auto; /* 15% from the top and centered */
     padding: 20px;
     border: 1px solid #888;
-    width: 80%;
-    /* Could be more or less, depending on screen size */
+    width: 80%; /* Could be more or less, depending on screen size */
   }
 
   .close {
@@ -37,7 +28,7 @@
 
   .close:hover,
   .close:focus {
-    /* color: black; */
+    color: black;
     text-decoration: none;
     cursor: pointer;
   }
@@ -53,64 +44,7 @@
     background-color: #f0f0f0;
   }
 
-  .delete-sub:hover {
-    background-color: rgb(112, 36, 13);
-  }
-
-  .show-popup-button {
-    padding: 10px 20px;
-    background-color: #3498db;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-
-  .pop_up {
-    display: none;
-    /* ซ่อน popup เริ่มต้น */
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: #fff;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    z-index: 9999;
-    /* ให้ popup อยู่ด้านบนสุด */
-  }
-
-  tbody {
-    background-color: white;
-  }
-
-  /* tbody tr:nth-child(even) {
-    background-color: #e0e0e0;
-  } */
-
-  /* tbody tr:hover {
-    background-color: #ccc;
-  } */
-
-  tbody td {
-    align-items: center;
-    justify-content: center;
-    padding: 8px;
-    /* border: 1px solid #ddd; */
-    border-radius: 10px;
-  }
-
-  .delete-all-csv,
-  .delete-btn-csv {
-    color: #d32f2f;
-  }
-
-  .delete-all-csv:hover,
-  .delete-btn-csv:hover {
-    color: #850a0a;
-  }
+  
 </style>
 
 <script>
@@ -123,10 +57,10 @@
     templateDetailsDiv.style.display = "block";
   }
 
-
+  
   function selectTemplate(id, text, event) {
     if (event) {
-      event.stopPropagation();  // ป้องกัน event bubbling
+        event.stopPropagation();  // ป้องกัน event bubbling
     }
     var templateDetailsDiv = document.getElementById("template_details");
     templateDetailsDiv.innerHTML = "<p>แม่แบบที่เลือก: " + text + "</p>";
@@ -137,12 +71,10 @@
 
     var newInput = document.createElement('input');
     newInput.type = 'text';
-    newInput.value = text;
-    newInput.id = 'main_item_form_template';
+    newInput.value = text;  
+    newInput.id = 'main_item_form_template';  
     newInput.className = 'main_item_form_template';
-    newInput.style.border = "1px solid gray";
-    newInput.style.margin = "8px";
-
+    
     var hiddenInput = document.createElement('input');
     hiddenInput.type = 'hidden';
     hiddenInput.name = 'main_item_form_template_id';  // ตั้งชื่อฟิลด์ที่ต้องการส่งไปยังหลังบ้าน
@@ -154,352 +86,201 @@
       targetInput.querySelector(".Main_item").appendChild(newInput);
       targetInput.querySelector(".Main_item").appendChild(hiddenInput);
     }
-  }
+}
 
-  let sub_count = 0;
+let sub_count = 0;
 
-  function set_subField(id, text, event) {
-    event.stopPropagation(); // ป้องกัน event bubbling
+function set_subField(id, text, event) {
+  event.stopPropagation(); // ป้องกัน event bubbling
 
-    var parentDiv = document.getElementById('Plo_div'); // หา div หลัก
+  var parentDiv = document.getElementById('Plo_div'); // หา div หลัก
 
-    var newInput = document.createElement('input');
-    newInput.type = 'text';
-    newInput.value = text;
-    newInput.id = 'sub_item_form_template_' + id;
-    newInput.className = 'sub_item_form_template';
-    newInput.style.border = "1px solid gray";
-    newInput.style.margin = "8px";
+  var newInput = document.createElement('input');
+  newInput.type = 'text';
+  newInput.value = text;
+  newInput.id = 'sub_item_form_template_' + id;
+  newInput.className = 'sub_item_form_template';
 
-    var hiddenInput = document.createElement('input');
-    hiddenInput.type = 'hidden';
-    hiddenInput.name = 'sub_item_form_template_id';  // ตั้งชื่อฟิลด์ที่ต้องการส่งไปยังหลังบ้าน
-    hiddenInput.value = id;  // ใส่ค่าไอดีที่ต้องการส่ง
-    hiddenInput.id = 'main_item_form_template_id';
+  var hiddenInput = document.createElement('input');
+  hiddenInput.type = 'hidden';
+  hiddenInput.name = 'sub_item_form_template_id';  // ตั้งชื่อฟิลด์ที่ต้องการส่งไปยังหลังบ้าน
+  hiddenInput.value = id;  // ใส่ค่าไอดีที่ต้องการส่ง
+  hiddenInput.id = 'main_item_form_template_id';
 
-    /*if (parentDiv) {
-      var existingField = parentDiv.querySelector("#sub_item_form_template_" + sub_count);
-  
-      if ( id < sub_count) {
-        
-        console.log(existingField)
-        parentDiv.querySelector(".subFields").insertBefore(newInput, existingField);
-        sub_count = id
-      } else {
-        sub_count = id;
-        parentDiv.querySelector(".subFields").appendChild(newInput); // เพิ่ม input ใหม่ใน div หลัก
-      }
+  /*if (parentDiv) {
+    var existingField = parentDiv.querySelector("#sub_item_form_template_" + sub_count);
+
+    if ( id < sub_count) {
+      
+      console.log(existingField)
+      parentDiv.querySelector(".subFields").insertBefore(newInput, existingField);
+      sub_count = id
     } else {
-      console.error('Parent division not found');
-    }*/
-
-    if (parentDiv) {
-      parentDiv.querySelector(".subFields").appendChild(newInput);
-      parentDiv.querySelector(".subFields").appendChild(hiddenInput);
+      sub_count = id;
+      parentDiv.querySelector(".subFields").appendChild(newInput); // เพิ่ม input ใหม่ใน div หลัก
     }
+  } else {
+    console.error('Parent division not found');
+  }*/
+
+  if (parentDiv) {
+    parentDiv.querySelector(".subFields").appendChild(newInput);
+    parentDiv.querySelector(".subFields").appendChild(hiddenInput);  
+  }
+}
+
+function openPopup() {
+  var popup = document.getElementById("popup");
+  popup.style.display = "block";
+}
+
+function closePopup() {
+  var popup = document.getElementById("popup");
+  popup.style.display = "none";
+}
+
+function checkboxHandle(checkboxId, id, text, event, status) {
+  if (event) {
+    event.stopPropagation();  // ป้องกัน event bubbling
+}
+
+
+  console.log(status)
+  var checkbox = document.getElementById(checkboxId);
+  console.log(checkboxId)
+  if (checkbox.checked && status == 'main') {
+    selectTemplate(id, text, event);
+  }
+  else if (checkbox.checked && status == 'sub') {
+    set_subField(id, text, event);
+  }
+  else if (!checkbox.checked && status == 'main'){
+    var targetInput = document.getElementById('main_item_form_template');
+    targetInput.parentNode.removeChild(targetInput);
+    
+  }
+  else if (!checkbox.checked && status == 'sub'){
+    var targetInput = document.getElementById('sub_item_form_template_'+ id);
+    targetInput.parentNode.removeChild(targetInput);
+  
+  }
+}
+
+function toggleSections() {
+  var uploadCsvSection = document.getElementById("upload-csv-section");
+  var container = document.getElementById("Main_display_page");
+
+  if (uploadCsvSection.style.display === "none") {
+    uploadCsvSection.style.display = "block";
+    container.style.display = "none";
+    uploadCsvSection.scrollIntoView({ behavior: "smooth" });
+  } else {
+    uploadCsvSection.style.display = "none";
+    container.style.display = "block";
+    container.scrollIntoView({ behavior: "smooth" });
   }
 
-  function openPopup() {
-    var popup = document.getElementById("popup");
-    popup.style.display = "block";
-  }
+  document.getElementById('csv_file').addEventListener('change', function(event) {
+    // อ่านไฟล์ CSV
+    const file = event.target.files[0];
+    const reader = new FileReader();
 
-  function closePopup() {
-    var popup = document.getElementById("popup");
-    popup.style.display = "none";
-  }
+    reader.onload = function(e) {
+      // แสดงข้อมูล CSV ในหน้าเว็บ
+      const csvData = e.target.result;
+      const displayElement = document.getElementById('csv_data_display');
+      displayElement.innerText = csvData;
 
-  function checkboxHandle(checkboxId, id, text, event, status) {
-    if (event) {
-      event.stopPropagation();  // ป้องกัน event bubbling
-    }
+      
+    };
 
-
-    console.log(status)
-    var checkbox = document.getElementById(checkboxId);
-    console.log(checkboxId)
-    if (checkbox.checked && status == 'main') {
-      selectTemplate(id, text, event);
-    }
-    else if (checkbox.checked && status == 'sub') {
-      set_subField(id, text, event);
-    }
-    else if (!checkbox.checked && status == 'main') {
-      var targetInput = document.getElementById('main_item_form_template');
-      targetInput.parentNode.removeChild(targetInput);
-
-    }
-    else if (!checkbox.checked && status == 'sub') {
-      var targetInput = document.getElementById('sub_item_form_template_' + id);
-      targetInput.parentNode.removeChild(targetInput);
-
-    }
-  }
+    reader.readAsText(file); // อ่านไฟล์เป็นข้อความ
+  });
+}
 
 </script>
-{% extends "nav.html" %}
-{% block title %} Create Form By {{user_now}}{% endblock %}
 
-<!doctype html>
-<html>
+{% block title %} Create Form By {{user_now}}{% endblock %} {% block content %}
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>สร้างแบบประเมิน</title>
+  <!-- ช่องอัปโหลดไฟล์ CSV -->
+  <div id="upload-csv-section" style="display: none;">
+    <h2>Upload CSV File</h2>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="file" name="csv_file" id="csv_file" />
+      <button type="submit" name="import" id="import">Submit</button>
+    </form>
+    <div id="csv_data_display">
+      <h2>Progress</h2>
+      <div id="csv_data_display" style="width: 2.5%"></div>
+    </div>
+  </div>
 
-  <link rel="stylesheet" href="output.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
+  <button type="button" onclick="toggleSections()">จัดการนักศึกษา</button>
 
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
-
-  <!-- link datetime pickle -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
-</head>
-
-
-
-{% block content %}
-<!-- <div class="container"> -->
-
-<div class="pt-6   mx-auto max-w-screen-2xl ">
-  <div class=" rounded-lg bg-gray-800 mx-10 pl-5 pb-4 pt-5">
-    <p class="flex items-center text-white text-2xl ml-5 px-4 py-4 ">สร้างแบบประเมินการทวนสอบผลสัมฤทธิ์</p>
-    <div class="relative rounded-lg bg-gray-300 p-8 shadow-xl px-16 ">
-      <div class="rounded-md pb-5 bg-white ">
-        <div class=" bg-white my-0 text-black bottom-5 p-5 shadow-inner text-xl border-2 ">
-          แบบประเมินการทวนสอบผลสัมฤทธิ์ของนักศึกษา(01)</div>
-
-        <!-- เพิ่มหัวแรก -->
-        {% csrf_token %}
-        <div class="flex justify-between">
-          <h1>สร้าง FORM and CLOs</h1>
-          <button type="button" onclick="show_Dialog()"
-            class="py-1 m-2 text-white text-center bg-blue-500 hover:bg-blue-600 items-center w-auto rounded-lg ">
-            <h1 class="p-2 "><i class=" p-1 fa-solid fa-plus"></i>เพิ่มนักศึกษา</h1>
-          </button>
-        </div>
-        <div id="dialog1"
-          class="fixed opject-top bg-black bg-opacity-100  opacity-0 hidden transition-opacity duration-500 ml-52 md:ml-20">
-
-          <!-- popup เพิ่มข้อมูล -->
-          <div
-            class="fixed w-1/3 h-auto mx-80 my-52  overflow-y-auto overflow-x-auto  top-1/2 left-1/2 z-50 justify-center items-center md:inset-0  max-h-full">
-            <div class="relative bg-white rounded-lg shadow-xl dark:bg-gray-700 ">
-              <div class="border shadow-xl">
-                <button type="button" onclick="hide_dialog()"
-                  class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
-                  <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-                    viewBox="0 0 14 14">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-                  </svg>
-                  <span class="sr-only">Close modal</span>
-                </button>
-                <div class="flex py-3 pl-2 ">
-                  <div class="justify-center text-center py-1 text-black text-xl font-medium px-2 ">
-                    <h1>เพิ่มสิทธิ์นักศึกษา</h1>
-                  </div>
-
-                </div>
+<div class="container" id= 'Main_display_page' style="display: !none">
+  {% csrf_token %}
+  <h1>สร้าง FORM and CLOs</h1>
+  <form method="post" id="main">
+    {% csrf_token %} {{new_form.as_p }}
+    
+    <!-- ป๊อปอัพ แม่แบบ-->
+    <div id="popup" class="popup" style="display: none">
+      <div class="popup-content">
+          <span class="close" onclick="closePopup()">&times;</span>
+          <div id="form_select_template">
+              <label for="template_select">เลือกแม่แบบ:</label>
+              <div id="template_list">
+                {% for item in template_data %}
+                    {% if not item.parent %}
+                        <div class="template_main_item">
+                            <input type="checkbox" id="item_{{ item.id }}" name="template_choice" value="{{ item.id }}" onchange="checkboxHandle('item_{{ item.id }}', '{{ item.id }}', '{{ item.text }}', event, 'main')">
+                            <label for="item_{{ item.id }}">&nbsp;&nbsp;{{ forloop.counter }} : {{ item.text }}</label>
+                        </div>
+                
+                        {% for sub in item.sub_items.all %}
+                            <!-- โค้ดสำหรับ sub-items -->
+                            <div class="template_sub_item">
+                                <input type="checkbox" id="sub_{{ sub.id }}" name="template_choice" value="{{ sub.id }}" onchange="checkboxHandle('sub_{{ sub.id  }}', '{{ sub.id }}', '{{ sub.text }}', event, 'sub')">
+                                <label for="sub_{{ sub.id }}">: {{ sub.text }}</label>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
               </div>
-
-              <div id="upload-csv-section">
-                <h2>Upload CSV File</h2>
-                <form method="post" enctype="multipart/form-data">
-                  {% csrf_token %}
-                  <input type="file" name="csv_file" id="csv_file" class="border border-gray-200 bg-gray-50" />
-                  <!-- <button type="submit" name="import" id="import" class="border rounded-md p-1 bg-green-400 hover:bg-green-500 text-white ">Submit</button> -->
-
-                </form>
-                <div class="flex justify-center">
-                  <table id="csv-table" class="border ">
-                    <thead>
-                      <tr>
-                        <th class="p-2  text-l font-medium text-gray-500 uppercase tracking-wider">รหัส</th>
-                        <th class="  text-l font-medium text-gray-500 uppercase tracking-wider">ชื่อ</th>
-                        <th class="  text-l font-medium text-gray-500 uppercase tracking-wider">นามสกุล</th>
-                        <th class="p-2  text-l font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                        <!-- และอื่น ๆ ตามต้องการ -->
-                      </tr>
-                    </thead>
-                    <tbody id="data-csv" class="m-4 p-2 px-2 text-l font-mono text-gray-500 uppercase ">
-                      <!-- ข้อมูลจาก CSV จะถูกแทรกที่นี่ -->
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              <form>
-              </form>
-              <!-- end Import file popup-->
-
-              <!-- button in popup -->
-              <div class="p-2 flex justify-between bg-white ">
-                <div></div>
-                <div class="pr-1">
-                  <button id="deleteAll"
-                    class="bg-white  rounded px-4 py-2 mr-2 text-black cursor-pointer border hover:bg-gray-500 focus:ring-4 focus:outline-none focus:ring-gray-500 dark:hover:bg-gray-300 dark:focus:ring-gray-400 items-center w-20 "
-                    onclick="hide_dialog()">
-                    ยกเลิก
-                  </button>
-                  <button
-                    class="bg-blue-700  rounded px-4 py-2 mr-1 text-white cursor-pointer  hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-300 items-center w-20 "
-                    onclick="">
-                    ยืนยัน
-                  </button>
-                </div>
-              </div>
-              <!-- end button in popup -->
-            </div>
           </div>
-        </div>
-        <!-- End popup เพิ่มข้อมูล-->
-        <form method="post" id="main">
-          <div class="p-4">
-            {% csrf_token %} {{new_form.as_p }}
-          </div>
-          <!-- ป๊อปอัพ แม่แบบ-->
-          <div id="popup" class="popup" style="display: none">
-            <div class="popup-content">
-              <span class="close" onclick="closePopup()">&times;</span>
-              <div id="form_select_template">
-                <label for="template_select">เลือกแม่แบบ:</label>
-                <div id="template_list">
-                  {% for template, items in template_data.items %}
-                  {% for item in items %}
-                  {%if not item.parent%}
-
-                  <div class="template_main_item">
-                    <input type="checkbox" id="item_{{ item.id }}" name="template_choice" value="{{ item.id }}"
-                      onchange="checkboxHandle('item_{{ item.id }}', '{{ item.id }}', '{{ item.text }}', event, 'main')">
-                    <label for="item_{{ item.id }}">&nbsp;&nbsp;{{ forloop.parentloop.counter }} : {{ item.text
-                      }}</label>
-
-                  </div>
-
-                  {% for sub in item.sub_items.all %}
-                  <!-- โค้ดสำหรับ sub-items -->
-                  <div class="template_sub_item">
-                    <input type="checkbox" id="sub_{{ sub.id }}" name="template_choice" value="{{ sub.id }}"
-                      onchange="checkboxHandle('sub_{{ sub.id  }}', '{{ sub.id }}', '{{ sub.text }}', event, 'sub')">
-                    <label for="sub_{{ sub.id }}">: {{ sub.text }}</label>
-                  </div>
-                  {% endfor %}
-                  {% endif %}
-                  {% endfor %}
-                  {% endfor %}
-                </div>
-              </div>
-              <div id="template_details" style="display: none">
-                <!-- Details will be shown here -->
-              </div>
-            </div>
-          </div>
-
-          <div class="flex justify-center p-4">
-            <textarea id="message" rows="4"
-              class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="คำชี้แจง"></textarea>
-          </div>
-          <div class="w-auto">
-            <button type="button" onclick="" class=" w-52 bg-green-300">เลือกเวลา</button>
-
-            <!-- Date pickle -->
-            <!-- <div class="fixed h-10 w-full min-w-[200px]">
-              <input id="date-picker"
-                class="ml-2 peer h-full w-1/3 rounded-[7px] border border-blue-gray-200 border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal text-blue-gray-700 outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 focus:border-2 focus:border-gray-900 focus:border-t-transparent focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50"
-                placeholder=" " />
-              <label
-                class="ml-2 before:content[' '] after:content[' '] pointer-events-none absolute left-0 -top-1.5 flex h-full w-1/3 select-none !overflow-visible truncate text-[11px] font-normal leading-tight text-gray-500 transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t before:border-l before:border-blue-gray-200 before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t after:border-r after:border-blue-gray-200 after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[3.75] peer-placeholder-shown:text-blue-gray-500 peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-gray-900 peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:!border-gray-900 peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:!border-gray-900 peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-blue-gray-500">
-                Select a Date
-              </label>
-            </div> -->
-
-          </div>
-          <div class="">
-            <div class="p-4 border">
-              <div id="parent">
-                <!-- div แม่ -->
-                <!-- ฟิลด์แรกของแม่ -->
-                <div id="main_field0" class=" py-4">
-                  <!-- div ลูก -->
-                  <input type="text" name="main_field0" placeholder="หัวข้อหลัก"
-                    class="border border-gray-400 bg-gray-50 h-8 w-1/3 rounded-lg p-2"></input>
-                  <!-- ปุ่มเพิ่มลูก -->
-                  <button type="button" class="addSubField" onclick="addSubField(this)">
-
-                    <div class="bg-blue-500 text-white rounded-lg w-auto p-1 flex justify-center">
-                      + เพิ่มหัวข้อย่อย
-                    </div>
-                  </button>
-                  <div class="subFields"></div>
-
-                </div>
-                <div class="flex justify-between">
-                  <div></div>
-
-                  <!-- ปุุ่มเพิ่มแม่ -->
-                  <button type="button" class="add_main_Field" onclick="addMainField()">
-                    <div class="bg-blue-500 text-white rounded-xl w-auto p-2 hover:bg-blue-600 flex justify-center">
-                      + เพิ่มหัวข้อหลัก
-                    </div>
-                  </button>
-                </div>
-              </div>
-
-            </div>
-            <div class="p-1 text-lg">
-              <h1>หัวข้อการประเมิน PLO</h1>
-            </div>
-            <div id="Plo_div" class="Plo_div">
-              <button type="button" onclick="openPopup()"
-                class="bg-blue-500 text-white rounded-lg w-auto p-1 flex justify-center hover:bg-blue-600 mt-1 ml-2 mb-2">เลือกแม่แบบ</button>
-              <div class="Main_item"></div>
-              <div class="subFields"></div>
-            </div>
-
-            <div id="upload-csv-section">
-
-              <!-- <table id="csv-table" class="border ">
-                <thead>
-                  <tr>
-                    <th>รหัส</th>
-                    <th>ชื่อ</th>
-                    <th>นามสกุล</th>
-                    <th>Action</th>
-                    
-                  </tr>
-                </thead>
-                <tbody id="data-csv" class="divide-y divide-gray-200"> -->
-              <!-- ข้อมูลจาก CSV จะถูกแทรกที่นี่ -->
-              <!-- </tbody>
-              </table> -->
-
-            </div>
-
-          </div>
-          <div class="flex justify-between">
-            <div></div>
-            <button type="submit" name="action" value="create"
-              class="mx-4 mt-8 bg-green-400 hover:bg-green-500 text-white text-lg rounded-lg w-auto py-2 px-4 flex justify-center">Create</button>
+          <div id="template_details" style="display: none">
+              <!-- Details will be shown here -->
           </div>
       </div>
+  </div>
 
+    <div id="parent">
+      <!-- div แม่ -->
+      <!-- ฟิลด์แรกของแม่ -->
+      <div class="main_field0">
+        <!-- div ลูก -->
+        <input type="text" name="main_field0" placeholder="Main Field" />
+        <button type="button" class="addSubField" onclick="addSubField(this)">
+          +
+        </button>
+        <div class="subFields"></div>
+      </div>
+      <button type="button" class="add_main_Field" onclick="addMainField()">
+        +
+      </button>
+      <!-- ปุุ่มเพิ่มแม่ -->
     </div>
 
-  </div>
+    <div id="Plo_div" class="Plo_div">
+      <button type="button" onclick="openPopup()">เลือกแม่แบบ</button>
+      <div class="Main_item"></div>
+      <div class="subFields"></div>
+    </div>
+
+    <button type="submit" name="action" value="create">Create</button>
+  </form>
 </div>
-<!-- </div> -->
-
-</form>
-
-
-</div>
-
 {% endblock %}
 
 <script>
@@ -513,13 +294,7 @@
     var subField = document.createElement("input");
     subField.type = "text";
     subField.name = "sub_field_" + divName;
-    subField.placeholder = "หัวข้อย่อย";
-    subField.style.width = "50%";
-    subField.style.border = "1px solid gray";
-    subField.style.paddingTop = "2px";
-    subField.style.paddingLeft = "4px";
-    subField.style.borderRadius = "0.5rem";
-    subField.style.height = "40px";
+    subField.placeholder = "Sub Field";
     //subField.setAttribute("required", "true");
 
     var divName = button.parentNode.className;
@@ -529,19 +304,7 @@
     // สร้างปุ่มลบฟิลด์ลูก
     var deleteButton = document.createElement("button");
     deleteButton.type = "button";
-    deleteButton.id = 'delete-sub'
-    deleteButton.className = "delete-sub";
     deleteButton.textContent = "-";
-    deleteButton.style.color = "white";
-    // deleteButton.style.border="1px solid gray";
-    // deleteButton.style.backgroundColor = "rgb(185 ,28 ,28)";
-    deleteButton.style.backgroundColor = "rgb(156,163 ,175)";
-    deleteButton.style.padding = "1px";
-    // deleteButton.style.borderRadius = "0.5rem";
-    deleteButton.style.width = "25px";
-    deleteButton.style.margin = "2px";
-
-
     deleteButton.onclick = function () {
       // ลบฟิลด์ลูกเมื่อคลิกปุ่มลบ
       subField.remove();
@@ -558,7 +321,7 @@
     // สร้างฟิลด์แม่ใหม่
     var parentDiv = document.getElementById("parent");
     var mainFieldDiv = document.createElement("div");
-    mainFieldDiv.id = "main_field" + dynamicFieldCounter;
+    mainFieldDiv.id  = "main_field" + dynamicFieldCounter;
     mainFieldDiv.classList.add("main_field" + dynamicFieldCounter);
 
     var mainField = document.createElement("input");
@@ -566,28 +329,13 @@
     mainField.name = "main_field" + dynamicFieldCounter;
     mainField.className = "main_field" + dynamicFieldCounter;
     mainField.id = "main_field" + dynamicFieldCounter
-    mainField.placeholder = "หัวข้อหลัก";
-    mainField.style.width = "33.333%";
-    mainField.style.border = "1px solid gray";
-    mainField.style.height = "30px";
-    mainField.style.backgroundColor = "rgb(249,250 ,251)";
-    mainField.style.marginTop = "8px";
-    mainField.style.borderRadius = "0.5rem";
-    mainField.style.paddingLeft = "4px";
+    mainField.placeholder = "Main Field";
+
     console.log(dynamicFieldCounter);
 
     var addButton = document.createElement("button");
     addButton.type = "button";
-    addButton.textContent = "+ เพิ่มหัวข้อย่อย";
-    addButton.style.border = "1px solid gray";
-    addButton.style.backgroundColor = "rgb(59, 130, 246)"
-    addButton.style.color = "white";
-    addButton.style.width = "110px";
-    addButton.style.padding = "2px";
-    addButton.style.margin = "2px"
-    addButton.style.borderRadius = "0.5rem"
-
-
+    addButton.textContent = "+";
     addButton.onclick = function () {
       addSubField(addButton);
     };
@@ -599,7 +347,6 @@
     var deleteButton = document.createElement("button");
     deleteButton.type = "button";
     deleteButton.textContent = "-";
-
     deleteButton.onclick = function () {
       mainField.remove();
       deleteButton.remove();
@@ -623,14 +370,7 @@
     //ทำปุ่มลบฟิลด์แม่
     var deleteButton = document.createElement("button");
     deleteButton.type = "button";
-    deleteButton.textContent = "ลบหัวข้อหลัก";
-    deleteButton.style.color = "white";
-    deleteButton.style.border = "1px solid gray";
-    deleteButton.style.backgroundColor = "rgb(185 ,28 ,28)";
-    deleteButton.style.padding = "2px";
-    deleteButton.style.borderRadius = "0.5rem";
-    deleteButton.style.width = "100px";
-    deleteButton.style.marginBottom = "3px"
+    deleteButton.textContent = "-";
     deleteButton.onclick = function () {
       //สำคัญสำหรับการลบ ห้ามแก้ ถ้าไม่มีมันตอนกด - ชื่อของฟิลด์ตอนหลังบ้านรับ POST จะผิด
 
@@ -714,28 +454,4 @@
 
     dynamicFieldCounter++;
   }
-
-
-
-  const datepicker = flatpickr("#date-picker", {});
-  // styling the date picker
-  const calendarContainer = datepicker.calendarContainer;
-  const calendarMonthNav = datepicker.monthNav;
-  const calendarNextMonthNav = datepicker.nextMonthNav;
-  const calendarPrevMonthNav = datepicker.prevMonthNav;
-  const calendarDaysContainer = datepicker.daysContainer;
-
-  calendarContainer.className = `${calendarContainer.className} bg-white p-4 border border-blue-gray-50 rounded-lg shadow-lg shadow-blue-gray-500/10 font-sans text-sm font-normal text-blue-gray-500 focus:outline-none break-words whitespace-normal`;
-
-  calendarMonthNav.className = `${calendarMonthNav.className} flex items-center justify-between mb-4 [&>div.flatpickr-month]:-translate-y-3`;
-
-  calendarNextMonthNav.className = `${calendarNextMonthNav.className} absolute !top-2.5 !right-1.5 h-6 w-6 bg-transparent hover:bg-blue-gray-50 !p-1 rounded-md transition-colors duration-300`;
-
-  calendarPrevMonthNav.className = `${calendarPrevMonthNav.className} absolute !top-2.5 !left-1.5 h-6 w-6 bg-transparent hover:bg-blue-gray-50 !p-1 rounded-md transition-colors duration-300`;
-
-  calendarDaysContainer.className = `${calendarDaysContainer.className} [&_span.flatpickr-day]:!rounded-md [&_span.flatpickr-day.selected]:!bg-gray-900 [&_span.flatpickr-day.selected]:!border-gray-900`;
-
 </script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="show_pop.js"></script>
-<!-- <script src="csv.js"></script> -->
