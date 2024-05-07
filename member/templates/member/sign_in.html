@@ -1,30 +1,225 @@
+
 <!-- blog/templates/blog/sign-in.html -->
+<style>*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+.container{
+    /* display: flex; */
+    justify-content: space-around; 
+    margin-bottom: 5rem;  
+}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-</head>
-<body>
+.logo{
+    width: 70px;
+    height: 70px;
+    margin-right: 80%;
+}
 
-    <h2>Login</h2>
+.logo:hover{
+    opacity: 0.7;
+}
 
-    {% if error_message %}
-        <p>{{ error_message }}</p>
-    {% endif %}
+.box{
+    border-radius: 30px;
+    width: 10%;
+    background-color: white;
+}
+.help{
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 20px;
+    
+    font-family:  'Nunito',sans-serif;
+    color: black;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    
+}
+.help a{
+    list-style: none;
+    text-decoration: none;
+    color: white;
+}
 
-    <form method="post" action="{% url 'sign_in' %}">
-        {% csrf_token %}
-        <label for="username">Username:</label>
-        <input type="text" name="username" required><br>
+nav{
+    font-size: 20px;
+    font-weight: 700;
+    display: flex;
+    justify-content: space-between;
+    padding-top: 32px;
+}
+body{
+    font-family:  'Nunito',sans-serif;
+    height: 100vh;
+    /* padding-top: 32px; */
+    /* background-image: linear-gradient(450deg,#0470fd 0%,#b721ff 100%); */
+    
+    background-image: url('https://campus.campus-star.com/app/uploads/2019/02/payap-4.jpg');
+    /* background-color: hwb(240 59% 40%); */
+    background-size: cover;
+    background-repeat: no-repeat;
+    /* จัดให้อยู้ center เหมือนกัน */
+    background-position: center;
+    /* justify-content:  center; */
 
-        <label for="password">Password:</label>
-        <input type="password" name="password" required><br>
+}
+form{
+    height: 854px ;
+    /* background-image: url('https://campus.campus-star.com/app/uploads/2019/02/payap-4.jpg'); */
 
-        <input type="submit" value="Login">
-    </form>
 
-</body>
-</html>
+}
+/* img{
+    width: 1311px;
+    height: 854px;
+
+} */
+.form{
+    display: flex;
+    justify-content: center;
+    padding-top: 3rem;
+    
+}
+
+/* .sub-form{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 30vw;
+    height: 70vh;
+    
+    border-radius: 12px;
+    /* justify-content:  center; 
+    align-items: center; 
+    background-color: white;    
+    
+} */
+
+.upper-form{
+   
+    /* width: 20vw; */
+    width: 20%;
+    height: 60vh;
+    border-radius: 12px;
+    box-shadow: rgba(50, 50, 93, 25) 0px 13px 27px -5px,rgba(0,0, 0, 0.3) 0px 8px 16px -8px;
+    background-color: white;
+    text-align: center;
+     /* justify-content:  center;   */
+    /* align-items: center;  */
+}
+
+/* .botton-form{
+    display: flex;
+    justify-content: center;
+    margin-top: 3rem;
+    background-color: white;
+    
+} */
+
+
+h2{
+    margin: 1rem 0 2rem 0;
+    text-align: center;
+    justify-content: center;
+
+}
+label{
+    margin-top: 8px;
+    margin-right: 55%;
+    padding-left: 16px;
+    /* opacity: 0,75; */
+    
+}
+
+input{
+    
+    position: relative;
+    display: flex;
+    border-radius: 50px;
+    border-style: none;
+    outline: none;
+    margin-top: 8px;
+    margin-left: 15%;
+    padding: 12px 24px;
+    width: 70%;
+    background-color: #EAEEED;
+}
+
+input:focus{
+     opacity: 0.7; 
+}
+.btn{
+    padding-top: 2rem;
+}
+
+button{
+    padding:  12px 48px;
+    border-radius: 58px;
+    color: white;
+    margin-top: 1rem;
+    cursor: pointer;
+    outline: none;
+    border-width: 0;
+    background-color: #1a1b27;
+    font-weight: 600;
+    width: 70%;
+}
+button:hover{
+    opacity: 0.8;
+}
+
+div.bottom-form{
+    display: flex;
+    justify-content: center;
+    margin-top:  10px;
+}
+
+
+</style>
+
+{% extends "member/basic.html" %}
+
+{%block title %}Login{% endblock %}
+{% block content %}
+    <!-- <div class="background"> -->
+    <div class="form">
+        <div class="upper-form">
+            <h2> SIGN IN </h2>
+            {% if form.errors %}
+            <p>Please, check your UserID and password</p>
+            {% else %}
+            <p> </p>
+            {% endif %}
+            <form class="sub-form" method="post">
+
+                {% csrf_token %}
+                {{form.as_p}}
+                <label>UserID</label><br>
+                <input type="text" name=username><br>
+                <label>Password</label><br>
+                <input type="password" name=password><br>
+                <div class="btn">
+                    <button type="submit" value="Login" 
+                        class="button button-primary">Login</button><br>
+                </div>
+                
+                <div class="bottom-form">
+                    <div class="Forgot password">Forgot your password?</div>
+                    <a href="#" class="signup">Click</a>
+                </div>
+                <br><br>
+                <div class="no-account">Don't have a account?</div>
+                <a href="sign_up.html" class="signup">sigup</a>
+            </form>
+        </div>
+
+    </div>
+    <!-- </div> -->
+
+{% endblock %}
+
