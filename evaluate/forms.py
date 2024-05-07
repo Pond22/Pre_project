@@ -4,6 +4,9 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 import re
 from django.forms import DateTimeInput
+from django.utils import timezone
+from django.core.exceptions import ValidationError
+
 
 class PLOsForm(forms.ModelForm):
     class Meta:
@@ -15,11 +18,12 @@ class PLOstest(forms.ModelForm):
         model = TemplateData
         fields = []
         #widgets = {'test': forms.TextInput(attrs={'class': 'form-control'})}  
-        
+
 class Assessment_Form(forms.ModelForm):
     class Meta:
         model = Form
-        fields = ['name', 'class_code', 'semester', 'section', 'year_number', 'start_date', 'end_date','template', 'description']
+        fields = ['name', 'class_code', 'semester', 'section', 'year_number', 'start_date', 'end_date', 'description']
+        
         widgets = {
             'semester': forms.Select(choices=((1, '1'), (2, '2'), (3, '3'))),
             'year_number': forms.Select(choices=((2567, '2567'), (2568, '2568'), (2569, '2569'))),

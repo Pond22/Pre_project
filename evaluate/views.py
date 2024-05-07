@@ -35,6 +35,7 @@ def create_plo(request):
 
 @login_required(login_url="sign_in")
 def create_form(request):
+    Active_Template = Teamplates.objects.get(is_active=True)
     if request.method == 'POST':
         for d in range(2):
             le = request.POST.get('length')
@@ -48,6 +49,7 @@ def create_form(request):
             if new_form.is_valid():
                 new_in = new_form.save(commit=False)
                 new_in.created_by = request.user
+                new_in.template = Active_Template
                 if d == 1:  # Check if it's the second loop iteration
                     new_in.is_teacher_form = True
                 new_in.save()
@@ -81,16 +83,15 @@ def create_form(request):
         return HttpResponse("Data saved successfully!")
              
     else:
-        active_forms = Teamplates.objects.filter(is_active=True).prefetch_related('templatedata_set')
-        template_data = {}
-
-        for form in active_forms:
-            template_data[form] = list(form.templatedata_set.all())
-            print(template_data[form])
+        print(Active_Template.id)
+        
+        template_data = list(Active_Template.templatedata_set.all())
+        for form in template_data:
+            print(form)
                     
         new_form = Assessment_Form()
         user_now = request.user.username
-        return render(request, 'evaluate/create_form.html', {'new_form': new_form, 'template_data': template_data, 'user_now':user_now,'active_forms':active_forms})
+        return render(request, 'evaluate/create_form.html', {'new_form': new_form, 'template_data': template_data, 'user_now':user_now})
 
     
 @login_required(login_url="sign_in")  

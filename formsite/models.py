@@ -48,7 +48,7 @@ class TemplateData(models.Model):
     form = models.ForeignKey(Teamplates, on_delete=models.CASCADE)
     
     def __str__(self):
-        return str(self.text)
+        return f"{self.text} ({self.id})"
     
 
 class Form(models.Model):
