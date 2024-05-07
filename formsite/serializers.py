@@ -25,3 +25,4 @@ class CSVUploadForm(serializers.ModelSerializer):
             raise forms.ValidationError("Invalid email format. Please enter a valid email address with domain payap.ac.th.")
         return email
     csv_file = forms.FileField(label='อัปโหลดไฟล์ CSV')
+    

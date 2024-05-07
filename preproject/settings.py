@@ -40,7 +40,7 @@ REST_FRAMEWORK = {
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 
-
+LOGOUT_REDIRECT_URL = '/sign_in/'
 #เพิ่มเอง
 
 # Application definition

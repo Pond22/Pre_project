@@ -69,8 +69,7 @@ class Form(models.Model):
     semester = models.IntegerField(choices=semester_choices)
     section = models.CharField(max_length=2)
     year_number = models.IntegerField(
-        verbose_name='ปี', 
-        help_text='ใส่ตัวเลขปี 4 ตัว',
+        verbose_name='ปีการศึกษา', 
         validators=[MinValueValidator(1999), MaxValueValidator(3100)]
     )
     start_date = models.DateTimeField(null=True, blank=True)
@@ -98,7 +97,7 @@ class AssessmentItem(models.Model):
     
     def __str__(self):
         if self.template_select:
-            return self.template_select.text
+            return f"มากจากแม่แบบ ID = {self.id} ข้อมูล = {self.template_select.text}"    #self.template_select.text
         else:
             return str(self.id)
         

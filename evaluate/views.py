@@ -9,6 +9,7 @@ from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 import pandas as pd
+import time
 # Create your views here.
 
 @login_required(login_url="sign_in")   
@@ -37,7 +38,10 @@ def create_plo(request):
 def create_form(request):
     Active_Template = Teamplates.objects.get(is_active=True)
     if request.method == 'POST':
-        for d in range(2):
+        stu_name_list = request.POST.getlist('stu_name_list[]')
+        stu_num_list = request.POST.getlist('stu_num_list[]')
+        
+        for round in range(2):
             le = request.POST.get('length')
             if le is None:
                 le = 0
@@ -49,24 +53,43 @@ def create_form(request):
             if new_form.is_valid():
                 new_in = new_form.save(commit=False)
                 new_in.created_by = request.user
-                new_in.template = Active_Template
-                if d == 1:  # Check if it's the second loop iteration
+                new_in.template = Active_Template      
+                if round == 1: #ถ้าเป็นครั้งที่สองสร้างของอาจารย์
                     new_in.is_teacher_form = True
-                new_in.save()
-                print('main_item_form_template_id', request.POST.getlist('main_field0'))
-
+                    new_in.save()
+                if round == 0: #ถ้าเป็นสร้างครั้งแรก ทำแบบฟอร์มของนักเรียนแล้วเอาชื่อเข้า
+                    start_time = time.time()
+                    print("PASS1")
+                    new_in.save()
+                    if (len(stu_num_list) == len(stu_name_list)):
+                        print("PASS2")
+                        for index in range(len(stu_num_list)):
+                            print(index)
+                            name = stu_name_list[index]
+                            password = stu_num_list[index]  # ใช้คอลัมน์ที่ 0 เป็นรหัสผ่าน
+                            email = str(stu_num_list[index]) + '@payap.ac.th'
+                            if not User.objects.filter(username=name).exists():
+                                user = User.objects.create_user(username=name, email=email, password=str(password))
+                                group = Group.objects.get(name='นักศึกษา')
+                                user.groups.add(group)  # เพิ่มเข้ากลุ่มที่ 2
+                                new_in.users.add(user)
+                            else:
+                                user_instance = User.objects.get(username=name)
+                                new_in.users.add(user_instance)  
+                end_time = time.time()
+                print("เวลาในการสร้างรายชื่อ = ",end_time - start_time)            
                 create_form = get_object_or_404(form_model, id=new_in.id)
                 if 'main_field0' in request.POST:  
                     for i in range(le + 1):
                         name_main = 'main_field' + str(i)
                         main_fields = request.POST.get(name_main, '')  # Use empty string if no value is found
-                        print('main_fields =', name_main)
+                        #print('main_fields =', name_main)
                         main_field = AssessmentItem.objects.create(text=main_fields, form=create_form)
                         
                         name_sub = 'sub_field_' + str(name_main)
                         sub_fields = request.POST.getlist(name_sub)
-                        print(sub_fields)
-                        print('name_sub =', name_sub)
+                        #print(sub_fields)
+                        #print('name_sub =', name_sub)
 
                         for sub_field_text in sub_fields:
                             sub_field = AssessmentItem.objects.create(text=sub_field_text, parent=main_field, form=create_form)
@@ -91,6 +114,7 @@ def create_form(request):
                     
         new_form = Assessment_Form()
         user_now = request.user.username
+
         return render(request, 'evaluate/create_form.html', {'new_form': new_form, 'template_data': template_data, 'user_now':user_now})
 
     
