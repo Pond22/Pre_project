@@ -31,6 +31,8 @@ ALLOWED_HOSTS = []
 #เพิ่มเอง
 DATA_UPLOAD_MAX_NUMBER_FIELDS = None
 
+
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication'

@@ -3,6 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 import re
 from django.core.validators import EmailValidator
+from formsite.models import User as CustomUser
 
 #regex 
 def validate_email(email):
@@ -11,7 +12,7 @@ def validate_email(email):
     
 class RegisterForm(UserCreationForm):
     class Meta:
-        model = User
+        model = CustomUser
         fields = ["email", "password1", "password2"]
     
     def clean_email(self):

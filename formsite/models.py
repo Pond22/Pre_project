@@ -2,20 +2,40 @@ from django.db import models
 from django.contrib.auth.models import User, AbstractUser
 import datetime
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.conf import settings
 # Create your models here.
+
 '''
 user_fields = User._meta.fields
 
 for field in user_fields:
     print(field.name)       #related_name สำคัญ
+    class Departments(models.Model):
+    name = models.CharField(max_length=100)
+'''
+class Departments(models.Model):
+    name = models.CharField(max_length=100)
+    
+    def __str__(self):
+        return self.name
+      
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    department = models.ForeignKey(Departments, null=True, blank=True, on_delete=models.CASCADE)
+    line_token = models.CharField(max_length=30, null=True, blank=True)
+
+    def __str__(self):
+        return self.user.username
+    
 '''
 class LineTokens(models.Model): # เพิ่มฟิลด์ line_token 
     line_token = models.CharField(max_length=30, blank=True, null=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    '''
     
-
 class Teamplates(models.Model):
     id = models.BigAutoField(primary_key=True)
+    department = models.ForeignKey(Departments, on_delete=models.CASCADE)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     create = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=False)
@@ -39,9 +59,21 @@ class Teamplates(models.Model):
         
         return super().save(*args, **kwargs)
 
+class Course(models.Model):
+    teamplates = models.ForeignKey(Teamplates, on_delete=models.CASCADE)
+    name = models.CharField(max_length=50)
+    section = models.CharField(max_length=2)
+    class_code = models.CharField(max_length=7)
+    
+
 class TemplateData(models.Model):
     id = models.BigAutoField(primary_key=True)
-    text = models.TextField(null=False, blank=False)
+    TYPE_CHOICES = (
+        ('PLO', 'Program Learning Outcome'),
+        ('O', 'Other'),
+    )
+    type_data = models.CharField(max_length=3, choices=TYPE_CHOICES, default='O')
+    text = models.TextField()
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='sub_items')
     create = models.DateTimeField(auto_now_add=True)
     update = models.DateTimeField(auto_now=True)
@@ -49,9 +81,15 @@ class TemplateData(models.Model):
     
     def __str__(self):
         return f"{self.text} ({self.id})"
-    
 
 class Form(models.Model):
+    semester_choices =(
+        #("Undefined","Undefined"),
+        (1, '1'),
+        (2, '2'),
+        (3, '3')
+    )
+    
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=100)
     class_code = models.CharField(max_length=10)
@@ -60,12 +98,6 @@ class Form(models.Model):
     description = models.CharField(max_length=200, null=True, blank=True)
     template = models.ForeignKey(Teamplates, on_delete=models.CASCADE)
     is_teacher_form = models.BooleanField(default=False)
-    semester_choices =(
-        #("Undefined","Undefined"),
-        (1, '1'),
-        (2, '2'),
-        (3, '3')
-    )
     semester = models.IntegerField(choices=semester_choices)
     section = models.CharField(max_length=2)
     year_number = models.IntegerField(
@@ -75,16 +107,17 @@ class Form(models.Model):
     start_date = models.DateTimeField(null=True, blank=True)
     end_date = models.DateTimeField(null=True, blank=True)
     expired = models.BooleanField(default=False) #เก็บว่าแบบฟอร์มนั้นครบกำหนดเวลาหรือยัง
-    users = models.ManyToManyField(User, related_name='forms') #ทำให้เกี่ยวกันกับ User แบบ M to N 
+    #users = models.ManyToManyField(User, related_name='forms') #ทำให้เกี่ยวกันกับ User แบบ M to N 
      
     def __str__(self):
         return str(self.id)
-    '''
+ 
 class AuthorizedUser(models.Model):
-    form = models.ForeignKey(Form, on_delete=models.CASCADE)  ไม่ใช้  ใช้users = models.ManyToManyField(User, related_name='forms') แทน
-    user_name = models.CharField(max_length=10)
+    form = models.ForeignKey(Form, on_delete=models.CASCADE)  
+    users = models.ManyToManyField(User, related_name='forms')
+    is_teacher = models.BooleanField(default=False)
     def __str__(self):
-        return str(self.form)'''
+        return str(self.form)
     
 class AssessmentItem(models.Model):    
     text = models.TextField()
@@ -111,11 +144,6 @@ class AssessmentResponse(models.Model):
     def __str__(self):
         return str(self.assessment_item)
     
-class Courese(models.Model):
-    teamplates = models.ForeignKey(Teamplates, on_delete=models.CASCADE)
-    section = models.CharField(max_length=2)
-    class_code = models.CharField(max_length=7)
-    create = models.DateTimeField(auto_now_add=True)
-    update = models.DateTimeField(auto_now=True)
+
     
 

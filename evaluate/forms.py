@@ -1,5 +1,5 @@
 from django import forms
-from formsite.models import TemplateData, Form, AssessmentItem
+from formsite.models import TemplateData, Form, AssessmentItem, Course
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 import re
@@ -22,19 +22,25 @@ class PLOstest(forms.ModelForm):
 class Assessment_Form(forms.ModelForm):
     class Meta:
         model = Form
-        fields = ['name', 'class_code', 'semester', 'section', 'year_number', 'start_date', 'end_date', 'description']
+        fields = ['name', 'class_code', 'semester', 'section', 'year_number', 'start_date', 'end_date', 'description', 'template']
         
         widgets = {
             'semester': forms.Select(choices=((1, '1'), (2, '2'), (3, '3'))),
             'year_number': forms.Select(choices=((2567, '2567'), (2568, '2568'), (2569, '2569'))),
             'start_date': DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
             'end_date': DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
-            
-        } 
+        }
+        exclude = ['template'] 
         
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            self.fields['template'].widget = forms.HiddenInput() 
+    def __init__(self, *args, custom_param=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        print(custom_param)
+        courses = Course.objects.filter(teamplates=custom_param)
+        
+        self.fields['name'].widget = forms.Select(choices = [(c.id, c.name) for c in courses])
+        self.fields['section'].widget = forms.Select(choices = [(c.id, c.section) for c in courses])
+        
+        self.fields['class_code'].widget = forms.Select(choices = [(c.id, c.class_code) for c in courses])
         
 class ClosForm(forms.ModelForm):
     class Meta:

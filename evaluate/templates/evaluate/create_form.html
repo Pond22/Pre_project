@@ -74,7 +74,7 @@
 
 {% block content %}
 <!-- <div class="container"> -->
-  <form method="post" id="main"> <!-- เย้เย้-->
+  <form method="post" id="main"> 
 
 
 
@@ -205,6 +205,7 @@
               <div id="template_details" style="display: none">
                 <!-- Details will be shown here -->
               </div>
+              <button onclick="confirmSelection()" type = "button">ยืนยัน</button>
             </div>
           </div>
 
@@ -213,21 +214,10 @@
               class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="คำชี้แจง"></textarea>
           </div>
-          <div class="w-auto">
-            <button type="button" onclick="" class=" w-52 bg-green-300">เลือกเวลา</button>
+            <div class="w-auto" id ="test_select">
+              <div id = 'test1'></div>
 
-            <!-- Date pickle -->
-            <!-- <div class="fixed h-10 w-full min-w-[200px]">
-              <input id="date-picker"
-                class="ml-2 peer h-full w-1/3 rounded-[7px] border border-blue-gray-200 border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal text-blue-gray-700 outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 focus:border-2 focus:border-gray-900 focus:border-t-transparent focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50"
-                placeholder=" " />
-              <label
-                class="ml-2 before:content[' '] after:content[' '] pointer-events-none absolute left-0 -top-1.5 flex h-full w-1/3 select-none !overflow-visible truncate text-[11px] font-normal leading-tight text-gray-500 transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t before:border-l before:border-blue-gray-200 before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t after:border-r after:border-blue-gray-200 after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[3.75] peer-placeholder-shown:text-blue-gray-500 peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-gray-900 peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:!border-gray-900 peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:!border-gray-900 peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-blue-gray-500">
-                Select a Date
-              </label>
-            </div> -->
-
-          </div>
+            </div>
           <div class="">
             <div class="p-4 border">
               <div id="parent">
@@ -269,25 +259,6 @@
               <div class="Main_item"></div>
               <div class="subFields"></div>
             </div>
-<!--
-            <div id="upload-csv-section">
-
-               <table id="csv-table" class="border ">
-                <thead>
-                  <tr>
-                    <th>รหัส</th>
-                    <th>ชื่อ</th>
-                    <th>นามสกุล</th>
-                    <th>Action</th>
-                    
-                  </tr>
-                </thead>
-                <tbody id="data-csv" class="divide-y divide-gray-200"> -->
-              <!-- ข้อมูลจาก CSV จะถูกแทรกที่นี่ -->
-              <!-- </tbody>
-              </table> 
-
-            </div>-->
 
           </div>
           <div class="flex justify-between">
@@ -302,7 +273,6 @@
   </div>
 </div>
 <!-- </div> -->
-
 </form>
 
 
@@ -311,375 +281,11 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
-  let dynamicFieldCounter = 1;
-  let num = 0;
 
-  function addSubField(button) {
-    var parentDiv = button.parentElement;
-    var divName = button.parentNode.className;
-    // สร้างฟิลด์ลูกใหม่
-    var subField = document.createElement("input");
-    subField.type = "text";
-    subField.name = "sub_field_"+divName;
-    subField.setAttribute('required', '');
-    console.log(divName)
-    subField.placeholder = "หัวข้อย่อย";
-    subField.style.width = "50%";
-    subField.style.border = "1px solid gray";
-    subField.style.paddingTop = "2px";
-    subField.style.paddingLeft = "4px";
-    subField.style.borderRadius = "0.5rem";
-    subField.style.height = "40px";
-    //subField.setAttribute("required", "true");
-
-    var divName = button.parentNode.className;
-    console.log(divName);
-    console.log(subField.name);
-
-    // สร้างปุ่มลบฟิลด์ลูก
-    var deleteButton = document.createElement("button");
-    deleteButton.type = "button";
-    deleteButton.className = "delete-sub";
-    deleteButton.textContent = "-";
-    deleteButton.style.color = "white";
-    deleteButton.style.backgroundColor = "rgb(156,163 ,175)";
-    deleteButton.style.padding = "1px"
-    deleteButton.style.width = "25px";
-    deleteButton.style.margin = "2px";
-    deleteButton.onclick = function () {
-      // ลบฟิลด์ลูกเมื่อคลิกปุ่มลบ
-      subField.remove();
-      deleteButton.remove();
-    };
-
-    // เพิ่มฟิลด์ลูกและปุ่มลบลงในแม่
-    parentDiv.querySelector(".subFields").appendChild(subField);
-    parentDiv.querySelector(".subFields").appendChild(deleteButton);
-    num++;
-  }
-
-  function addMainField() {
-    // สร้างฟิลด์แม่ใหม่
-    var parentDiv = document.getElementById("parent");
-    var mainFieldDiv = document.createElement("div");
-    mainFieldDiv.id  = "main_field" + dynamicFieldCounter;
-    mainFieldDiv.classList.add("main_field" + dynamicFieldCounter);
-
-    var mainField = document.createElement("input");
-    mainField.type = "text";
-    mainField.name = "main_field" + dynamicFieldCounter;
-    mainField.className = "main_field" + dynamicFieldCounter;
-    mainField.id = "main_field" + dynamicFieldCounter
-    mainField.placeholder = "Main Field";
-
- //แต่ง
-    mainField.type = "text";
-    mainField.name = "main_field" + dynamicFieldCounter;
-    mainField.className = "main_field" + dynamicFieldCounter;
-    mainField.id = "main_field" + dynamicFieldCounter
-    mainField.placeholder = "หัวข้อหลัก";
-    mainField.style.width = "33.333%";
-    mainField.style.border = "1px solid gray";
-    mainField.style.height = "30px";
-    mainField.style.backgroundColor = "rgb(249,250 ,251)";
-    mainField.style.marginTop = "8px";
-    mainField.style.borderRadius = "0.5rem";
-    mainField.style.paddingLeft = "4px";
-    console.log(dynamicFieldCounter);
-
-    var addButton = document.createElement("button");
-    addButton.type = "button";
-    addButton.textContent = "+ เพิ่มหัวข้อย่อย";
-    addButton.style.border = "1px solid gray";
-    addButton.style.backgroundColor = "rgb(59, 130, 246)"
-    addButton.style.color = "white";
-    addButton.style.width = "110px";
-    addButton.style.padding = "2px";
-    addButton.style.margin = "2px"
-    addButton.style.borderRadius = "0.5rem"
-    addButton.onclick = function () {
-      addSubField(addButton);
-    };
-
-    var subFieldsDiv = document.createElement("div");
-    subFieldsDiv.classList.add("subFields");
-
-    //ทำปุ่มลบฟิลด์แม่
-    var deleteButton = document.createElement("button");
-    deleteButton.type = "button";
-    deleteButton.textContent = "ลบหัวข้อหลัก";
-    deleteButton.style.color = "white";
-    deleteButton.style.border = "1px solid gray";
-    deleteButton.style.backgroundColor = "rgb(185 ,28 ,28)";
-    deleteButton.style.padding = "2px";
-    deleteButton.style.borderRadius = "0.5rem";
-    deleteButton.style.width = "100px";
-    deleteButton.style.marginBottom = "3px"
-    deleteButton.onclick = function () {
-      mainField.remove();
-      deleteButton.remove();
-    };
-    // ทำปุ่มแสดง popup
-    /*
-    var popupButton = document.createElement("button");
-    popupButton.type = "button";
-    popupButton.textContent = "เลือกแม่แบบ";
-    popupButton.onclick = function () {
-      showPopup(mainField.id);
-    };*/
-
-    // เพิ่มฟิลด์แม่และปุ่มเพิ่มฟิลด์ลูกลงในแม่
-    mainFieldDiv.appendChild(mainField);
-    //mainFieldDiv.appendChild(popupButton);
-    mainFieldDiv.appendChild(addButton);
-    mainFieldDiv.appendChild(subFieldsDiv);
-    parentDiv.insertBefore(mainFieldDiv, parentDiv.lastElementChild);
-
-    //ทำปุ่มลบฟิลด์แม่
-    var deleteButton = document.createElement("button");
-    deleteButton.type = "button";
-    deleteButton.textContent = "-";
-    deleteButton.onclick = function () {
-      //สำคัญสำหรับการลบ ห้ามแก้ ถ้าไม่มีมันตอนกด - ชื่อของฟิลด์ตอนหลังบ้านรับ POST จะผิด
-
-      thename = mainField.name;
-      mainFieldDiv.remove();
-      var number = thename.match(/\d+$/)[0]; // ดึงตัวเลขข้างหลังสุดออกมา
-      var value = number;
-      var tem = number;
-      tem++;
-
-      for (v = tem; v < dynamicFieldCounter; v++) {
-        //หาclass
-
-        console.log("ค่า v" + value);
-        var nextField = document.querySelector(".main_field" + v);
-        console.log("ชื่อมัน" + nextField.className);
-        var subclass = nextField.querySelector(".subFields");
-        //console.log(subclass.className);
-
-        if (nextField) {
-          var inputElement = nextField.querySelector("input"); // เลือก input ภายใน div
-          console.log("ste", value);
-          var name = "main_field" + value;
-          var name_sub = "sub_field_main_field" + value;
-          var subFields = subclass.querySelectorAll("input");
-          console.log(subFields);
-
-          nextField.className = name; // แก้ชื่อ div
-          console.log("แก้ชื่อ" + nextField.className);
-
-          inputElement.setAttribute("name", name); // แก้ชื่อ
-          inputElement.setAttribute("class", name); // แก้คลาส
-
-          // วนลูปทุก subField และตั้งค่า name ของแต่ละตัว
-          for (var i = 0; i < subFields.length; i++) {
-            subFields[i].setAttribute("name", name_sub); // แก้ชื่อ sub
-          }
-          //mainFieldDiv.remove();
-        }
-        hiddenInput.value = value;
-        value++;
-      }
-      if (tem == dynamicFieldCounter) {
-        tem -= 2;
-        console.log("ค่าที่ควรเป็น " + tem);
-        hiddenInput.value = tem;
-      }
-      document.getElementById("main").appendChild(hiddenInput);
-      dynamicFieldCounter--;
-      //mainFieldDiv.remove();
-    }; //สำคัญสำหรับการลบ ห้ามแก้ //สำคัญสำหรับการลบ ห้ามแก้//สำคัญสำหรับการลบ ห้ามแก้//สำคัญสำหรับการลบ ห้ามแก้//สำคัญสำหรับการลบ ห้ามแก้//สำคัญสำหรับการลบ ห้ามแก้
-    //สำคัญสำหรับการลบ ห้ามแก้//สำคัญสำหรับการลบ ห้ามแก้//สำคัญสำหรับการลบ ห้ามแก้//สำคัญสำหรับการลบ ห้ามแก้//สำคัญสำหรับการลบ ห้ามแก้//สำคัญสำหรับการลบ ห้ามแก้//สำคัญสำหรับการลบ ห้ามแก้
-    mainFieldDiv.appendChild(deleteButton);
-
-    var hiddenInput = document.createElement("input");
-    hiddenInput.type = "hidden";
-    hiddenInput.name = "length"; // ตั้งชื่อฟิลด์
-    hiddenInput.value = dynamicFieldCounter; // กำหนดค่าจาก dynamicFieldCounter
-
-    // เพิ่ม hiddenInput ลงใน form
-    document.getElementById("main").appendChild(hiddenInput);
-
-    document
-      .getElementById("main")
-      .addEventListener("change", function (event) {
-        // กันคนแก้ไขจากหน้า html
-        if (event.target.name === "length") {
-          // หากมีการแก้ไขฟิลด์ hidden ให้สร้าง hidden input ใหม่
-          var newHiddenInput = document.createElement("input");
-          newHiddenInput.type = "hidden";
-          newHiddenInput.name = "length";
-          newHiddenInput.value = dynamicFieldCounter;
-
-          // ลบอันเก่าออก
-          event.target.parentNode.removeChild(event.target);
-
-          // เพิ่มใหม่
-          document.getElementById("main").appendChild(newHiddenInput);
-        }
-      });
-
-    dynamicFieldCounter++;
-  }
-</script>
-
-<script> //จัดการทั่วไป
-  //pop-up
-
-  function showTemplateDetails() {
-    // โค้ดที่แสดงข้อมูลแม่แบบ
-    var templateDetailsDiv = document.getElementById("template_details");
-    templateDetailsDiv.innerHTML = "<p>ข้อมูลแม่แบบที่เลือก</p>";
-    templateDetailsDiv.style.display = "block";
-  }
-
-  
-  function selectTemplate(id, text, event) {
-    if (event) {
-        event.stopPropagation();  // ป้องกัน event bubbling
-    }
-    var templateDetailsDiv = document.getElementById("template_details");
-    templateDetailsDiv.innerHTML = "<p>แม่แบบที่เลือก: " + text + "</p>";
-    templateDetailsDiv.style.display = "block";
-
-    // โอนข้อความไปยังฟิลด์
-    var targetInput = document.getElementById('Plo_div');
-
-    var newInput = document.createElement('input');
-    newInput.type = 'text';
-    newInput.value = text;  
-    newInput.id = 'main_item_form_template';  
-    newInput.className = 'main_item_form_template';
-    
-    var hiddenInput = document.createElement('input');
-    hiddenInput.type = 'hidden';
-    hiddenInput.name = 'main_item_form_template_id';  // ตั้งชื่อฟิลด์ที่ต้องการส่งไปยังหลังบ้าน
-    hiddenInput.value = id;  // ใส่ค่าไอดีที่ต้องการส่ง
-    hiddenInput.id = 'main_item_form_template_id';
-
-    console.log(targetInput);
-    if (targetInput) {
-      targetInput.querySelector(".Main_item").appendChild(newInput);
-      targetInput.querySelector(".Main_item").appendChild(hiddenInput);
-    }
-}
-
-let sub_count = 0;
-
-function set_subField(id, text, event) {
-  event.stopPropagation(); // ป้องกัน event bubbling
-
-  var parentDiv = document.getElementById('Plo_div'); // หา div หลัก
-
-  var newInput = document.createElement('input');
-  newInput.type = 'text';
-  newInput.value = text;
-  newInput.id = 'sub_item_form_template_' + id;
-  newInput.className = 'sub_item_form_template';
-
-  var hiddenInput = document.createElement('input');
-  hiddenInput.type = 'hidden';
-  hiddenInput.name = 'sub_item_form_template_id';  // ตั้งชื่อฟิลด์ที่ต้องการส่งไปยังหลังบ้าน
-  hiddenInput.value = id;  // ใส่ค่าไอดีที่ต้องการส่ง
-  hiddenInput.id = 'main_item_form_template_id';
-
-  /*if (parentDiv) {
-    var existingField = parentDiv.querySelector("#sub_item_form_template_" + sub_count);
-
-    if ( id < sub_count) {
-      
-      console.log(existingField)
-      parentDiv.querySelector(".subFields").insertBefore(newInput, existingField);
-      sub_count = id
-    } else {
-      sub_count = id;
-      parentDiv.querySelector(".subFields").appendChild(newInput); // เพิ่ม input ใหม่ใน div หลัก
-    }
-  } else {
-    console.error('Parent division not found');
-  }*/
-
-  if (parentDiv) {
-    parentDiv.querySelector(".subFields").appendChild(newInput);
-    parentDiv.querySelector(".subFields").appendChild(hiddenInput);  
-  }
-}
-
-function openPopup() {
-  var popup = document.getElementById("popup");
-  popup.style.display = "block";
-}
-
-function closePopup() {
-  var popup = document.getElementById("popup");
-  popup.style.display = "none";
-}
-
-function checkboxHandle(checkboxId, id, text, event, status) {
-  if (event) {
-    event.stopPropagation();  // ป้องกัน event bubbling
-}
-
-
-  console.log(status)
-  var checkbox = document.getElementById(checkboxId);
-  console.log(checkboxId)
-  if (checkbox.checked && status == 'main') {
-    selectTemplate(id, text, event);
-  }
-  else if (checkbox.checked && status == 'sub') {
-    set_subField(id, text, event);
-  }
-  else if (!checkbox.checked && status == 'main'){
-    var targetInput = document.getElementById('main_item_form_template');
-    targetInput.parentNode.removeChild(targetInput);
-    
-  }
-  else if (!checkbox.checked && status == 'sub'){
-    var targetInput = document.getElementById('sub_item_form_template_'+ id);
-    targetInput.parentNode.removeChild(targetInput);
-  
-  }
-}
-
-function toggleSections() {
-  var uploadCsvSection = document.getElementById("upload-csv-section");
-  var container = document.getElementById("Main_display_page");
-
-  if (uploadCsvSection.style.display === "none") {
-    uploadCsvSection.style.display = "block";
-    container.style.display = "none";
-    uploadCsvSection.scrollIntoView({ behavior: "smooth" });
-  } else {
-    uploadCsvSection.style.display = "none";
-    container.style.display = "block";
-    container.scrollIntoView({ behavior: "smooth" });
-  }
-/*
-  document.getElementById('csv_file').addEventListener('change', function(event) {
-    // อ่านไฟล์ CSV
-    const file = event.target.files[0];
-    const reader = new FileReader();
-
-    reader.onload = function(e) {
-      // แสดงข้อมูล CSV ในหน้าเว็บ
-      const csvData = e.target.result;
-      const displayElement = document.getElementById('csv_data_display');
-      displayElement.innerText = csvData;
-
-      
-    };
-
-    reader.readAsText(file); // อ่านไฟล์เป็นข้อความ
-  });*/
-
-}
 ///จัดการทั่วไป
 </script>
 
-
+<script src="{% static "Func_Create_form.js"%}"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="{% static "show_pop.js"%}"></script>
 

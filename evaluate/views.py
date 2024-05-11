@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http.response import HttpResponse
-from django.contrib.auth.decorators import login_required
-from formsite.models import TemplateData, AssessmentItem, Teamplates
+from django.contrib.auth.decorators import login_required, user_passes_test
+from formsite.models import TemplateData, AssessmentItem, Teamplates, Course
 from formsite.models import Form as form_model
 from .forms import PLOsForm, Assessment_Form, ClosForm, CSVUploadForm, PLOstest
 from django.contrib.auth.models import User, Group
@@ -11,6 +11,19 @@ from rest_framework.response import Response
 import pandas as pd
 import time
 # Create your views here.
+
+def user_is_teacher(user):
+    return user.groups.filter(name='อาจารย์').exists() or user.is_superuser
+
+def teacher_required(view_func):
+    decorated_view_func = user_passes_test(user_is_teacher)
+    
+    def wrapper(request, *args, **kwargs):
+        if not user_is_teacher(request.user):
+            return HttpResponse("TEACHER ONLY!")
+        return view_func(request, *args, **kwargs)
+    
+    return wrapper
 
 @login_required(login_url="sign_in")   
 def eva_home(request):
@@ -34,7 +47,8 @@ def create_plo(request):
     return render(request, 'evaluate/create_plo.html', context)
 
 
-@login_required(login_url="sign_in")
+#@login_required(login_url="sign_in")
+@teacher_required
 def create_form(request):
     Active_Template = Teamplates.objects.get(is_active=True)
     if request.method == 'POST':
@@ -66,12 +80,12 @@ def create_form(request):
                         for index in range(len(stu_num_list)):
                             print(index)
                             name = stu_name_list[index]
-                            password = stu_num_list[index]  # ใช้คอลัมน์ที่ 0 เป็นรหัสผ่าน
+                            password = stu_num_list[index]  
                             email = str(stu_num_list[index]) + '@payap.ac.th'
                             if not User.objects.filter(username=name).exists():
                                 user = User.objects.create_user(username=name, email=email, password=str(password))
                                 group = Group.objects.get(name='นักศึกษา')
-                                user.groups.add(group)  # เพิ่มเข้ากลุ่มที่ 2
+                                user.groups.add(group)  
                                 new_in.users.add(user)
                             else:
                                 user_instance = User.objects.get(username=name)
@@ -82,7 +96,7 @@ def create_form(request):
                 if 'main_field0' in request.POST:  
                     for i in range(le + 1):
                         name_main = 'main_field' + str(i)
-                        main_fields = request.POST.get(name_main, '')  # Use empty string if no value is found
+                        main_fields = request.POST.get(name_main, '') 
                         #print('main_fields =', name_main)
                         main_field = AssessmentItem.objects.create(text=main_fields, form=create_form)
                         
@@ -106,16 +120,25 @@ def create_form(request):
         return HttpResponse("Data saved successfully!")
              
     else:
-        print(Active_Template.id)
-        
         template_data = list(Active_Template.templatedata_set.all())
         for form in template_data:
             print(form)
-                    
-        new_form = Assessment_Form()
-        user_now = request.user.username
-
-        return render(request, 'evaluate/create_form.html', {'new_form': new_form, 'template_data': template_data, 'user_now':user_now})
+            
+        #courses = Course.objects.filter(teamplates=Active_Template)
+        new_form = Assessment_Form(custom_param=Active_Template)
+      
+        #new_form.set_courses_choices(courses)
+  
+        return render(request, 'evaluate/create_form.html', {'new_form': new_form, 'template_data': template_data})
+    
+    ''''
+    form = Form.objects.get(id=form_id)
+    items = AssessmentItem.objects.filter(form=form)  ทดสอบคิวรี่
+    for item in items:
+        responses = AssessmentResponse.objects.filter(assessment_item=item)
+        print(f"คำถาม: {item.text}")
+        for response in responses:
+            print(f"ตอบโดย: {response.respondent.username}, คำตอบ: {response.response}, ความเห็น: {response.response_comment}")'''
 
     
 @login_required(login_url="sign_in")  
