@@ -1,11 +1,48 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http.response import HttpResponse
 from django.contrib.auth import authenticate, login, logout
 from member.forms import RegisterForm
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
+from formsite.models import TemplateData, AssessmentItem, Teamplates, UserProfile, AuthorizedUser
+import re
 # Create your views here.
-def member(request):
-    return HttpResponse("คน")
+def clean_string(value):
+    return re.sub(r'\s+', '', value)
+
+def manage_member(request):
+    user_profile = get_object_or_404(UserProfile, user=request.user) #คิวรี่แอดมินที่เข้าหน้านั้นตอนนั้นมาหาสาขา
+    group = Group.objects.get(name="อาจารย์")
+    users_in_department = UserProfile.objects.filter(department__name=user_profile.department, user__groups=group) #ค้นหาอาจารย์ที่อยู่ในสาขานั้นๆ กับแอดมิน
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        user_id = request.POST.get('user_id')
+
+        if action == 'edit':
+            # ดึง user profile
+            user_profile = get_object_or_404(UserProfile, user__id=user_id)
+            user = user_profile.user
+
+            # ใช้ฟังก์ชัน clean_string เพื่อ clean ข้อมูล
+            user.username = clean_string(request.POST.get('username', ''))
+            user.first_name = clean_string(request.POST.get('first_name', ''))
+            user.last_name = clean_string(request.POST.get('last_name', ''))
+            user.email = clean_string(request.POST.get('email', ''))
+            user.save()
+
+            user_profile.prefix = clean_string(request.POST.get('prefix', ''))
+            user_profile.save()
+
+            return redirect('/manage_member')
+
+
+        elif action == 'delete':
+            user = get_object_or_404(User, id=user_id)
+            user.delete()
+            return redirect('/manage_member')
+        
+    
+    return render(request, 'member/manage_member.html', {'user_profile': user_profile, 'users_in_department':users_in_department})
 
 def sign_in(request):
     if request.method == "POST":

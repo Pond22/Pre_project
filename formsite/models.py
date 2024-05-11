@@ -23,6 +23,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     department = models.ForeignKey(Departments, null=True, blank=True, on_delete=models.CASCADE)
     line_token = models.CharField(max_length=30, null=True, blank=True)
+    prefix = models.CharField(max_length=10, blank=True, verbose_name='คำนำหน้าชื่อ')
 
     def __str__(self):
         return self.user.username
