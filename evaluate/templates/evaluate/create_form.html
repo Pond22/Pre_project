@@ -187,19 +187,22 @@
                   {% for item in template_data %}
                       {% if not item.parent %}
                           <div class="template_main_item">
-                              <input type="checkbox" id="item_{{ item.id }}" name="template_choice" value="{{ item.id }}" onchange="checkboxHandle('item_{{ item.id }}', '{{ item.id }}', '{{ item.text }}', event, 'main')">
+                              <input type="checkbox" id="item_{{ item.id }}" name="template_choice" value="{{ item.id }}"
+                                     {% comment %} onchange="checkboxHandle('item_{{ item.id }}', '{{ item.id }}', '{{ item.text }}', event, 'main')" {% endcomment %}
+                                    data-is-sub="false" >
                               <label for="item_{{ item.id }}">&nbsp;&nbsp;{{ forloop.counter }} : {{ item.text }}</label>
                           </div>
-                  
                           {% for sub in item.sub_items.all %}
-                              <!-- โค้ดสำหรับ sub-items -->
                               <div class="template_sub_item">
-                                  <input type="checkbox" id="sub_{{ sub.id }}" name="template_choice" value="{{ sub.id }}" onchange="checkboxHandle('sub_{{ sub.id  }}', '{{ sub.id }}', '{{ sub.text }}', event, 'sub')">
+                                  <input type="checkbox" id="sub_{{ sub.id }}" name="template_choice" value="{{ sub.id }}"
+                                         {% comment %} onchange="checkboxHandle('sub_{{ sub.id  }}', '{{ sub.id }}', '{{ sub.text }}', event, 'sub')" {% endcomment %}
+                                        data-is-sub="true" data-parent-id="{{ item.id }}" >
                                   <label for="sub_{{ sub.id }}">: {{ sub.text }}</label>
                               </div>
                           {% endfor %}
                       {% endif %}
                   {% endfor %}
+
                 </div>
               </div>
               <div id="template_details" style="display: none">
@@ -253,9 +256,10 @@
             <div class="p-1 text-lg">
               <h1>หัวข้อการประเมิน PLO</h1>
             </div>
-            <div id="Plo_div" class="Plo_div">
-              <button type="button" onclick="openPopup()"
+            <button type="button" onclick="openPopup()"
                 class="bg-blue-500 text-white rounded-lg w-auto p-1 flex justify-center hover:bg-blue-600 mt-1 ml-2 mb-2">เลือกแม่แบบ</button>
+            <div id="Plo_div" class="Plo_div">
+      
               <div class="Main_item"></div>
               <div class="subFields"></div>
             </div>

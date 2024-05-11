@@ -334,49 +334,54 @@ function toggleSections() {
 }
 
 function confirmSelection() {
-    var checkedMain = document.querySelector('input[name="template_choice"]:checked');
-    var checkedSub = document.querySelectorAll('input[name="template_choice"]:checked');
-  
-    if (checkedMain || checkedSub.length > 0) {
-        // การตรวจสอบว่ามีข้อมูลที่ถูกเลือกหรือไม่
-        // จะทำการดำเนินการต่อไปตามที่คุณต้องการ เช่น ส่งข้อมูลไปยังฝั่ง backend หรือปิด popup
+    var checkedBoxes = document.querySelectorAll('input[name="template_choice"]:checked');
+
+    if (checkedBoxes.length > 0) {
         console.log("การเลือกข้อมูลเสร็จสิ้น");
-        
-        // เริ่มสร้างข้อมูลที่ผู้ใช้เลือก
-        var selectedData = [];
-        
-        // เก็บข้อมูลจาก checkbox ที่เลือกในหมวดหมู่หลัก
-        if (checkedMain) {
-            selectedData.push({
-                id: checkedMain.value,
-                text: checkedMain.nextSibling.textContent.trim()
-            });
-        }
-        
-        // เก็บข้อมูลจาก checkbox ที่เลือกในหมวดหมู่ย่อย
-        checkedSub.forEach(function(checkbox) {
-            selectedData.push({
+
+        var Plo_div = document.getElementById("Plo_div");
+        Plo_div.innerHTML = ""; // Clear 
+
+        var parents = {};
+
+        checkedBoxes.forEach(function(checkbox) {
+            var item = {
                 id: checkbox.value,
-                text: checkbox.nextSibling.textContent.trim()
-            });
-        });
-        
-        // สร้าง input ฟิลด์สำหรับแต่ละข้อมูลที่ผู้ใช้เลือก
-        selectedData.forEach(function(item) {
+                text: checkbox.nextElementSibling.textContent.trim(), 
+                isSub: checkbox.getAttribute('data-is-sub') === 'true',
+                parentId: checkbox.getAttribute('data-parent-id')
+            };
+
             var inputField = document.createElement('input');
             inputField.type = 'text';
-            inputField.name = 'selected_data[]'; // ตั้งชื่อฟิลด์ตามที่คุณต้องการ
-            inputField.value = item.text; // กำหนดค่าข้อมูลที่เลือกเป็นค่าของฟิลด์
-            
-            // เพิ่ม input ฟิลด์ลงใน div id="test_select"
-            var Plo_div = document.getElementById("Plo_div");
-            Plo_div.querySelector(".test1").appendChild(inputField);
+            inputField.name = 'selected_data[]';
+            inputField.value = item.text;
+            console.log("Creating input for:", item.text);
+
+            if (item.isSub) {
+                if (!parents[item.parentId]) {
+                    var parentDiv = document.createElement('div');
+                    parentDiv.id = 'div_' + item.parentId;
+                    Plo_div.appendChild(parentDiv);
+                    parents[item.parentId] = parentDiv;
+                }
+
+                parents[item.parentId].appendChild(inputField);
+            } else {
+                if (!parents[item.id]) {
+                    var mainDiv = document.createElement('div');
+                    mainDiv.id = 'div_' + item.id;
+                    mainDiv.appendChild(inputField);
+                    Plo_div.appendChild(mainDiv);
+                    parents[item.id] = mainDiv;
+                } else {
+                    parents[item.id].appendChild(inputField);
+                }
+            }
         });
-        
-        // ปิด popup หลังจากแสดงข้อมูลเสร็จสิ้น
+
         closePopup();
     } else {
-        // ถ้าไม่มีข้อมูลที่ถูกเลือก
         alert("โปรดเลือกข้อมูล");
     }
 }
