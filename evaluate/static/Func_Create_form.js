@@ -340,7 +340,7 @@ function confirmSelection() {
         console.log("การเลือกข้อมูลเสร็จสิ้น");
 
         var Plo_div = document.getElementById("Plo_div");
-        Plo_div.innerHTML = ""; // Clear 
+        Plo_div.innerHTML = ""; // Clear
         var count = 0;
         var parents = {}; // Object to store references to parent divs
         var parentCounts = {}; // Object to store the counts used for parent divs
@@ -353,37 +353,46 @@ function confirmSelection() {
                 parentId: checkbox.getAttribute('data-parent-id')
             };
 
+            var inputField = document.createElement('input');
+            inputField.type = 'text';
+            inputField.value = item.text;
+
+            // Create hidden input for storing the item.id
+            var hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.value = item.id;
+
             if (!item.isSub) {
                 // Main item
-                var inputField = document.createElement('input');
-                inputField.type = 'text';
-                inputField.name = 'plo_main_' + count; // Naming based on count, with 'plo_main_' prefix
-                inputField.value = item.text;
+                inputField.name = 'plo_main_' + count;
+                hiddenInput.name = 'id_main_' + count;
 
                 if (!parents[item.id]) {
                     var mainDiv = document.createElement('div');
                     mainDiv.id = 'div_' + count;
                     mainDiv.appendChild(inputField);
+                    mainDiv.appendChild(hiddenInput); // Add hidden input to the same div
                     Plo_div.appendChild(mainDiv);
                     parents[item.id] = mainDiv;
                     parentCounts[item.id] = count; // Store count for sub-items to use
-                    count++; 
+                    count++;
                 } else {
                     parents[item.id].appendChild(inputField);
+                    parents[item.id].appendChild(hiddenInput); // Add hidden input to the existing div
                 }
             } else {
                 // Sub-item
+                inputField.name = 'plo_sub_' + parentCounts[item.parentId];
+                hiddenInput.name = 'id_sub_' + parentCounts[item.parentId];
+
                 if (!parents[item.parentId]) {
                     var parentDiv = document.createElement('div');
-                    parentDiv.id = 'div_' + parentCounts[item.parentId]; // Ensure sub-items use the same div ID
+                    parentDiv.id = 'div_' + parentCounts[item.parentId];
                     Plo_div.appendChild(parentDiv);
                     parents[item.parentId] = parentDiv;
                 }
-                var subInputField = document.createElement('input');
-                subInputField.type = 'text';
-                subInputField.name = 'plo_sub_' + parentCounts[item.parentId]; // Sub-item uses 'plo_sub_' prefix with the parent's count
-                subInputField.value = item.text;
-                parents[item.parentId].appendChild(subInputField);
+                parents[item.parentId].appendChild(inputField);
+                parents[item.parentId].appendChild(hiddenInput); // Add hidden input to the parent div
             }
         });
 

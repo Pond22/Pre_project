@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http.response import HttpResponse
 from django.contrib.auth.decorators import login_required, user_passes_test
-from formsite.models import TemplateData, AssessmentItem, Teamplates, Course
+from formsite.models import TemplateData, AssessmentItem, Teamplates, UserProfile, AuthorizedUser
 from formsite.models import Form as form_model
 from .forms import PLOsForm, Assessment_Form, ClosForm, CSVUploadForm, PLOstest
 from django.contrib.auth.models import User, Group
@@ -50,7 +50,8 @@ def create_plo(request):
 #@login_required(login_url="sign_in")
 @teacher_required
 def create_form(request):
-    Active_Template = Teamplates.objects.get(is_active=True)
+    user_profile = get_object_or_404(UserProfile, user=request.user)
+    Active_Template = Teamplates.objects.get(is_active=True, department=user_profile.department)
     if request.method == 'POST':
         stu_name_list = request.POST.getlist('stu_name_list[]')
         stu_num_list = request.POST.getlist('stu_num_list[]')
@@ -86,10 +87,10 @@ def create_form(request):
                                 user = User.objects.create_user(username=name, email=email, password=str(password))
                                 group = Group.objects.get(name='นักศึกษา')
                                 user.groups.add(group)  
-                                new_in.users.add(user)
+                                AuthorizedUser.objects.create(form=new_in, users=user)
                             else:
                                 user_instance = User.objects.get(username=name)
-                                new_in.users.add(user_instance)  
+                                AuthorizedUser.objects.create(form=new_in, users=user_instance)
                 end_time = time.time()
                 print("เวลาในการสร้างรายชื่อ = ",end_time - start_time)            
                 create_form = get_object_or_404(form_model, id=new_in.id)
@@ -108,15 +109,30 @@ def create_form(request):
                         for sub_field_text in sub_fields:
                             sub_field = AssessmentItem.objects.create(text=sub_field_text, parent=main_field, form=create_form)
                         
-                    if 'main_item_form_template_id' in request.POST:
-                        main_template_fields = request.POST.get('main_item_form_template_id')
-                        template_data = TemplateData.objects.get(id=main_template_fields)
-                        template_main_field = AssessmentItem.objects.create(template_select=template_data, form=create_form)
-                            
-                        sub_template_fields = request.POST.getlist('sub_item_form_template_id')
-                        for sub_template_field_id in sub_template_fields:
-                            sub_template_data = TemplateData.objects.get(id=sub_template_field_id)
-                            AssessmentItem.objects.create(template_select=sub_template_data, parent=template_main_field, form=create_form)
+                    count = 0 #ทำขั้นตอนบันทึก PLOs
+                    while True:
+                        main_field_name = f'id_main_{count}'
+                        sub_field_name = f'id_sub_{count}'
+
+
+                        if main_field_name in request.POST:
+                            main_id = request.POST[main_field_name]
+                            main_template_data = TemplateData.objects.get(id=main_id)
+
+                            template_main_field = AssessmentItem.objects.create(
+                                template_select=main_template_data, form=create_form
+                            )
+
+                            sub_ids = request.POST.getlist(sub_field_name) 
+                            for sub_id in sub_ids:
+                                sub_template_data = TemplateData.objects.get(id=sub_id)
+                                AssessmentItem.objects.create(
+                                    template_select=sub_template_data, parent=template_main_field, form=create_form
+                                )
+                        else:
+                            break
+
+                        count += 1
         return HttpResponse("Data saved successfully!")
              
     else:

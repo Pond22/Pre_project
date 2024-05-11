@@ -114,10 +114,10 @@ class Form(models.Model):
  
 class AuthorizedUser(models.Model):
     form = models.ForeignKey(Form, on_delete=models.CASCADE)  
-    users = models.ManyToManyField(User, related_name='forms')
+    users = models.ForeignKey(User, on_delete=models.CASCADE)
     is_teacher = models.BooleanField(default=False)
     def __str__(self):
-        return str(self.form)
+        return f"ฟอร์มที่ = {self.form.id} Username = {self.users.username}"
     
 class AssessmentItem(models.Model):    
     text = models.TextField()
@@ -130,9 +130,9 @@ class AssessmentItem(models.Model):
     
     def __str__(self):
         if self.template_select:
-            return f"มากจากแม่แบบ ID = {self.id} ข้อมูล = {self.template_select.text}"    #self.template_select.text
+            return f"มากจากแม่แบบ ID = {self.template_select.id} ข้อมูล = {self.template_select.text}"    #self.template_select.text
         else:
-            return str(self.id)
+            return f"มากจากฟอร์ม = {self.form}"
         
 class AssessmentResponse(models.Model):
     respondent = models.ForeignKey(User, on_delete=models.CASCADE)
