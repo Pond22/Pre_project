@@ -1,0 +1,101 @@
+<style>
+  .container {
+    width: 80%;
+    margin: auto;
+    padding: 20px;
+    background-color: #f4f4f4;
+    border: 1px solid #ccc;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  }
+
+  input[type="text"],
+  input[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    box-sizing: border-box; /* Makes sure padding does not affect width */
+  }
+</style>
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dynamic Forms Example</title>
+    {% comment %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <!-- Your CSS file -->
+    {% endcomment %}
+  </head>
+
+  <body>
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="container" id="PLO">
+            วัตถุประสงค์ของรายวิชา (0)
+            {% for item in template %}
+                {% for clo_data in item.CLO.all %}
+                {% if not clo_data.parent %}
+                    <div class ='container'>
+                        <!-- แม่ วัตถุประสงค์ของรายวิชา (0)-->
+                        <input type="text" name="parent_{{ clo_data.id }}" value="{{ clo_data.text }}" />
+                        {% for child in clo_data.sub_items.all %}
+                            <div style="margin-left: 20px;">
+                                <!-- ลูกวัตถุประสงค์ของรายวิชา (0) -->
+                                <input type="text" name="child_{{ child.id }}" value="{{ child.text }}" />
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+            PLOs 
+            {% comment %} {% for item in template %} {% endcomment %}
+                {% for template_data in item.TemplateData.all %}
+                    {% if not template_data.parent %}
+                        <div class ='container'>
+                            <!-- แม่-->
+                            <input type="text" name="parent_{{ template_data.id }}" value="{{ template_data.text }}" />
+                            {% for child in template_data.sub_items.all %}
+                                <div style="margin-left: 20px;">
+                                    <!-- ลูก -->
+                                    <input type="text" name="child_{{ child.id }}" value="{{ child.text }}" />
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+        </div>
+        
+        <input type="submit" value="Submit" />
+    </form>
+</body>
+
+    {% comment %}
+    <script src="{% static 'js/script.js' %}"></script>
+    <!-- Your JS file -->
+    {% endcomment %}
+  </body>
+</html>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const addChildButton = document.getElementById("addChildField");
+    const childFieldContainer = document.getElementById(
+      "child-field-container"
+    );
+/*
+    addChildButton.addEventListener("click", function () {
+      const newChildField = document.createElement("input");
+      newChildField.type = "text";
+      newChildField.name =
+        "child_field_" + (childFieldContainer.children.length + 1);
+      newChildField.placeholder =
+        "Child Field " + (childFieldContainer.children.length + 1);
+      childFieldContainer.appendChild(newChildField);
+    });
+  });*/
+</script>

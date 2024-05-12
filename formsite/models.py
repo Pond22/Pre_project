@@ -59,6 +59,28 @@ class Teamplates(models.Model):
                 self.is_active = False
         
         return super().save(*args, **kwargs)
+    
+class TemplateData(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    text = models.TextField()
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='sub_items')
+    create = models.DateTimeField(auto_now_add=True)
+    update = models.DateTimeField(auto_now=True)
+    form = models.ForeignKey(Teamplates, on_delete=models.CASCADE, related_name='TemplateData')
+    
+    def __str__(self):
+        return f"{self.text} ({self.id})"
+    
+class CLO(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    text = models.TextField()
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='sub_items')
+    create = models.DateTimeField(auto_now_add=True)
+    update = models.DateTimeField(auto_now=True)
+    form = models.ForeignKey(Teamplates, on_delete=models.CASCADE, related_name='CLO')
+    
+    def __str__(self):
+        return f"{self.text} ({self.id})"
 
 class Course(models.Model):
     teamplates = models.ForeignKey(Teamplates, on_delete=models.CASCADE)
@@ -66,22 +88,6 @@ class Course(models.Model):
     section = models.CharField(max_length=2)
     class_code = models.CharField(max_length=7)
     
-
-class TemplateData(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    TYPE_CHOICES = (
-        ('PLO', 'Program Learning Outcome'),
-        ('O', 'Other'),
-    )
-    type_data = models.CharField(max_length=3, choices=TYPE_CHOICES, default='O')
-    text = models.TextField()
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='sub_items')
-    create = models.DateTimeField(auto_now_add=True)
-    update = models.DateTimeField(auto_now=True)
-    form = models.ForeignKey(Teamplates, on_delete=models.CASCADE)
-    
-    def __str__(self):
-        return f"{self.text} ({self.id})"
 
 class Form(models.Model):
     semester_choices =(

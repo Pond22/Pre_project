@@ -13,7 +13,8 @@ urlpatterns = [
     path('index', views.index, name='index'),
     path('test', views.view_form, name='view_form'),
     path('create_plo', views.create_plo, name='create_plo'),
-    path('manage_plos', views.manage_plos, name='manage_plos'),
+    path('manage_template', views.manage_template, name='manage_template'),
+    path('edit_template/<int:form_id>/', edit_template, name='edit_template'),
     #path('', include(router.urls)),
     #path('api-csv/', include('rest_framework.urls', namespace='rest_framework'))
 ]

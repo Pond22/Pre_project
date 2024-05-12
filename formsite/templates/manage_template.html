@@ -1,0 +1,99 @@
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .main-container {
+        background: white;
+        width: 80%;
+        margin: 20px auto;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .form-list {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .form-card {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin: 10px;
+        width: 95%;
+        background: #e9e9e9;
+    }
+    
+    .form-card label {
+        display: block;
+    }
+    
+    .form-card input[type="checkbox"] {
+        margin-right: 10px;
+    }
+    
+    button {
+        margin-top: 10px;
+        padding: 5px 10px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+    
+    button:hover {
+        opacity: 0.8;
+    }
+    
+</style>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payap University</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="main-container">
+        <h1>จัดการหัวข้อประเมินการสอน (PLO) สาขา{{user_profile.department}}</h1>
+        <div class="form-list">
+            {% for data in form%}
+            <div class="form-card">
+                <label>
+                    <input type="checkbox">
+                    Create by: {{data.created}}
+                    Form ID: {{data.id}}
+                            {{data.semester}}/{{data.year_number}}
+                    {% comment %} {% for clo_data in data.CLO.all %}
+                        CLO {{ clo_data.text }}
+                    {% endfor %} {% endcomment %}
+                    <a href="{% url 'edit_template' form_id=data.id %}">
+                        <button onclick="viewForm({{data.id}})">จัดการแบบฟอร์ม {{data.semester}}/{{data.year_number}} </button>
+                    </a>
+                </label>
+            </div>
+            {% endfor %}
+            <a href="create_plo">
+                <button>Create Template!</button>
+            </a>
+        </div>
+    </div>
+</body>
+</html>
+
+<script>
+    function viewForm(formId) {
+        alert("Viewing details for Form ID: " + formId);
+    }
+    
+    {% comment %} document.getElementById('create-form').addEventListener('click', function() {
+        alert('Create new form functionality goes here.');
+    }); {% endcomment %}
+    
+</script>

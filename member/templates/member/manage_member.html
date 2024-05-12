@@ -104,7 +104,6 @@
             <table>
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>รหัสอาจารย์</th>
                         <th>คำนำหน้า</th>
                         <th>ชื่อ</th>
@@ -116,7 +115,6 @@
                 <tbody>
                     {% for user in users_in_department %}
                     <tr>
-                        <td>{{ user.user.id }}</td>
                         <td>{{ user.user.username }}</td>
                         <td>{{ user.prefix }}</td>
                         <td>{{ user.user.first_name }}</td>

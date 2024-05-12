@@ -124,6 +124,8 @@ class CSV_API(viewsets.ViewSet):
 '''
 
 def create_plo(request):
+    user_profile = get_object_or_404(UserProfile, user=request.user) #คิวรี่แอดมินที่เข้าหน้านั้นตอนนั้นมาหาสาขา
+    
     if request.method == "POST":
         school = request.POST.get('school_year')
         year = request.POST.get('year_number')
@@ -133,8 +135,7 @@ def create_plo(request):
         if form.is_valid():
             plo_form_instance = form.save(commit=False)
             plo_form_instance.created_by = request.user
-            plo_form_instance.year_number = year
-            plo_form_instance.semester = school
+            plo_form_instance.department = user_profile.department
             plo_form_instance.save()
         if le is None:
             le = 0
@@ -142,32 +143,68 @@ def create_plo(request):
             le = int(le)
         
         print(le)
-        print('ไอดี = ',id)
+        print('ไอดี = ',plo_form_instance.id)
         print('year = '+year)
-        
-        for i in range(0, le):
-            name_main = 'main_field' + str(i)
-            create_form = get_object_or_404(Teamplates, id=plo_form_instance.id) #หา id ของ PLO_FORM
-            main_fields = request.POST.get(name_main)  # รับข้อมูลจากฟิลด์แม่
-            print('main_fields = '+str(main_fields))
-            main_field = TemplateData.objects.create(text=main_fields, form=create_form)
-            print('ไอดี = ',id)
-            name_sub = 'sub_field_' + str(name_main)
-            sub_fields = request.POST.getlist(name_sub)
-            print(sub_fields)
-            print('name_sub = '+str(name_sub))
-            #TemplateData.objects.create(text=sub_fields, parent=main_field)
-       
-            # วนลูปผ่านฟิลด์ลูกและสร้าง PLO ลูก
-            for sub_field_text in sub_fields:
-                sub_field = TemplateData.objects.create(text=sub_field_text, parent=main_field,form=create_form)
+        create_form = get_object_or_404(Teamplates, id=plo_form_instance.id)
+        if 'main_field0' in request.POST:  
+            for i in range(le + 1):
+                name_main = 'main_field' + str(i)
+                print(name_main,i)
+                if (i ==0): # ถ้าเป็น 0 บันทุก O
+                    main_fields = request.POST.get(name_main, '') 
+                    main_field = CLO.objects.create(text=main_fields, form=create_form)
+                        
+                    name_sub = 'sub_field_' + str(name_main)
+                    sub_fields = request.POST.getlist(name_sub)
+
+                    for sub_field_text in sub_fields:
+                        CLO.objects.create(text=sub_field_text, parent=main_field, form=create_form)
+                       
+                else:        
+                 #  นอกเหนือจาก 0 บันทีกลง PLO   
+                    main_fields = request.POST.get(name_main, '') 
+                    main_field = TemplateData.objects.create(text=main_fields, form=create_form)
+                            
+                    name_sub = 'sub_field_' + str(name_main)
+                    sub_fields = request.POST.getlist(name_sub)
+
+                    for sub_field_text in sub_fields:
+                        TemplateData.objects.create(text=sub_field_text, parent=main_field, form=create_form)
 
         return HttpResponse("Data saved successfully!")
+    else:
+        form = Plo_form
+        #print(user_profile.department)
+        return render(request, 'create_plos.html', {'form': form, 'user_profile':user_profile})
+    
+def manage_template(request):
+    user_profile = get_object_or_404(UserProfile, user=request.user)
+    template = Teamplates.objects.filter(department=user_profile.department)
+    
+    if request.method == "POST":
+        pass
+    else:
+        template = Teamplates.objects.filter(department=user_profile.department)
+        for data in template:
+            for template_data in data.TemplateData.all():
+                print(template_data.text)
+            # แสดงข้อมูลจากโมเดล CLO ที่เชื่อมโยงกับ Teamplates นี้
+            """ for clo in data.CLO.all():
+                print(clo.text) """
+    return render(request, 'manage_template.html', {'form': template, 'user_profile': user_profile})
 
-    return render(request, 'create_plos.html')
+def edit_template(request, form_id):
+
+    template = Teamplates.objects.filter(id=form_id)
+    for data in template:
+        for template_data in data.TemplateData.all():
+            print(template_data.text)
+
+    return render(request, 'edit_template.html', {'template': template})
 
 
-def manage_plos(request):
+'''
+def edit_template(request):
     if request.method == 'POST':
         #แก้ไข
         if 'main_text' in request.POST and 'plo_id' in request.POST:
@@ -199,9 +236,9 @@ def manage_plos(request):
     elif request.method == 'GET':
         year_number = request.GET.get('year_number')
         school_year = request.GET.get('school_year')
-        plos_form = TemplateData.objects.filter(created_by=request.user)
+        plos_form = Teamplates.objects.filter(created_by=request.user)
         return render(request, 'manage_plos.html', {'plos': plos_form})
     else:
         plos_form = TemplateData.objects.filter(parent__isnull=True)
         return render(request, 'manage_plos.html', {'plos': plos_form})
-
+'''
