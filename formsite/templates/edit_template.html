@@ -81,11 +81,13 @@
 
             PLOs
             {% for template_data in item.TemplateData.all %}
+           
             {% if not template_data.parent %}
                 <div class="container" id="parent-container_{{ template_data.id }}">
+                  <label>{{ forloop.counter }}</label>
                     <!-- แม่ -->
-              
-                      <input type="text" id="parent_{{ template_data.id }}" name="parent_{{ template_data.id }}" value="{{ template_data.text }}" readonly  data-type="TemplateData"/>
+                    {% comment %} <label>{{ forloop.counter }}</label> {% endcomment %}
+                      <input type="text" id="parent_{{ template_data.id }}" name="parent_{{ template_data.id }}" value="{{ template_data.text }}" readonly data-type="TemplateData" placeholder="กรุณาใส่หัวข้อประเด็นหลัก"/>
                       <button type="button" class="button_parent_{{ template_data.id }}" onclick="editField('parent_{{ template_data.id }}')">Edit</button>
                       <button type="button" class="button_parent_{{ template_data.id }}" onclick="deleteField('parent_{{ template_data.id }}', 'button_parent_{{ template_data.id }}')">ลบ</button>
                
@@ -94,7 +96,8 @@
                     <div id="child-container_{{ template_data.id }}" style="margin-left: 20px;">
                         {% for child in template_data.sub_items.all %}
                             <div>
-                                <input type="text" id="clochild_{{ child.id }}" name="child_{{ child.id }}" value="{{ child.text }}" readonly  data-type="TemplateData"/>
+                              <label>{{ forloop.parentloop.counter }}.{{ forloop.counter }}</label>
+                                <input type="text" id="clochild_{{ child.id }}" name="child_{{ child.id }}" value="{{ child.text }}" readonly  data-type="TemplateData" placeholder="กรุณาใส่หัวข้อประเด็นรอง"/>
                                 <button type="button" class="button_clochild_{{ child.id }}" onclick="editField('clochild_{{ child.id }}')">Edit</button>
                                 <button type="button" class="button_clochild_{{ child.id }}" onclick="deleteField('clochild_{{ child.id }}', 'button_clochild_{{ child.id }}')">ลบ</button>
                             </div>
@@ -229,12 +232,13 @@ function addField(parentId, dataType, tem_id) {
   const div = document.createElement('div');
   //div.style.marginLeft = parentId ? '20px' : '';
   div.innerHTML = `
-      <input type="text" id="child_parentID_${parentId}" name="child_parentID_${parentId}" value=""  data-type="${dataType}" required>
+      <input type="text" id="child_parentID_${parentId}" name="child_parentID_${parentId}" value=""  data-type="${dataType}" required> 
       <button type="button" onclick="editField('new_${parentId}')">Edit</button>
   `;
 
   container.appendChild(div);
   const input = div.querySelector('input');
+  input.setAttribute('placeholder',"กรุณาใส่หัวข้อประเด็นรอง")
   input.onblur = function() {
     input.setAttribute('readonly', true);
     console.log(input.id.split('_')[2])
