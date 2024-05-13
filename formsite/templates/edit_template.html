@@ -15,6 +15,18 @@
     margin-top: 5px;
     box-sizing: border-box; /* Makes sure padding does not affect width */
   }
+
+  .head {
+    display: flex;
+    justify-content: center; /* จัดให้ข้อความอยู่ตรงกลาง */
+    margin-top: 20px; /* กำหนดระยะห่างจากส่วนบน */
+}
+
+.form_name {
+    font-size: 24px; /* ขนาดข้อความ */
+    color: #333; /* สีข้อความ */
+    font-weight: bold; /* หนาข้อความ */
+}
 </style>
 
 <!DOCTYPE html>
@@ -22,7 +34,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dynamic Forms Example</title>
+    <title>จัดการข้อมูลแม่แบบ</title>
     {% comment %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}" />
     <!-- Your CSS file -->
@@ -33,41 +45,59 @@
     <form method="post">
         {% csrf_token %}
 
+        <div class="head"> 
+          <div class="form_name" name="form_name"> 
+            {% for data in template%}
+              {{data.semester}}/{{data.year_number}} 
+            {%endfor %}
+           </div>
+        </div>
+  
         <div class="container" id="PLO">
-            วัตถุประสงค์ของรายวิชา (0)
+            วัตถุประสงค์ของรายวิชา (0) 
             {% for item in template %}
                 {% for clo_data in item.CLO.all %}
                 {% if not clo_data.parent %}
-                    <div class ='container'>
+                    <div class ='container' id="parent-container_{{ clo_data.id }}">
                         <!-- แม่ วัตถุประสงค์ของรายวิชา (0)-->
-                        <input type="text" name="parent_{{ clo_data.id }}" value="{{ clo_data.text }}" />
+                        <input type="text" id="parent_{{ clo_data.id }}" name="parent_{{ clo_data.id }}" value="{{ clo_data.text }}" readonly data-type="CLO"/>
+                        <button type="button" onclick="editField('parent_{{ clo_data.id }}')">Edit</button>
                         {% for child in clo_data.sub_items.all %}
-                            <div style="margin-left: 20px;">
+
+                            <div id="child-container_{{ clo_data.id }}" style="margin-left: 20px;">
                                 <!-- ลูกวัตถุประสงค์ของรายวิชา (0) -->
-                                <input type="text" name="child_{{ child.id }}" value="{{ child.text }}" />
+                                <input type="text" id="child_{{ child.id }}" name="child_{{ child.id }}" value="{{ child.text }}" readonly data-type="CLO"/>
+                                <button type = "button" onclick="editField('child_{{ child.id }}')">Edit</button>
                             </div>
                         {% endfor %}
+                        {% comment %} <button type="button" onclick="addField('{{ clo_data.id }}', 'CLO', {{item.id}})">Add New Child Field</button> {% endcomment %}
                     </div>
+                    <button type="button" onclick="addField('{{ clo_data.id }}', 'CLO', {{item.id}})">Add New Child Field</button>
                 {% endif %}
             {% endfor %}
 
-            PLOs 
-            {% comment %} {% for item in template %} {% endcomment %}
-                {% for template_data in item.TemplateData.all %}
-                    {% if not template_data.parent %}
-                        <div class ='container'>
-                            <!-- แม่-->
-                            <input type="text" name="parent_{{ template_data.id }}" value="{{ template_data.text }}" />
-                            {% for child in template_data.sub_items.all %}
-                                <div style="margin-left: 20px;">
-                                    <!-- ลูก -->
-                                    <input type="text" name="child_{{ child.id }}" value="{{ child.text }}" />
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                {% endfor %}
-            {% endfor %}
+            PLOs
+            {% for template_data in item.TemplateData.all %}
+            {% if not template_data.parent %}
+                <div class="container" id="parent-container_{{ template_data.id }}">
+                    <!-- แม่ -->
+                    <input type="text" id="parent_{{ template_data.id }}" name="parent_{{ template_data.id }}" value="{{ template_data.text }}" readonly data-type="TemplateData"/>
+                    <button type="button" onclick="editField('parent_{{ template_data.id }}')">Edit</button>
+                    <!-- ลูก -->
+                    <div id="child-container_{{ template_data.id }}" style="margin-left: 20px;">
+                        {% for child in template_data.sub_items.all %}
+                            <div>
+                                <input type="text" id="child_{{ child.id }}" name="child_{{ child.id }}" value="{{ child.text }}" readonly data-type="TemplateData"/>
+                                <button type="button" onclick="editField('child_{{ child.id }}')">Edit</button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" onclick="addField('{{ template_data.id }}', 'TemplateData', {{item.id}})">Add New Child Field</button>
+                </div>
+            {% endif %}
+        {% endfor %}
+
+        {% endfor %}
         </div>
         
         <input type="submit" value="Submit" />
@@ -82,11 +112,89 @@
 </html>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const addChildButton = document.getElementById("addChildField");
-    const childFieldContainer = document.getElementById(
-      "child-field-container"
-    );
+  function editField(fieldId) {
+    var input = document.getElementById(fieldId);
+    input.removeAttribute('readonly');
+    input.focus();
+
+    input.onblur = function() {
+        var value = input.value;  
+        var dataType = input.getAttribute('data-type');
+        input.setAttribute('readonly', true);
+
+        // สร้าง XMLHttpRequest
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/update-template-data/', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken')); // รับ CSRF token
+
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                console.log('Response:', xhr.responseText);
+            } else {
+                console.error('Error:', xhr.statusText);
+            }
+        };
+
+        xhr.send('data_id=' + encodeURIComponent(fieldId.split('_')[1]) + '&text=' + encodeURIComponent(value) + '&type=' + encodeURIComponent(dataType));
+    };
+}//ลองแบบ XML
+
+//  cookie
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function addField(parentId, dataType, tem_id) {
+  // Check if parentId is provided, adjust the container accordingly
+  const containerId = parentId ? `child-container_${parentId}` : 'PLO';
+  const container = document.getElementById(containerId);
+  const newFieldId = new Date().getTime(); // Unique ID for new field
+
+  const div = document.createElement('div');
+  //div.style.marginLeft = parentId ? '20px' : '';
+  div.innerHTML = `
+      <input type="text" id="child_parentID_${parentId}" name="child_parentID_${parentId}" value=""  data-type="${dataType}">
+      <button type="button" onclick="editField('new_${newFieldId}')">Edit</button>
+  `;
+
+  container.appendChild(div);
+
+  const input = div.querySelector('input');
+  input.onblur = function() {
+    input.setAttribute('readonly', true);
+    console.log(input.id.split('_')[2])
+    saveFieldData(input.id, input.value, dataType, tem_id);
+  };
+}
+
+//แบบ fetch ธรรมดา
+function saveFieldData(fieldId, value, dataType, tem_id) {
+  fetch('/addnew_template_data/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'X-CSRFToken': getCookie('csrftoken') 
+    },
+    body: `data_id=${encodeURIComponent(fieldId)}&text=${encodeURIComponent(value)}&type=${encodeURIComponent(dataType)}&form_id=${encodeURIComponent(tem_id)}`
+  })
+  .then(response => response.json())
+  .then(data => console.log('Success:', data))
+  .catch(error => console.error('Error:', error));
+}
+
+
 /*
     addChildButton.addEventListener("click", function () {
       const newChildField = document.createElement("input");

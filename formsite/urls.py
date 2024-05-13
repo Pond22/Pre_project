@@ -15,6 +15,8 @@ urlpatterns = [
     path('create_plo', views.create_plo, name='create_plo'),
     path('manage_template', views.manage_template, name='manage_template'),
     path('edit_template/<int:form_id>/', edit_template, name='edit_template'),
+    path('update-template-data/', update_template_data, name='update-template-data'),
+    path('addnew_template_data/', addnew_template_data, name='addnew_template_data'),
     #path('', include(router.urls)),
     #path('api-csv/', include('rest_framework.urls', namespace='rest_framework'))
 ]

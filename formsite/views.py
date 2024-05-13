@@ -11,6 +11,7 @@ from rest_framework import routers, serializers, viewsets, status
 from rest_framework.response import Response
 from .serializers import CSVUploadForm as CSV_API
 from .models import TemplateData, Teamplates
+from django.http import JsonResponse
 # Create your views here.
 
 #def index(request):
@@ -196,11 +197,46 @@ def manage_template(request):
 def edit_template(request, form_id):
 
     template = Teamplates.objects.filter(id=form_id)
+    
     for data in template:
-        for template_data in data.TemplateData.all():
-            print(template_data.text)
-
+        print(data.id)
+    
     return render(request, 'edit_template.html', {'template': template})
+
+#อัพเดตข้อมูล PLO&O ใน Temlplate ที่มีอยู่ก่อน
+def update_template_data(request):
+    if request.method == 'POST':
+        data_id = request.POST.get('data_id')
+        text = request.POST.get('text')
+        data_type = request.POST.get('type')  
+
+        if data_type == 'TemplateData':
+            TemplateData.objects.filter(id=data_id).update(text=text)
+        elif data_type == 'CLO':
+            CLO.objects.filter(id=data_id).update(text=text)
+        return JsonResponse({'status': 'success', 'message': 'Data updated successfully'})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+#เพิ่มข้อมูล PLO&O ใน Temlplate ที่มีอยู่ก่อน
+def addnew_template_data(request):
+    if request.method == 'POST':
+        parent_id = request.POST.get('data_id').split('_')[2]  # สมมุติว่า data_id มาในรูปแบบ new_123456
+        text = request.POST.get('text')
+        data_type = request.POST.get('type')
+
+        tempalte_in = Teamplates.objects.get(id=request.POST.get('form_id'))
+        if data_type == 'TemplateData':
+            # สร้างหรืออัพเดต TemplateData ใหม่
+            TemplateData.objects.update_or_create(parent=TemplateData.objects.get(id=parent_id), text=text, form = tempalte_in)
+        elif data_type == 'CLO':
+            # สร้างหรืออัพเดต CLO ใหม่
+            CLO.objects.update_or_create(parent=CLO.objects.get(id=parent_id), text=text, form =tempalte_in)
+        return JsonResponse({'status': 'success', 'message': 'Data updated successfully'})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+
 
 
 '''
