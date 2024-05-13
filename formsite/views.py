@@ -230,18 +230,29 @@ def delete_update_template_data(request):
 #เพิ่มข้อมูล PLO&O ใน Temlplate ที่มีอยู่ก่อน
 def addnew_template_data(request):
     if request.method == 'POST':
-        parent_id = request.POST.get('data_id').split('_')[2]  # สมมุติว่า data_id มาในรูปแบบ new_123456
-        text = request.POST.get('text')
-        data_type = request.POST.get('type')
-
-        tempalte_in = Teamplates.objects.get(id=request.POST.get('form_id'))
-        if data_type == 'TemplateData':
-            # สร้างหรืออัพเดต TemplateData ใหม่
-            TemplateData.objects.update_or_create(parent=TemplateData.objects.get(id=parent_id), text=text, form = tempalte_in)
-        elif data_type == 'CLO':
-            # สร้างหรืออัพเดต CLO ใหม่
-            CLO.objects.update_or_create(parent=CLO.objects.get(id=parent_id), text=text, form =tempalte_in)
-        return JsonResponse({'status': 'success', 'message': 'Data updated successfully'})
+    
+        if request.POST.get('type') == "Newparent":
+            template_in = get_object_or_404(Teamplates, id=request.POST.get('form_id')) 
+    
+            TemplateData.objects.create(form = template_in, text ="")
+            return JsonResponse({'status': 'success', 'message': 'Data updated successfully'})
+        
+        elif request.POST.get('type') != "Newparent":
+            parent_id = request.POST.get('data_id').split('_')[2] 
+            text = request.POST.get('text')
+            print(request.POST.get('text'))
+            data_type = request.POST.get('type')
+            if text is not None and text.strip() != "" :
+                tempalte_in = Teamplates.objects.get(id=request.POST.get('form_id'))
+                if data_type == 'TemplateData':
+                    # สร้างหรืออัพเดต TemplateData ใหม่
+                    TemplateData.objects.update_or_create(parent=TemplateData.objects.get(id=parent_id), text=text, form = tempalte_in)
+                elif data_type == 'CLO':
+                    # สร้างหรืออัพเดต CLO ใหม่
+                    CLO.objects.update_or_create(parent=CLO.objects.get(id=parent_id), text=text, form =tempalte_in)
+                return JsonResponse({'status': 'success', 'message': 'Data updated successfully'})
+            else:
+                return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
     

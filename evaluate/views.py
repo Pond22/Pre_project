@@ -136,16 +136,21 @@ def create_form(request):
         return HttpResponse("Data saved successfully!")
              
     else:
-        template_data = list(Active_Template.templatedata_set.all())
+        
+        """ template_data = list(Active_Template.TemplateDataset.all())
         for form in template_data:
-            print(form)
+            print(form) """
+            
+        template_data = []
+        if Active_Template:
+            template_data = Active_Template.TemplateData.all()
             
         #courses = Course.objects.filter(teamplates=Active_Template)
         new_form = Assessment_Form(custom_param=Active_Template)
       
         #new_form.set_courses_choices(courses)
   
-        return render(request, 'evaluate/create_form.html', {'new_form': new_form, 'template_data': template_data})
+        return render(request, 'evaluate/create_form.html', {'new_form': new_form, 'template_data':template_data})
     
     ''''
     form = Form.objects.get(id=form_id)

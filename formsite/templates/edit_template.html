@@ -60,22 +60,22 @@
                 {% if not clo_data.parent %}
                     <div class ='container' id="parent-container_{{ clo_data.id }}">
                         <!-- แม่ วัตถุประสงค์ของรายวิชา (0)-->
-                        <input type="text" id="parent_{{ clo_data.id }}" name="parent_{{ clo_data.id }}" value="{{ clo_data.text }}" readonly data-type="CLO"/>
-                        <button type="button" onclick="editField('parent_{{ clo_data.id }}')">Edit</button>
-                        {% comment %} {% for child in clo_data.sub_items.all %} {% endcomment %}
+                        <input type="text" id="parent_{{ clo_data.id }}" name="parent_{{ clo_data.id }}" value="{{ clo_data.text }}" readonly  data-type="CLO"/>
+                        {% comment %} <button type="button" onclick="editField('parent_{{ clo_data.id }}')">Edit</button> {% endcomment %}
+          
 
                             <div id="child-container_{{ clo_data.id }}" style="margin-left: 20px;">
                               {% for child in clo_data.sub_items.all %}
                                 <!-- ลูกวัตถุประสงค์ของรายวิชา (0) -->
-                                <input type="text" id="child_{{ child.id }}" name="child_{{ child.id }}" value="{{ child.text }}" readonly data-type="CLO"/>
+                                <input type="text" id="child_{{ child.id }}" name="child_{{ child.id }}" value="{{ child.text }}" readonly  data-type="CLO"/>
                                 <button type = "button" class="button_child_{{ child.id }}" onclick="editField('child_{{ child.id }}')">Edit</button>
                                 <button type="button" class="button_child_{{ child.id }}" onclick="deleteField('child_{{ child.id }}', 'button_child_{{ child.id }}')">ลบ</button>
                                 {% endfor %}
                             </div>
-                        {% comment %} {% endfor %} {% endcomment %}
+               
                         <button type="button" onclick="addField('{{ clo_data.id }}', 'CLO', {{item.id}})">Add New Child Field</button>
                     </div>
-                    {% comment %} <button type="button" onclick="addField('{{ clo_data.id }}', 'CLO', {{item.id}})">Add New Child Field</button> {% endcomment %}
+      
                 {% endif %}
             {% endfor %}
 
@@ -84,13 +84,17 @@
             {% if not template_data.parent %}
                 <div class="container" id="parent-container_{{ template_data.id }}">
                     <!-- แม่ -->
-                    <input type="text" id="parent_{{ template_data.id }}" name="parent_{{ template_data.id }}" value="{{ template_data.text }}" readonly data-type="TemplateData"/>
-                    <button type="button" onclick="editField('parent_{{ template_data.id }}')">Edit</button>
+              
+                      <input type="text" id="parent_{{ template_data.id }}" name="parent_{{ template_data.id }}" value="{{ template_data.text }}" readonly  data-type="TemplateData"/>
+                      <button type="button" class="button_parent_{{ template_data.id }}" onclick="editField('parent_{{ template_data.id }}')">Edit</button>
+                      <button type="button" class="button_parent_{{ template_data.id }}" onclick="deleteField('parent_{{ template_data.id }}', 'button_parent_{{ template_data.id }}')">ลบ</button>
+               
+
                     <!-- ลูก -->
                     <div id="child-container_{{ template_data.id }}" style="margin-left: 20px;">
                         {% for child in template_data.sub_items.all %}
                             <div>
-                                <input type="text" id="clochild_{{ child.id }}" name="child_{{ child.id }}" value="{{ child.text }}" readonly data-type="TemplateData"/>
+                                <input type="text" id="clochild_{{ child.id }}" name="child_{{ child.id }}" value="{{ child.text }}" readonly  data-type="TemplateData"/>
                                 <button type="button" class="button_clochild_{{ child.id }}" onclick="editField('clochild_{{ child.id }}')">Edit</button>
                                 <button type="button" class="button_clochild_{{ child.id }}" onclick="deleteField('clochild_{{ child.id }}', 'button_clochild_{{ child.id }}')">ลบ</button>
                             </div>
@@ -100,11 +104,12 @@
                 </div>
             {% endif %}
         {% endfor %}
-
+        <button type="button" onclick="saveNewParent('Newparent', {{item.id}})">Add New parent Field</button>
         {% endfor %}
+        
         </div>
         
-    
+        <div class="newParent" id="newParent"> </div>
     </form>
 </body>
 
@@ -116,11 +121,12 @@
 </html>
 
 <script>
+  //ลบฟิลด์
   function deleteField(fieldId, buttonclass) {
     var input = document.getElementById(fieldId);
     var dataType = input.getAttribute('data-type');
     var buttons = document.querySelectorAll('.' + buttonclass);
-    console.log(dataType)
+    console.log(fieldId)
 
     var xhr = new XMLHttpRequest();
     xhr.open('DELETE', '/delete_update_template_data/?data_id=' + encodeURIComponent(fieldId.split('_')[1]) + '&type=' + encodeURIComponent(dataType), true);
@@ -135,14 +141,20 @@
       }
     };
     xhr.send();
-    input.remove();
 
+    var parts = fieldId.split('_');
+    input.remove();
+    console.log(parts[0])
+    if (parts[0] == "parent") {
+      reloadPageAfterDelay(200) //ถ้าลบฟิลด์แม่ให้โหลดหน้าจอใหม่
+    }
     buttons.forEach(function(button) {
       button.remove();
     });
 
   }
 
+//แก้ไขฟิลด์ทั้งหมด
   function editField(fieldId) {
     var input = document.getElementById(fieldId);
     console.log(input)
@@ -188,6 +200,26 @@ function getCookie(name) {
     return cookieValue;
 }
 
+//สร้าง ฟิลด์แม่ใหม่
+function saveNewParent(type, formID) {
+
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/addnew_template_data/', true);
+  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+  xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+
+  xhr.onload = function () {
+    if (xhr.status === 200) {
+        console.log('Response:', xhr.responseText);
+    } else {
+        console.error('Error:', xhr.statusText);
+    }
+  };
+  xhr.send('&form_id=' + encodeURIComponent(formID) + '&type=' + encodeURIComponent(type));
+  location.reload();
+}
+
+//เพิ่มฟิลด์ลูก
 function addField(parentId, dataType, tem_id) {
   // Check if parentId is provided, adjust the container accordingly
   const containerId = parentId ? `child-container_${parentId}` : 'PLO';
@@ -197,7 +229,7 @@ function addField(parentId, dataType, tem_id) {
   const div = document.createElement('div');
   //div.style.marginLeft = parentId ? '20px' : '';
   div.innerHTML = `
-      <input type="text" id="child_parentID_${parentId}" name="child_parentID_${parentId}" value=""  data-type="${dataType}">
+      <input type="text" id="child_parentID_${parentId}" name="child_parentID_${parentId}" value=""  data-type="${dataType}" required>
       <button type="button" onclick="editField('new_${parentId}')">Edit</button>
   `;
 
@@ -223,10 +255,17 @@ function saveFieldData(fieldId, value, dataType, tem_id) {
   .then(response => response.json())
   .then(data => console.log('Success:', data))
   .catch(error => console.error('Error:', error));
-  location.reload()
+
+  location.reload();
+
  
 }
 
+function reloadPageAfterDelay(delayInMilliseconds) {
+  setTimeout(function() {
+      location.reload();
+  }, delayInMilliseconds);
+}
 /*
     addChildButton.addEventListener("click", function () {
       const newChildField = document.createElement("input");
