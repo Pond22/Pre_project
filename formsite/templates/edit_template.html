@@ -62,17 +62,20 @@
                         <!-- แม่ วัตถุประสงค์ของรายวิชา (0)-->
                         <input type="text" id="parent_{{ clo_data.id }}" name="parent_{{ clo_data.id }}" value="{{ clo_data.text }}" readonly data-type="CLO"/>
                         <button type="button" onclick="editField('parent_{{ clo_data.id }}')">Edit</button>
-                        {% for child in clo_data.sub_items.all %}
+                        {% comment %} {% for child in clo_data.sub_items.all %} {% endcomment %}
 
                             <div id="child-container_{{ clo_data.id }}" style="margin-left: 20px;">
+                              {% for child in clo_data.sub_items.all %}
                                 <!-- ลูกวัตถุประสงค์ของรายวิชา (0) -->
                                 <input type="text" id="child_{{ child.id }}" name="child_{{ child.id }}" value="{{ child.text }}" readonly data-type="CLO"/>
-                                <button type = "button" onclick="editField('child_{{ child.id }}')">Edit</button>
+                                <button type = "button" class="button_child_{{ child.id }}" onclick="editField('child_{{ child.id }}')">Edit</button>
+                                <button type="button" class="button_child_{{ child.id }}" onclick="deleteField('child_{{ child.id }}', 'button_child_{{ child.id }}')">ลบ</button>
+                                {% endfor %}
                             </div>
-                        {% endfor %}
-                        {% comment %} <button type="button" onclick="addField('{{ clo_data.id }}', 'CLO', {{item.id}})">Add New Child Field</button> {% endcomment %}
+                        {% comment %} {% endfor %} {% endcomment %}
+                        <button type="button" onclick="addField('{{ clo_data.id }}', 'CLO', {{item.id}})">Add New Child Field</button>
                     </div>
-                    <button type="button" onclick="addField('{{ clo_data.id }}', 'CLO', {{item.id}})">Add New Child Field</button>
+                    {% comment %} <button type="button" onclick="addField('{{ clo_data.id }}', 'CLO', {{item.id}})">Add New Child Field</button> {% endcomment %}
                 {% endif %}
             {% endfor %}
 
@@ -87,8 +90,9 @@
                     <div id="child-container_{{ template_data.id }}" style="margin-left: 20px;">
                         {% for child in template_data.sub_items.all %}
                             <div>
-                                <input type="text" id="child_{{ child.id }}" name="child_{{ child.id }}" value="{{ child.text }}" readonly data-type="TemplateData"/>
-                                <button type="button" onclick="editField('child_{{ child.id }}')">Edit</button>
+                                <input type="text" id="clochild_{{ child.id }}" name="child_{{ child.id }}" value="{{ child.text }}" readonly data-type="TemplateData"/>
+                                <button type="button" class="button_clochild_{{ child.id }}" onclick="editField('clochild_{{ child.id }}')">Edit</button>
+                                <button type="button" class="button_clochild_{{ child.id }}" onclick="deleteField('clochild_{{ child.id }}', 'button_clochild_{{ child.id }}')">ลบ</button>
                             </div>
                         {% endfor %}
                     </div>
@@ -100,7 +104,7 @@
         {% endfor %}
         </div>
         
-        <input type="submit" value="Submit" />
+    
     </form>
 </body>
 
@@ -112,8 +116,36 @@
 </html>
 
 <script>
+  function deleteField(fieldId, buttonclass) {
+    var input = document.getElementById(fieldId);
+    var dataType = input.getAttribute('data-type');
+    var buttons = document.querySelectorAll('.' + buttonclass);
+    console.log(dataType)
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('DELETE', '/delete_update_template_data/?data_id=' + encodeURIComponent(fieldId.split('_')[1]) + '&type=' + encodeURIComponent(dataType), true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+
+    xhr.onload = function () {
+      if (xhr.status === 200) {
+          console.log('Response:', xhr.responseText);
+      } else {
+          console.error('Error:', xhr.statusText);
+      }
+    };
+    xhr.send();
+    input.remove();
+
+    buttons.forEach(function(button) {
+      button.remove();
+    });
+
+  }
+
   function editField(fieldId) {
     var input = document.getElementById(fieldId);
+    console.log(input)
     input.removeAttribute('readonly');
     input.focus();
 
@@ -124,7 +156,7 @@
 
         // สร้าง XMLHttpRequest
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', '/update-template-data/', true);
+        xhr.open('POST', '/delete_update_template_data/', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken')); // รับ CSRF token
 
@@ -166,11 +198,10 @@ function addField(parentId, dataType, tem_id) {
   //div.style.marginLeft = parentId ? '20px' : '';
   div.innerHTML = `
       <input type="text" id="child_parentID_${parentId}" name="child_parentID_${parentId}" value=""  data-type="${dataType}">
-      <button type="button" onclick="editField('new_${newFieldId}')">Edit</button>
+      <button type="button" onclick="editField('new_${parentId}')">Edit</button>
   `;
 
   container.appendChild(div);
-
   const input = div.querySelector('input');
   input.onblur = function() {
     input.setAttribute('readonly', true);
@@ -192,8 +223,9 @@ function saveFieldData(fieldId, value, dataType, tem_id) {
   .then(response => response.json())
   .then(data => console.log('Success:', data))
   .catch(error => console.error('Error:', error));
+  location.reload()
+ 
 }
-
 
 /*
     addChildButton.addEventListener("click", function () {

@@ -197,14 +197,11 @@ def manage_template(request):
 def edit_template(request, form_id):
 
     template = Teamplates.objects.filter(id=form_id)
-    
-    for data in template:
-        print(data.id)
-    
+
     return render(request, 'edit_template.html', {'template': template})
 
 #อัพเดตข้อมูล PLO&O ใน Temlplate ที่มีอยู่ก่อน
-def update_template_data(request):
+def delete_update_template_data(request):
     if request.method == 'POST':
         data_id = request.POST.get('data_id')
         text = request.POST.get('text')
@@ -215,6 +212,18 @@ def update_template_data(request):
         elif data_type == 'CLO':
             CLO.objects.filter(id=data_id).update(text=text)
         return JsonResponse({'status': 'success', 'message': 'Data updated successfully'})
+    
+    elif request.method == 'DELETE' :
+        data_id = request.GET.get('data_id')
+        data_type = request.GET.get('type')  
+      
+        if data_type == 'TemplateData':
+            TemplateData.objects.filter(id=data_id).delete()
+            print("delete",data_id)
+        elif data_type == 'CLO':
+            CLO.objects.filter(id=data_id).delete()
+        return JsonResponse({'status': 'success', 'message': 'Delete successfully'})
+    
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
@@ -235,9 +244,7 @@ def addnew_template_data(request):
         return JsonResponse({'status': 'success', 'message': 'Data updated successfully'})
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
-
-
-
+    
 
 '''
 def edit_template(request):
