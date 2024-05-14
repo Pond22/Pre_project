@@ -1,15 +1,143 @@
-<!-- evaluate_home.html -->
+<style>
+    body, html {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f0f0f0;
+    }
+    
+    .header img {
+        width: 100%;
+        height: auto;
+    }
+    
+    .container {
+        width: 80%;
+        margin: 20px auto;
+        background: #fff;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    th, td {
+        text-align: left;
+        padding: 8px;
+        border-bottom: 1px solid #ddd;
+    }
+    
+    th {
+        background-color: #f2f2f2;
+    }
+    
+    .edit-btn, .delete-btn {
+        padding: 5px 10px;
+        margin-right: 5px;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .edit-btn {
+        background-color: #4CAF50;
+    }
+    
+    .delete-btn {
+        background-color: #f44336;
+    }
 
-{% block title %}Evaluate Home{% endblock %}
+    .modal {
+        display: none; 
+        position: fixed;
+        z-index: 1; 
+        left: 0;
+        top: 0;
+        width: 100%; 
+        height: 100%; 
+        overflow: auto; 
+        background-color: rgb(0,0,0); 
+        background-color: rgba(0,0,0,0.4); 
+    }
+    
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%; 
+    }
+    
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+    
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    
+    
+</style>
 
 {% block content %}
-<div class="container">
-    <h1>Welcome to the Evaluation Home Page</h1>
-    <p>This is a placeholder text for the Evaluation Home Page.</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payap University</title>
+    {% comment %} <link rel="stylesheet" href="style.css"> {% endcomment %}
+</head>
+<body>
+    <div class="container">
+        <div class="table">
+            <h2>แสดงรายชื่อแบบฟอร์มการประเมิน</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>รหัสวิชา</th>
+                        <th>ชื่อวิชา</th>
+                        <th>ตอนเรียน</th>
+                        {% comment %} <th>นามสกุล</th>
+                        <th>Email</th>
+                        <th>Actions</th> {% endcomment %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in form %}
+                    <tr>
+                        <td>{{ data.course.class_code }}</td>
+                        <td>{{ data.course.name }}</td>
+                        <td>{{ data.section }}</td>
 
-    {% for i in plo%}
-        <p>{{ i.create }}<br> {{ i.text }}</p>
-    {% endfor %}
-    </form>
-</div>
-{% endblock %}
+                        {% comment %} <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.prefix }}</td>
+                        <td>{{ user.user.first_name }}</td>
+                        <td>{{ user.user.last_name }}</td>
+                        <td>{{ user.user.email }}</td> {% endcomment %}
+                        <td>
+                            <a href="{% url 'evaluate_form' form_id=data.id %}">
+                                <button onclick="viewForm({{data.id}})">จัดการแบบฟอร์ม {{data.semester}}/{{data.year_number}} </button>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                   
+                </tbody>
+            </table>
+        </div>
+
+</body>
+</html>
+
+{%endblock%}

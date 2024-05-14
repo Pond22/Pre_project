@@ -85,7 +85,7 @@ class CLO(models.Model):
 class Course(models.Model):
     teamplates = models.ForeignKey(Teamplates, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
-    section = models.CharField(max_length=2)
+    """ section = models.CharField(max_length=2) """
     class_code = models.CharField(max_length=7)
     
 
@@ -98,19 +98,21 @@ class Form(models.Model):
     )
     
     id = models.BigAutoField(primary_key=True)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='forms')
+    
     name = models.CharField(max_length=100)
     class_code = models.CharField(max_length=10)
+    section = models.CharField(max_length=2) 
+    
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     create = models.DateTimeField(max_length=300, null=True, blank=True)
     description = models.CharField(max_length=200, null=True, blank=True)
     template = models.ForeignKey(Teamplates, on_delete=models.CASCADE)
     is_teacher_form = models.BooleanField(default=False)
-    semester = models.IntegerField(choices=semester_choices)
-    section = models.CharField(max_length=2)
-    year_number = models.IntegerField(
+    """ year_number = models.IntegerField(
         verbose_name='ปีการศึกษา', 
         validators=[MinValueValidator(1999), MaxValueValidator(3100)]
-    )
+    ) """
     start_date = models.DateTimeField(null=True, blank=True)
     end_date = models.DateTimeField(null=True, blank=True)
     expired = models.BooleanField(default=False) #เก็บว่าแบบฟอร์มนั้นครบกำหนดเวลาหรือยัง
@@ -137,19 +139,25 @@ class AssessmentItem(models.Model):
     
     def __str__(self):
         if self.template_select:
-            return f"มากจากแม่แบบ ID = {self.template_select.id} ข้อมูล = {self.template_select.text}"    #self.template_select.text
+            return f"มากจากแม่แบบ ID = {self.id} ข้อมูล = {self.template_select.text}"    #self.template_select.text
         else:
-            return f"มากจากฟอร์ม = {self.form}"
+            return f"มากจากฟอร์ม = {self.form} ID = {self.id}"
+
+class CommentForm(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    respondent = models.ForeignKey(User, on_delete=models.CASCADE)
+    comment = models.TextField(null=True, blank=True)
+    form = models.ForeignKey(Form, related_name="comments", on_delete=models.CASCADE)
+    
         
 class AssessmentResponse(models.Model):
     respondent = models.ForeignKey(User, on_delete=models.CASCADE)
     response_date = models.DateTimeField(auto_now_add=True)
     assessment_item  = models.ForeignKey(AssessmentItem, on_delete=models.CASCADE)
     response = models.IntegerField(choices=[(1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5')])
-    response_comment = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
-        return str(self.assessment_item)
+        return f"มาจากคำถามไอดีที่ {self.assessment_item.id} ของฟอร์มที่ {self.assessment_item.form.id} คนตอบ {self.respondent}"
     
 
     

@@ -60,6 +60,8 @@ INSTALLED_APPS = [
     'evaluate',
     'rest_framework',
     'channels',
+    'dal',
+    'dal_select2',
 ]
 
 MIDDLEWARE = [

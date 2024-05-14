@@ -1,15 +1,17 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http.response import HttpResponse
 from django.contrib.auth.decorators import login_required, user_passes_test
-from formsite.models import TemplateData, AssessmentItem, Teamplates, UserProfile, AuthorizedUser
+from formsite.models import TemplateData, AssessmentItem, Teamplates, UserProfile, AuthorizedUser, AssessmentResponse, CommentForm
 from formsite.models import Form as form_model
-from .forms import PLOsForm, Assessment_Form, ClosForm, CSVUploadForm, PLOstest
+from .forms import PLOsForm, Assessment_Form, ClosForm, CSVUploadForm, DynamicLikertForm
 from django.contrib.auth.models import User, Group
 from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 import pandas as pd
 import time
+from django.utils import timezone
+
 # Create your views here.
 
 def user_is_teacher(user):
@@ -25,10 +27,51 @@ def teacher_required(view_func):
     
     return wrapper
 
-@login_required(login_url="sign_in")   
+@login_required(login_url="sign_in")   #แสดงฟอร์มที่สามารถประเมินได้ทั้งหมด
 def eva_home(request):
-    x = TemplateData.objects.all().order_by("id")
-    return render(request, 'evaluate/evaluate_home.html', {'plo':x})
+    user = request.user
+    current_time = timezone.now()
+    form = form_model.objects.filter(authorizeduser__users__username=user, expired=False, start_date__lte = current_time)
+    print(form)
+    for data in form:   
+        print(data.id)
+        
+    forms_not_answered = []
+    for data in form:
+        if not AssessmentResponse.objects.filter(respondent=user, assessment_item__form=data).exists():
+            forms_not_answered.append(data)
+    
+    return render(request, 'evaluate/evaluate_home.html', {'form':forms_not_answered})
+
+def evaluate_form(request, form_id):
+    if AssessmentResponse.objects.filter(respondent=request.user, assessment_item__form=form_id).exists():
+        return redirect('/evaluate/')
+    
+    if request.method == 'POST':
+        form = DynamicLikertForm(request.POST, custom_param=form_id)
+        if form.is_valid():
+            for field_name, response in form.cleaned_data.items():
+                # เช็คว่าไม่ใช่ฟิลด์ของคำถามหลักที่ต้องการแค่แสดงข้อมูล
+                if field_name.startswith('question_') or field_name.startswith('template_question_'):
+                    continue  # ข้ามคำถามหลักเนื่องจากไม่ต้องการบันทึกคำตอบ
+                if field_name.startswith('sub_question_'):
+                    question_id = field_name.split('_')[2]
+                elif field_name.startswith('template_sub_question_'):
+                    question_id = field_name.split('_')[3]
+                else:
+                    continue
+
+                question = get_object_or_404(AssessmentItem, pk=question_id)
+                # บันทึกคำตอบของคำถามย่อย
+                AssessmentResponse.objects.create(respondent=request.user, assessment_item=question, response=response)
+                
+            CommentForm.objects.create(respondent=request.user, form=form_model.objects.get(id=form_id), comment=request.POST.get('user_comment'))
+            return HttpResponse("Successfully submitted!")
+    else:
+        form = DynamicLikertForm(custom_param=form_id)
+
+    return render(request, 'evaluate/evaluate_form.html', {'form': form})
+
     
 @login_required(login_url="sign_in")   #Not used here
 def create_plo(request):
@@ -305,30 +348,6 @@ def handle_sub_clo_delete(request):
         return True
     except AssessmentItem.DoesNotExist:
         return False
-
-def dy (request):
-    if request.method == 'POST':
-        length = request.POST.get('length')
-        if length is None:
-            length = 1
-        length = int(length)
-        new_PLOstest = PLOstest(request.POST)
-        if new_PLOstest.is_valid():
-            for i in range(length):
-                str1 = "text_"+ str(i+1)
-                if request.POST.get(str1):
-                    text = request.POST.get(str1)
-                    print(text)
-                    user1 = request.user
-                    TemplateData.objects.create(created_by=user1, text=text)
-                else:
-                    print("NULL")
-    return render(request, 'evaluate/Dynamic_Form.html', {'form':PLOstest})
-
-
-
-
-
 
 #สำหรับการบันทึก 2 รอบรอบแรกจะเป็น form สำหรับนักศึกษาที่มีสิทธ์ประเมินรายวิชานั้นๆ รอบที่ 2 จะบันทึกสำหรับอาจารย์
 '''

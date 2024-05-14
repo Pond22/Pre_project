@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import TemplateData,AssessmentItem,Form, AssessmentResponse, Teamplates, Departments, UserProfile, Course, AuthorizedUser, CLO
+from .models import TemplateData,AssessmentItem,Form, AssessmentResponse, Teamplates, Departments, UserProfile, Course, AuthorizedUser, CLO, CommentForm
 print("Hello from admin.py")
 
 class FormAdmin(admin.ModelAdmin):
@@ -15,4 +15,4 @@ admin.site.register(UserProfile)
 admin.site.register(Course)
 admin.site.register(AuthorizedUser)
 admin.site.register(CLO)
-
+admin.site.register(CommentForm)

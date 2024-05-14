@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<style>
+    .radio-select input[type="radio"] {
+        margin-right: 10px;  /* ห่างระหว่างปุ่ม */
+        vertical-align: middle; /* ปรับให้ตรงกลางทางด้านตั้ง */
+    }
+    
+    .radio-select label {
+        display: inline-block; /* ทำให้เรียงกันเป็นแนวนอน */
+        margin-right: 15px; /* ห่างระหว่าง label */
+    }
+</style>
+<html>
+<head>
+    
+    <title>Survey</title>
+</head>
+<body>
+    <h1>Survey</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="user_comment" id="user_comment"> ข้อเสนอแนะความคิดเห็นอื่น
+            <input type="text" name="user_comment" placeholder="พิมพ์ข้อเสนอแนะความคิดเห็นอื่ที่นี้"></input>
+        </div>
+        <button type="submit">Submit</button>
+    </form>
+</body>
+
+{% comment %} <form method="post">   โค๊ดนี้ใช้แทนอันข้างบนได้ทำงานเหมือนกัน
+    {% csrf_token %}
+    {% for field in form %}
+        <div class="fieldWrapper">
+            {{ field.label_tag }} {{ field }}
+            {% if field.help_text %}
+                <p class="help">{{ field.help_text }}</p>
+            {% endif %}
+            {% for error in field.errors %}
+                <p class="error">{{ error }}</p>
+            {% endfor %}
+        </div>
+    {% endfor %}
+    <input type="text" name="user_comment" placeholder="พิมพ์ข้อเสนอแนะความคิดเห็นอื่ที่นี้"></input>
+    <button type="submit">Submit</button>
+</form> {% endcomment %}
