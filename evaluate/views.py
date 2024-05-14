@@ -11,7 +11,7 @@ from rest_framework.response import Response
 import pandas as pd
 import time
 from django.utils import timezone
-
+import json
 # Create your views here.
 
 def user_is_teacher(user):
@@ -226,12 +226,69 @@ def create_clo(request, form_id): #Not use here
     return render(request, 'evaluate/create_clo.html', {'context': context})
 
 
-@login_required(login_url="sign_in")    
+@login_required(login_url="sign_in") #อาจารย์ดูแบบฟอร์มของตัวเอง
 def form_detail(request):
     user = request.user
-    forms = form_model.objects.filter(created_by=user)
-    context = {'forms': forms, 'user':user}
-    return render(request, 'evaluate/form_detail.html', context)
+    forms = form_model.objects.filter(created_by=user, expired=False)
+    """ context = {'forms': forms, 'user':user} """
+    return render(request, 'evaluate/form_detail.html', {'forms':forms})
+
+def edit_form(request, form_id): #แก้ไขฟอร์มหลังสร้าง
+    form = form_model.objects.filter(id=form_id)
+    user_profile = get_object_or_404(UserProfile, user=request.user)
+    Active_Template = Teamplates.objects.get(is_active=True, department=user_profile.department)
+    assessment_items = AssessmentItem.objects.filter(form=form_id, parent__isnull=True, template_select__isnull=True)
+    selection_item = AssessmentItem.objects.filter(form=form_id, parent__isnull=True, template_select__isnull=False)
+    
+    template_data = []
+    if Active_Template:
+        template_data = Active_Template.TemplateData.all()
+    
+    context = {
+        'form': form,
+        'assessment_items': assessment_items,
+        'selection_item': selection_item,
+        'template_data':template_data
+    }
+    return render(request, 'evaluate/edit_form.html', {'context':context})
+
+def API_addnew_tempaltedata (request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        form_id = data.get('form_id')
+        items = data.get('items')
+        print(items)
+        try:
+            form = form_model.objects.get(id=form_id)
+
+            # ลบ AssessmentItem จากแม่อบบเก่าออก
+            items_to_delete = AssessmentItem.objects.filter(form=form, template_select__isnull=False)
+            items_to_delete.delete()
+            for item in items:
+                parent = None
+                if item['isSub']:
+                    parent = AssessmentItem.objects.get(id=item_id)
+                
+                template_select = TemplateData.objects.get(id=item['template_select_id'])
+                assessment_item =AssessmentItem.objects.create(
+                    text=item['text'],
+                    form=form,
+                    template_select=template_select,
+                    parent=parent
+                )
+                if item['isSub'] == False :
+                    item_id = assessment_item.id
+            return JsonResponse({'success': True})
+        except form_model.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Form not found'})
+        except AssessmentItem.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Parent item not found'})
+        except TemplateData.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Template item not found'})
+    else:
+        return JsonResponse({'success': False, 'error': 'Invalid request method'})
+    
+
 
 
 @login_required(login_url="sign_in")   

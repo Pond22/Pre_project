@@ -1,28 +1,100 @@
 <style>
-    #butlink {
-        background-color: #4CAF50; 
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .main-container {
+        background: white;
+        width: 80%;
+        margin: 20px auto;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .form-list {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .form-card {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin: 10px;
+        width: 95%;
+        background: #e9e9e9;
+    }
+    
+    .form-card label {
+        display: block;
+    }
+    
+    .form-card input[type="checkbox"] {
+        margin-right: 10px;
+    }
+    
+    button {
+        margin-top: 10px;
+        padding: 5px 10px;
+        background-color: #4CAF50;
+        color: white;
         border: none;
-        color: white; 
-        padding: 15px 32px; 
-        text-align: center;
-        text-decoration: none;
-        display: inline-block;
-        font-size: 16px;
-        margin: 4px 2px;
         cursor: pointer;
-        border-radius: 8px; 
     }
-    #butlink:hover {
-        background-color: #45a049; 
+    
+    button:hover {
+        opacity: 0.8;
     }
+    
 </style>
 
-<form method="POST" >
-    {% csrf_token %}
-    {% for form_instance in forms %}
-    <p>Created_by:{{ form_instance.created_by }}<br>Form ID: {{ form_instance.id }}<br>Form Name: {{ form_instance.name }}<br>class_code: {{ form_instance.class_code }}
-        <a href="{% url 'view_form' form_id=form_instance.id %}">View Form</a></p>
-    {% endfor %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payap University</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="main-container">
+        <h1>จัดการหัวข้อประเมินการสอน (PLO) สาขา{{user_profile.department}}</h1>
+        <div class="form-list">
+            {% for data in forms%}
+            <div class="form-card">
+                <label>
+                    {%if data.is_teacher_form %}
+                    แบบฟอร์ม การทวนสอบผลสัมฤทธิ์ โดยอาจารย์
+                    {%else%}
+                    แบบฟอร์ม การทวนสอบผลสัมฤทธิ์ โดยนักศึกษา
+                    {%endif%}
+                    {{data.course.class_code}} {{data.course.name}} ตอนเรียนที่ {{data.section}}
+                    |Form ID: {{data.id}} |
+                          {{data.course.teamplates.semester}}/{{data.course.teamplates.year_number}}
+                    <a href="{% url 'edit_form' form_id=data.id %}">
+                        <button onclick="viewForm({{data.id}})">จัดการแบบฟอร์ม {{data.course.class_code}} {{data.course.name}}  </button>
+                    </a>
+                </label>
+            </div>
+            {% endfor %}
+            <a href="แก้ไข">
+                <button>Create Form!</button>
+            </a>
+        </div>
+    </div>
+</body>
+</html>
 
-    <a id='butlink' href="http://127.0.0.1:8000/evaluate/create_form">Go to Create Form</a>
-</form>
+<script>
+    function viewForm(formId) {
+        alert("Viewing details for Form ID: " + formId);
+    }
+    
+    {% comment %} document.getElementById('create-form').addEventListener('click', function() {
+        alert('Create new form functionality goes here.');
+    }); {% endcomment %}
+    
+</script>

@@ -1,0 +1,381 @@
+{% load static %}
+<style>
+    .container {
+      width: 80%;
+      margin: auto;
+      padding: 20px;
+      background-color: #f4f4f4;
+      border: 1px solid #ccc;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    }
+  
+    input[type="text"],
+    input[type="submit"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      box-sizing: border-box; /* Makes sure padding does not affect width */
+    }
+  
+    .head {
+      display: flex;
+      justify-content: center; /* จัดให้ข้อความอยู่ตรงกลาง */
+      margin-top: 20px; /* กำหนดระยะห่างจากส่วนบน */
+  }
+  
+  .form_name {
+      font-size: 24px; /* ขนาดข้อความ */
+      color: #333; /* สีข้อความ */
+      font-weight: bold; /* หนาข้อความ */
+  }
+  </style>
+  
+  <!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>จัดการข้อมูลแม่แบบ</title>
+      {% comment %}
+      <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+      <!-- Your CSS file -->
+      {% endcomment %}
+    </head>
+  
+    <body>
+      <form method="post">
+          {% csrf_token %}
+  
+          <div class="head"> 
+            <div class="form_name" name="form_name"> 
+              {% for data in context.form%}
+                {{data.course.class_code}} {{data.course.name}} ตอนเรียนที่ {{data.section}} asdasd{{data.id}}
+              {%endfor %}
+             </div>
+          </div>
+    
+          <div class="container" id="PLO">
+              {% comment %} วัตถุประสงค์ของรายวิชา (0) 
+              {% for item in form %}
+                  {% for clo_data in item.AssessmentItem.all %}
+                  {% if not clo_data.parent %}
+                      <div class ='container' id="parent-container_{{ clo_data.id }}">
+                          <!-- แม่ วัตถุประสงค์ของรายวิชา (0)-->
+                          <input type="text" id="parent_{{ clo_data.id }}" name="parent_{{ clo_data.id }}" value="{{ clo_data.text }}" readonly  data-type="CLO"/>
+                          
+            
+  
+                              <div id="child-container_{{ clo_data.id }}" style="margin-left: 20px;">
+                                {% for child in clo_data.sub_items.all %}
+                                  <!-- ลูกวัตถุประสงค์ของรายวิชา (0) -->
+                                  <input type="text" id="child_{{ child.id }}" name="child_{{ child.id }}" value="{{ child.text }}" readonly  data-type="CLO"/>
+                                  <button type = "button" class="button_child_{{ child.id }}" onclick="editField('child_{{ child.id }}')">Edit</button>
+                                  <button type="button" class="button_child_{{ child.id }}" onclick="deleteField('child_{{ child.id }}', 'button_child_{{ child.id }}')">ลบ</button>
+                                  {% endfor %}
+                              </div>
+                 
+                          <button type="button" onclick="addField('{{ clo_data.id }}', 'CLO', {{item.id}})">Add New Child Field</button>
+                      </div>
+        
+                  {% endif %}
+              {% endfor %} {% endcomment %}
+  
+              PLOs
+              {% for item in context.assessment_items %}
+                {% if not item.parent %}
+                    <div class="container" id="parent-container_{{ item.id }}">
+                        <label>{{ forloop.counter }}</label>
+                        <input type="text" id="parent_{{ item.id }}" name="parent_{{ item.id }}" value="{{ item.text }}" readonly data-type="TemplateData" placeholder="กรุณาใส่หัวข้อประเด็นหลัก"/>
+                        <button type="button" class="button_parent_{{ item.id }}" onclick="editField('parent_{{ item.id }}')">Edit</button>
+                        <button type="button" class="button_parent_{{ item.id }}" onclick="deleteField('parent_{{ item.id }}', 'button_parent_{{ item.id }}')">ลบ</button>
+
+                        <!-- ลูก -->
+                        <div id="child-container_{{ item.id }}" style="margin-left: 20px;">
+                            {% for child in item.sub_items.all %}
+                                <div>
+                                    <label>{{ forloop.parentloop.counter }}.{{ forloop.counter }}</label>
+                                    <input type="text" id="clochild_{{ child.id }}" name="child_{{ child.id }}" value="{{ child.text }}" readonly data-type="TemplateData" placeholder="กรุณาใส่หัวข้อประเด็นรอง"/>
+                                    <button type="button" class="button_clochild_{{ child.id }}" onclick="editField('clochild_{{ child.id }}')">Edit</button>
+                                    <button type="button" class="button_clochild_{{ child.id }}" onclick="deleteField('clochild_{{ child.id }}', 'button_clochild_{{ child.id }}')">ลบ</button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <button type="button" onclick="addField('{{ item.id }}', 'TemplateData', {{ item.form.id }})">Add New Child Field</button>
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+                    หัวข้อประเด็นจากแม่แบบ
+
+            <button type="button" onclick="openPopup()"
+                class="bg-blue-500 text-white rounded-lg w-auto p-1 flex justify-center hover:bg-blue-600 mt-1 ml-2 mb-2">เลือกแม่แบบ</button>
+                <div id="Plo_div" class="Plo_div">
+      
+                    <div class="Main_item"></div>
+                    <div class="subFields"></div>
+                  </div>
+
+            {% for item in context.selection_item %}
+                {% if not item.parent %}
+                    <div class="container" id="parent-container_{{ item.id }}">
+                        <label>{{ forloop.counter }}</label>
+                        <input type="text" id="selectionparent_{{ item.id }}" name="selectionparent_{{ item.id }}" value="{{ item.template_select.text }}" readonly data-type="selectionTemplateData" placeholder="กรุณาใส่หัวข้อประเด็นหลัก"/>
+                        <button type="button" class="button_selectionparent_{{ item.id }}" onclick="editField('selectionparent_{{ item.id }}')">Edit</button>
+                        <button type="button" class="button_selectionparent_{{ item.id }}" onclick="deleteField('selectionparent_{{ item.id }}', 'button_selectionparent_{{ item.id }}')">ลบ</button>
+
+                        <!-- ลูก -->
+                        <div id="child-container_{{ item.id }}" style="margin-left: 20px;">
+                            {% for child in item.sub_items.all %}
+                                <div>
+                                    <label>{{ forloop.parentloop.counter }}.{{ forloop.counter }}</label>
+                                    <input type="text" id="selectionclochild_{{ child.id }}" name="selectionchild_{{ child.id }}" value="{{ child.template_select.text }}" readonly data-type="selectionTemplateData" placeholder="กรุณาใส่หัวข้อประเด็นรอง"/>
+                                    <button type="button" class="button_selectionclochild_{{ child.id }}" onclick="editField('selectionclochild_{{ child.id }}')">Edit</button>
+                                    <button type="button" class="button_selectionclochild_{{ child.id }}" onclick="deleteField('selectionclochild_{{ child.id }}', 'button_selectionclochild_{{ child.id }}')">ลบ</button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <button type="button" onclick="addField('{{ item.id }}', 'TemplateData', {{ item.form.id }})">Add New Child Field</button>
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+
+            <button type="button" onclick="saveNewParent('Newparent', {{ form.id }})">Add New Parent Field</button>
+          
+          </div>
+          
+          <div class="newParent" id="newParent"> </div>
+
+      </form>
+  
+
+      <!-- ป๊อปอัพ แม่แบบ-->
+      <div id="popup" class="popup" style="display: none">
+        <div class="popup-content">
+          <span class="close" onclick="closePopup()">&times;</span>
+          <div id="form_select_template">
+            <label for="template_select">เลือกแม่แบบ:</label>
+            <div id="template_list">
+              {% for item in context.template_data %}
+                  {% if not item.parent %}
+                      <div class="template_main_item">
+                          <input type="checkbox" id="item_{{ item.id }}" name="template_choice" value="{{ item.id }}"
+                                 {% comment %} onchange="checkboxHandle('item_{{ item.id }}', '{{ item.id }}', '{{ item.text }}', event, 'main')" {% endcomment %}
+                                 onchange="handleParentCheckbox('{{ item.id }}')"
+                                data-is-sub="false" >
+                          <label for="item_{{ item.id }}">&nbsp;&nbsp;{{ forloop.counter }} : {{ item.text }}</label>
+                      </div>
+                      {% for sub in item.sub_items.all %}
+                          <div class="template_sub_item">
+                              <input type="checkbox" id="sub_{{ sub.id }}" name="template_choice" value="{{ sub.id }}"
+                                     {% comment %} onchange="checkboxHandle('sub_{{ sub.id  }}', '{{ sub.id }}', '{{ sub.text }}', event, 'sub')" {% endcomment %}
+                                     onchange="checkHandle('sub_{{ sub.id }}', '{{ item.id }}')"
+                                    data-is-sub="true" data-parent-id="{{ item.id }}" >
+                              <label for="sub_{{ sub.id }}">: {{ sub.text }}</label>
+                          </div>
+                      {% endfor %}
+                  {% endif %}
+              {% endfor %}
+
+            </div>
+          </div>
+          <div id="template_details" style="display: none">
+            <!-- Details will be shown here -->
+          </div>
+          {% for data in context.form%}
+                <button onclick="confirmSelection({{data.id}})" type = "button">ยืนยัน</button>
+              {%endfor %}
+
+        </div>
+      </div>
+
+      {% comment %}
+      <script src="{% static 'js/script.js' %}"></script>
+      <!-- Your JS file -->
+      {% endcomment %}
+    </body>
+  </html>
+  
+  <script>
+    function checkHandle(checkboxId, parentId) {
+        var checkbox = document.getElementById(checkboxId);
+        var parentCheckbox = document.getElementById('item_' + parentId);
+      
+        // เมื่อ checkbox ลูกถูกเลือก, ให้เลือก checkbox แม่ด้วย
+        if (checkbox.checked) {
+          parentCheckbox.checked = true;
+        }
+      
+        // ตรวจสอบว่าควรจะยกเลิกการเลือก checkbox แม่หรือไม่ (ถ้าลูกทั้งหมดไม่ถูกเลือก)
+        else {
+          var allSiblingsChecked = document.querySelectorAll(`input[data-parent-id="${parentId}"]:checked`).length > 0;
+          if (!allSiblingsChecked) {
+            parentCheckbox.checked = false;
+          }
+        }
+      }
+
+      function handleParentCheckbox(parentId) {
+        var parentCheckbox = document.getElementById('item_' + parentId);
+        var childCheckboxes = document.querySelectorAll(`input[data-parent-id="${parentId}"]`);
+      
+        // ตั้งค่า checkbox ลูกทั้งหมดให้มีสถานะเดียวกันกับ checkbox แม่
+        childCheckboxes.forEach(function(checkbox) {
+          checkbox.checked = parentCheckbox.checked;
+        });
+      }
+      
+
+    //ลบฟิลด์
+    function deleteField(fieldId, buttonclass) {
+      var input = document.getElementById(fieldId);
+      var dataType = input.getAttribute('data-type');
+      var buttons = document.querySelectorAll('.' + buttonclass);
+      console.log(fieldId)
+  
+      var xhr = new XMLHttpRequest();
+      xhr.open('DELETE', '/delete_update_template_data/?data_id=' + encodeURIComponent(fieldId.split('_')[1]) + '&type=' + encodeURIComponent(dataType), true);
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+      xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+  
+      xhr.onload = function () {
+        if (xhr.status === 200) {
+            console.log('Response:', xhr.responseText);
+        } else {
+            console.error('Error:', xhr.statusText);
+        }
+      };
+      xhr.send();
+  
+      var parts = fieldId.split('_');
+      input.remove();
+      console.log(parts[0])
+      if (parts[0] == "parent") {
+        reloadPageAfterDelay(200) //ถ้าลบฟิลด์แม่ให้โหลดหน้าจอใหม่
+      }
+      buttons.forEach(function(button) {
+        button.remove();
+      });
+  
+    }
+  
+  //แก้ไขฟิลด์ทั้งหมด
+    function editField(fieldId) {
+      var input = document.getElementById(fieldId);
+      console.log(input)
+      input.removeAttribute('readonly');
+      input.focus();
+  
+      input.onblur = function() {
+          var value = input.value;  
+          var dataType = input.getAttribute('data-type');
+          input.setAttribute('readonly', true);
+  
+          // สร้าง XMLHttpRequest
+          var xhr = new XMLHttpRequest();
+          xhr.open('POST', '/delete_update_template_data/', true);
+          xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+          xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken')); // รับ CSRF token
+  
+          xhr.onload = function () {
+              if (xhr.status === 200) {
+                  console.log('Response:', xhr.responseText);
+              } else {
+                  console.error('Error:', xhr.statusText);
+              }
+          };
+  
+          xhr.send('data_id=' + encodeURIComponent(fieldId.split('_')[1]) + '&text=' + encodeURIComponent(value) + '&type=' + encodeURIComponent(dataType));
+      };
+  }//ลองแบบ XML
+  
+  //  cookie
+  function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+              const cookie = cookies[i].trim();
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
+  }
+  
+  //สร้าง ฟิลด์แม่ใหม่
+  function saveNewParent(type, formID) {
+  
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/addnew_template_data/', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+  
+    xhr.onload = function () {
+      if (xhr.status === 200) {
+          console.log('Response:', xhr.responseText);
+      } else {
+          console.error('Error:', xhr.statusText);
+      }
+    };
+    xhr.send('&form_id=' + encodeURIComponent(formID) + '&type=' + encodeURIComponent(type));
+    location.reload();
+  }
+  
+  //เพิ่มฟิลด์ลูก
+  function addField(parentId, dataType, tem_id) {
+    // Check if parentId is provided, adjust the container accordingly
+    const containerId = parentId ? `child-container_${parentId}` : 'PLO';
+    const container = document.getElementById(containerId);
+    const newFieldId = new Date().getTime(); // Unique ID for new field
+  
+    const div = document.createElement('div');
+    //div.style.marginLeft = parentId ? '20px' : '';
+    div.innerHTML = `
+        <input type="text" id="child_parentID_${parentId}" name="child_parentID_${parentId}" value=""  data-type="${dataType}" required> 
+        <button type="button" onclick="editField('new_${parentId}')">Edit</button>
+    `;
+  
+    container.appendChild(div);
+    const input = div.querySelector('input');
+    input.setAttribute('placeholder',"กรุณาใส่หัวข้อประเด็นรอง")
+    input.onblur = function() {
+      input.setAttribute('readonly', true);
+      console.log(input.id.split('_')[2])
+      saveFieldData(input.id, input.value, dataType, tem_id);
+    };
+  }
+  
+  //แบบ fetch ธรรมดา
+  function saveFieldData(fieldId, value, dataType, tem_id) {
+    fetch('/addnew_template_data/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRFToken': getCookie('csrftoken') 
+      },
+      body: `data_id=${encodeURIComponent(fieldId)}&text=${encodeURIComponent(value)}&type=${encodeURIComponent(dataType)}&form_id=${encodeURIComponent(tem_id)}`
+    })
+    .then(response => response.json())
+    .then(data => console.log('Success:', data))
+    .catch(error => console.error('Error:', error));
+  
+    location.reload();
+  
+   
+  }
+  
+  function reloadPageAfterDelay(delayInMilliseconds) {
+    setTimeout(function() {
+        location.reload();
+    }, delayInMilliseconds);
+  }
+
+
+
+  </script>
+
+
+<script src="{% static "edit_form.js"%}"></script>
