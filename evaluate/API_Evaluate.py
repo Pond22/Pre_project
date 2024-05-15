@@ -117,7 +117,7 @@ def update_form_api(request):
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
     
-def add_new_user_api(request):
+def manage_AuthorizedUser(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         form_id = data.get("form_id")
@@ -145,3 +145,12 @@ def add_new_user_api(request):
         AuthorizedUser.objects.create(form=form_in, users=user)
         
         return JsonResponse({'User successfully created and authorized'}, status=400)
+
+    if request.method == 'DELETE':
+        data = json.loads(request.body)
+        aut_id = data['aut_id']
+        
+        if AuthorizedUser.objects.filter(id=aut_id).exists():
+            AuthorizedUser.objects.get(id=aut_id).delete()
+        return JsonResponse({'message': 'User deleted successfully'}, status=200)
+    return JsonResponse({'error': 'User not found'}, status=404)

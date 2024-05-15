@@ -31,30 +31,28 @@
   }
 
   /* CSS สำหรับป๊อปอัป */
+  .popup-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    width: 300px; /* หรือขนาดที่เหมาะสม */
+    height: 80%; /* ปรับตามความต้องการ */
+    overflow: auto; /* เพิ่มแถบเลื่อนแนวตั้งถ้าต้องการ */
+    text-align: center;
+    position: relative; /* สำหรับตำแหน่งของปุ่มปิด */
+}
+
 .popup {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* สีพื้นหลังโปร่งใส */
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
-    backdrop-filter: blur(5px); /* เบลอพื้นหลัง */
+    background-color: rgba(0, 0, 0, 0.5);
 }
-
-.popup-content {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    width: 50%;
-    max-width: 600px;
-    position: relative;
-}
-
 .popup-content h2 {
     margin-top: 0;
     font-size: 24px;
@@ -109,6 +107,25 @@ body.blur-background {
   margin-right: 10px; /* คุณสามารถปรับระยะห่างตามต้องการ */
 }
  {% endcomment %}
+ .user-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px; /* เพิ่มระยะห่างระหว่างแถว */
+}
+
+.user-row input {
+  flex: 1;
+  margin-right: 10px; /* เพิ่มระยะห่างระหว่าง input กับปุ่มลบ */
+}
+
+.btn-delete-user {
+  background-color: #ff4d4d; /* สีแดงสำหรับปุ่มลบ */
+  border: none;
+  color: white;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
   </style>
   
   <!DOCTYPE html>
@@ -269,33 +286,41 @@ body.blur-background {
                 {% endif %}
             {% endfor %}
 
-                    
-            รายชื่อ
-                    <div class="container" id="aut_user">
-                      <div class="popup" id="popup1" style="display:none;">
-                        <div class="popup-content">
-                          <span class="close" onclick="togglePopup()">&times;</span>
-                      {% for user in context.aut_user %}
-                      {% if forloop.first %}
-                      <button type="button" onclick="add_user({{user.form.id}})">เพิ่มรายชื่อ</button>
-                      {% endif%}
-                      <div class="input-container" id="input-container">
-                      {% comment %} <label>{{ forloop.counter }}</label> {% endcomment %}
-                        <input type="text" id="user_{{ user.id }}" name="user_{{ user.id }}" value="{{ user.users.username }}" readonly data-type="user" />
-                      {%endfor%}
-                    </div>
-                  </div>
-                </div>
-                      </div>
-
-
-
           </div>
           
           <div class="newParent" id="newParent"> </div>
           <button type="submit" >Save changes</button>
       </form>
-  
+      
+      <div class="container" id="aut_user">
+        <div class="popup" id="popup1" style="display:none;">
+          <div class="popup-content">
+            <span class="close" onclick="togglePopup()">&times;</span>
+              {% if not context.aut_user %}
+                <div class="input-container" id="input-container">
+                  <div class="user-row">
+                    {% for data in context.form%}
+                      <button type="button" onclick="add_user({{data.id}})">เพิ่มรายชื่อ</button>
+                    {% endfor %} 
+                  </div>
+                </div>
+              {%endif%} 
+            {% for user in context.aut_user %}
+            {% if forloop.first %}
+            <button type="button" onclick="add_user({{user.form.id}})">เพิ่มรายชื่อ</button>
+            {% endif%}
+            <div class="input-container" id="input-container">
+            {% comment %} <label>{{ forloop.counter }}</label> {% endcomment %}
+            <div class="user-row">
+              <input type="text" id="user_{{ user.id }}" name="user_{{ user.id }}" value="{{ user.users.username }}" readonly data-type="user" />
+              <button type="button" class="btn-delete-user" onclick='delete_user({{user.id}})'>ลบ</button>
+            </div>
+            {%endfor%}
+         
+          </div>
+        </div>
+      </div>
+    </div>
       {% comment %}
       <script src="{% static 'js/script.js' %}"></script>
       <!-- Your JS file -->
@@ -305,10 +330,11 @@ body.blur-background {
   
   {% block scripts %}
   <script>
-    function togglePopup() {
+    {% comment %} function togglePopup() {
       var popup = document.getElementById("popup1");
       popup.style.display = popup.style.display === "none" ? "block" : "none";
-  }
+  } {% endcomment %}
+
 
     function checkHandle(checkboxId, parentId) {
         var checkbox = document.getElementById(checkboxId);

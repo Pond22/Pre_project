@@ -114,17 +114,18 @@ function getCookie(name) {
     return cookieValue;
 }
 
-function add_user(form_id) {
+function add_user(form_id, type) {
     const inputContainer = document.getElementById('input-container');
     const newInput = document.createElement('input');
     newInput.type = 'text';
+    newInput.placeholder ="กรุณาใส่รหัสนักศึกษา 10 หลัก";
     newInput.onblur = function() {
         if (this.value.trim() === '') { // ถ้าช่องว่าง
-            alert('กรุณาใส่รหัสนักศึกษา 10 หลัก'); // แสดงป็อปอัพ
-            this.focus(); // ให้โฟกัสกลับไปที่ช่องอินพุตนี้
+            /* alert('กรุณาใส่รหัสนักศึกษา 10 หลัก'); // แสดงป็อปอัพ */
+            /* this.focus(); // ให้โฟกัสกลับไปที่ช่องอินพุตนี้ */
         } else if (this.value.trim().length !== 10) { // ตรวจสอบว่ามี 10 หลักหรือไม่
-            this.focus(); // ให้โฟกัสกลับไปที่ช่องอินพุตนี้
-            this.scrollIntoView(); 
+            /* this.focus(); // ให้โฟกัสกลับไปที่ช่องอินพุตนี้
+            this.scrollIntoView();  */
         } else {
             saveData_user(this, form_id); // ถ้าข้อมูลถูกต้อง, บันทึกข้อมูล
         }
@@ -137,7 +138,7 @@ function add_user(form_id) {
 
   function saveData_user(inputElement, form_id) {
     const value = inputElement.value;
-    const apiUrl = '/add_new_user_api/'; 
+    const apiUrl = '/manage_AuthorizedUser/'; 
 
     fetch(apiUrl, {
         method: 'POST',
@@ -159,12 +160,90 @@ function add_user(form_id) {
     })
     .then(data => {
         console.log('Success:', data);
-        location.reload();
+        location.reload(); 
     })
     .catch(error => {
         console.error('Error:');
+        location.reload(); 
     });
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const formElement = document.getElementById('editForm');
+    const formFields = formElement.querySelectorAll('input, select, textarea');
+    
+    const saveFormData = () => {
+        const formData = new FormData(formElement);
+        const data = Object.fromEntries(formData.entries());
+        localStorage.setItem('formData', JSON.stringify(data));
+    };
+    
+
+    const loadFormData = () => {
+        const savedData = JSON.parse(localStorage.getItem('formData'));
+        if (savedData) {
+            Object.keys(savedData).forEach(key => {
+                const field = formElement.querySelector(`[name="${key}"]`);
+                if (field) {
+                    field.value = savedData[key];
+                }
+            });
+        }
+    };
+
+    formFields.forEach(field => {
+        field.addEventListener('input', saveFormData);
+    });
+
+    loadFormData();
+
+
+    const popupStatus = localStorage.getItem('popupStatus');
+    const popup = document.getElementById("popup1");
+    if (popupStatus === 'open') {
+        popup.style.display = "block";
+    } else {
+        popup.style.display = "none";
+    }
+});
+
+function togglePopup() {
+    const popup = document.getElementById("popup1");
+    if (popup.style.display === "none" || popup.style.display === "") {
+        popup.style.display = "block";
+        localStorage.setItem('popupStatus', 'open');
+    } else {
+        popup.style.display = "none";
+        localStorage.setItem('popupStatus', 'closed');
+    }
+}
+
+function delete_user(id){
+    fetch('/manage_AuthorizedUser/', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json', 
+            'X-CSRFToken': getCookie('csrftoken') 
+        },
+        body: JSON.stringify({
+            aut_id : id,
+        })
+    })
+    .then(response => {
+        console.log('Status:', response.status);
+        /* var userRow = document.getElementById('user_' + id).closest('.user-row');
+        if (userRow) {
+            userRow.remove();
+        } */
+        location.reload();
+        if (!response.ok) {
+            console.error('Error:', error)
+        }
+        return response.json(); 
+    })
+}
+
+
 /* async function updateForm(formId) {
     const formElement = document.getElementById('editForm');
     const formData = new FormData(formElement);

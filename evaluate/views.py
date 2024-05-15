@@ -116,6 +116,7 @@ def create_form(request):
                 if round == 1: #ถ้าเป็นครั้งที่สองสร้างของอาจารย์
                     new_in.is_teacher_form = True
                     new_in.save()
+                    AuthorizedUser.objects.create(form=new_in, users=request.user,is_teacher=True)
                 if round == 0: #ถ้าเป็นสร้างครั้งแรก ทำแบบฟอร์มของนักเรียนแล้วเอาชื่อเข้า
                     start_time = time.time()
                     print("PASS1")
