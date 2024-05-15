@@ -114,3 +114,81 @@ function getCookie(name) {
     return cookieValue;
 }
 
+function add_user(form_id) {
+    const inputContainer = document.getElementById('input-container');
+    const newInput = document.createElement('input');
+    newInput.type = 'text';
+    newInput.onblur = function() {
+        if (this.value.trim() === '') { // ถ้าช่องว่าง
+            alert('กรุณาใส่รหัสนักศึกษา 10 หลัก'); // แสดงป็อปอัพ
+            this.focus(); // ให้โฟกัสกลับไปที่ช่องอินพุตนี้
+        } else if (this.value.trim().length !== 10) { // ตรวจสอบว่ามี 10 หลักหรือไม่
+            this.focus(); // ให้โฟกัสกลับไปที่ช่องอินพุตนี้
+            this.scrollIntoView(); 
+        } else {
+            saveData_user(this, form_id); // ถ้าข้อมูลถูกต้อง, บันทึกข้อมูล
+        }
+    };
+  
+    inputContainer.appendChild(newInput); // เพิ่มอินพุตใหม่เข้าไปในคอนเทนเนอร์
+    newInput.scrollIntoView(); 
+    newInput.focus(); 
+  }
+
+  function saveData_user(inputElement, form_id) {
+    const value = inputElement.value;
+    const apiUrl = '/add_new_user_api/'; 
+
+    fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json', 
+            'X-CSRFToken': getCookie('csrftoken') 
+        },
+        body: JSON.stringify({
+            form_id: form_id,
+            student_code: value 
+        })
+    })
+    .then(response => {
+        console.log('Status:', response.status);
+        if (!response.ok) {
+            console.error('Error:', error)
+        }
+        return response.json(); 
+    })
+    .then(data => {
+        console.log('Success:', data);
+        location.reload();
+    })
+    .catch(error => {
+        console.error('Error:');
+    });
+}
+/* async function updateForm(formId) {
+    const formElement = document.getElementById('editForm');
+    const formData = new FormData(formElement);
+    const data = Object.fromEntries(formData.entries());
+    
+    const response = await fetch(`/update_form_api/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            form_id: formId,
+            data: data
+        })
+    });
+    
+    const result = await response.json();
+    if (response.ok) {
+        alert('Form updated successfully');
+        // Redirect or update the page as needed
+    } else {
+        console.error(result);
+        alert('Error updating form');
+    }
+}
+ */

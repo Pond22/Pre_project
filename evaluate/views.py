@@ -3,7 +3,7 @@ from django.http.response import HttpResponse
 from django.contrib.auth.decorators import login_required, user_passes_test
 from formsite.models import TemplateData, AssessmentItem, Teamplates, UserProfile, AuthorizedUser, AssessmentResponse, CommentForm
 from formsite.models import Form as form_model
-from .forms import PLOsForm, Assessment_Form, ClosForm, CSVUploadForm, DynamicLikertForm
+from .forms import PLOsForm, Assessment_Form, ClosForm, CSVUploadForm, DynamicLikertForm, FormUpdateForm
 from django.contrib.auth.models import User, Group
 from django.http import JsonResponse
 from rest_framework.views import APIView
@@ -46,7 +46,8 @@ def eva_home(request):
 def evaluate_form(request, form_id):
     if AssessmentResponse.objects.filter(respondent=request.user, assessment_item__form=form_id).exists():
         return redirect('/evaluate/')
-    
+    elif not AuthorizedUser.objects.filter(users=request.user, form=form_id).exists():
+        return redirect('/index')
     if request.method == 'POST':
         form = DynamicLikertForm(request.POST, custom_param=form_id)
         if form.is_valid():
@@ -235,29 +236,47 @@ def form_detail(request):
 
 def edit_form(request, form_id): #แก้ไขฟอร์มหลังสร้าง
     form = form_model.objects.filter(id=form_id)
+    formID = form_model.objects.get(id=form_id)
     user_profile = get_object_or_404(UserProfile, user=request.user)
     Active_Template = Teamplates.objects.get(is_active=True, department=user_profile.department)
     assessment_items = AssessmentItem.objects.filter(form=form_id, parent__isnull=True, template_select__isnull=True)
     selection_item = AssessmentItem.objects.filter(form=form_id, parent__isnull=True, template_select__isnull=False)
     
+    if request.method == "POST":
+        form = FormUpdateForm(request.POST, instance=formID)
+        if form.is_valid():
+            form.save()
+            return redirect('/form/form_detail')
+        else:
+            return JsonResponse(form.errors, status=400)
+    
     template_data = []
     if Active_Template:
         template_data = Active_Template.TemplateData.all()
+        
+    form_update = FormUpdateForm(instance=formID)
+    aut_user = AuthorizedUser.objects.filter(form = formID)
     
+    for data in aut_user:
+        print(data.id)
+        print(data.users.username)
+        
     context = {
+        'aut_user':aut_user,
         'form': form,
         'assessment_items': assessment_items,
         'selection_item': selection_item,
-        'template_data':template_data
+        'template_data':template_data,
+        'form_update':form_update
     }
     return render(request, 'evaluate/edit_form.html', {'context':context})
 
-def API_addnew_tempaltedata (request):
+""" def API_addnew_tempaltedata (request):
     if request.method == 'POST':
         data = json.loads(request.body)
         form_id = data.get('form_id')
         items = data.get('items')
-        print(items)
+     
         try:
             form = form_model.objects.get(id=form_id)
 
@@ -286,7 +305,7 @@ def API_addnew_tempaltedata (request):
         except TemplateData.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Template item not found'})
     else:
-        return JsonResponse({'success': False, 'error': 'Invalid request method'})
+        return JsonResponse({'success': False, 'error': 'Invalid request method'}) """
     
 
 

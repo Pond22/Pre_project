@@ -200,7 +200,7 @@ def edit_template(request, form_id):
 
     return render(request, 'edit_template.html', {'template': template})
 
-#อัพเดตข้อมูล PLO&O ใน Temlplate ที่มีอยู่ก่อน
+#อัพเดตข้อมูล PLO&O ใน Temlplate ที่มีอยู่ก่อน ลบด้วย
 def delete_update_template_data(request):
     if request.method == 'POST':
         data_id = request.POST.get('data_id')
