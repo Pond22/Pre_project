@@ -26,8 +26,8 @@ class FormUpdateForm(forms.ModelForm):
         ]
         widgets = {
             'section': forms.Select(choices=((1, 'ตอนเรียนที่ 1'), (2, 'ตอนเรียนที่ 2'), (3, 'ตอนเรียนที่ 3'), (4, 'ตอนเรียนที่ 4'), (5, 'ตอนเรียนที่ 5'), (6, 'ตอนเรียนที่ 6'), (7, 'ตอนเรียนที่ 7'), (8, 'ตอนเรียนที่ 8'), (9, 'ตอนเรียนที่ 9'), (10, 'ตอนเรียนที่ 10'))),
-            'start_date': DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
-            'end_date': DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+            'start_date': DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control', 'class': 'form-control'}),
+            'end_date': DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control', 'class': 'form-control'}),
         }
 
 class Assessment_Form(forms.ModelForm):

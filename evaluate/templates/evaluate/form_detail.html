@@ -71,7 +71,7 @@
                     {%else%}
                     แบบฟอร์ม การทวนสอบผลสัมฤทธิ์ โดยนักศึกษา
                     {%endif%}
-                    {{data.course.class_code}} {{data.course.name}} ตอนเรียนที่ {{data.section}}
+                    {{data.course.class_code}} {{data.course.name}} ตอนเรียนที่    {{data.section}}
                     |Form ID: {{data.id}} |
                           {{data.course.teamplates.semester}}/{{data.course.teamplates.year_number}}
                     <a href="{% url 'edit_form' form_id=data.id %}">

@@ -141,18 +141,32 @@ def create_form(request):
                 create_form = get_object_or_404(form_model, id=new_in.id)
                 if 'main_field0' in request.POST:  
                     for i in range(le + 1):
-                        name_main = 'main_field' + str(i)
-                        main_fields = request.POST.get(name_main, '') 
-                        #print('main_fields =', name_main)
-                        main_field = AssessmentItem.objects.create(text=main_fields, form=create_form)
-                        
-                        name_sub = 'sub_field_' + str(name_main)
-                        sub_fields = request.POST.getlist(name_sub)
-                        #print(sub_fields)
-                        #print('name_sub =', name_sub)
+                        if round == 1 :
+                            name_main = 'main_field' + str(i)
+                            main_fields = request.POST.get(name_main, '') 
+                            #print('main_fields =', name_main)
+                            main_field = AssessmentItem.objects.create(text=main_fields, form=create_form)
+                            
+                            name_sub = 'sub_field_' + str(name_main)
+                            sub_fields = request.POST.getlist(name_sub)
+                            #print(sub_fields)
+                            #print('name_sub =', name_sub)
 
-                        for sub_field_text in sub_fields:
-                            sub_field = AssessmentItem.objects.create(text=sub_field_text, parent=main_field, form=create_form)
+                            for sub_field_text in sub_fields:
+                                sub_field = AssessmentItem.objects.create(text=sub_field_text, parent=main_field, form=create_form)
+                        else :
+                            name_main = 'main_field' + str(i)
+                            main_fields = request.POST.get(name_main, '') 
+                            #print('main_fields =', name_main)
+                            main_field = AssessmentItem.objects.create(text=main_fields, form=create_form)
+                            
+                            name_sub = 'sub_field_' + str(name_main)
+                            sub_fields = request.POST.getlist(name_sub)
+                            #print(sub_fields)
+                            #print('name_sub =', name_sub)
+
+                            for sub_field_text in sub_fields:
+                                sub_field = AssessmentItem.objects.create(text=sub_field_text, parent=main_field, form=create_form)
                         
                     count = 0 #ทำขั้นตอนบันทึก PLOs
                     while True:
