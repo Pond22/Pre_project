@@ -175,6 +175,12 @@
         <form method="post" id="main">-->
           <div class="p-4">
             {% csrf_token %} {{new_form.as_p }}
+              {% comment %} <div id="session-container">
+                <label for="id_section">Session</label>  ไม่ใช้
+                <select id="id_section" name="section">
+                    <option value="">---------</option>
+                </select> {% endcomment %}
+            </div>
           </div>
           <!-- ป๊อปอัพ แม่แบบ-->
           <div id="popup" class="popup" style="display: none">
@@ -285,6 +291,32 @@
 {% endblock %}
 
 {% block scripts %}
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      const courseSelect = document.getElementById('id_course');
+      const sectionSelect = document.getElementById('id_section');
+
+      courseSelect.addEventListener('change', function() {
+          const courseId = courseSelect.value;
+          if (courseId) {
+              fetch(`/get_sections/${courseId}/`)
+                  .then(response => response.json())
+                  .then(data => {
+                      sectionSelect.innerHTML = '<option value="">---------</option>';
+                      data.forEach(section => {
+                          const option = document.createElement('option');
+                          option.value = section[0];
+                          option.textContent = `Section ${section[1]}`;
+                          sectionSelect.appendChild(option);
+                      });
+                  });
+          } else {
+              sectionSelect.innerHTML = '<option value="">---------</option>';
+          }
+      });
+  });
+</script>
 
 <script src="{% static "Func_Create_form.js"%}"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>

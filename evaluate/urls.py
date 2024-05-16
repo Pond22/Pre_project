@@ -17,7 +17,8 @@ urlpatterns = [
     path('addnew_form_data/', addnew_form_data, name='addnew_form_data'),
     path('API_updates_delete_form/', API_updates_delete_form, name='API_updates_delete_form'),
     path('update_form_api/', update_form_api, name='update_form_api'),
-    path('manage_AuthorizedUser/', manage_AuthorizedUser, name='manage_AuthorizedUser'), #api user
+    path('manage_AuthorizedUser/', manage_AuthorizedUser, name='manage_AuthorizedUser'),#api user
+    path('get_sections/<int:course_id>/', get_sections, name='get_sections'),
  
     
 ]

@@ -87,6 +87,13 @@ class Course(models.Model):
     name = models.CharField(max_length=50)
     """ section = models.CharField(max_length=2) """
     class_code = models.CharField(max_length=7)
+
+class Section(models.Model):
+    course = models.ForeignKey(Course, related_name='sections', on_delete=models.CASCADE)
+    session_number = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.course.name} - ตอนเรียนที่ {self.session_number} ~ ID = {self.id}"
     
 
 class Form(models.Model):
@@ -102,7 +109,8 @@ class Form(models.Model):
     
     name = models.CharField(max_length=100)
     class_code = models.CharField(max_length=10)
-    section = models.CharField(max_length=2) 
+    section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='forms')
+ 
     
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     create = models.DateTimeField(max_length=300, null=True, blank=True)
@@ -112,14 +120,14 @@ class Form(models.Model):
     """ year_number = models.IntegerField(
         verbose_name='ปีการศึกษา', 
         validators=[MinValueValidator(1999), MaxValueValidator(3100)]
-    ) """
+    ) """           
     start_date = models.DateTimeField(null=True, blank=True)
     end_date = models.DateTimeField(null=True, blank=True)
     expired = models.BooleanField(default=False) #เก็บว่าแบบฟอร์มนั้นครบกำหนดเวลาหรือยัง
     #users = models.ManyToManyField(User, related_name='forms') #ทำให้เกี่ยวกันกับ User แบบ M to N 
      
     def __str__(self):
-        return str(self.id)
+        return f"ไอดีฟอร์ม {self.id} secID {self.section.id}"
  
 class AuthorizedUser(models.Model):
     form = models.ForeignKey(Form, on_delete=models.CASCADE)  

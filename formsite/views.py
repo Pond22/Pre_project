@@ -185,12 +185,12 @@ def manage_template(request):
     if request.method == "POST":
         pass
     else:
-        template = Teamplates.objects.filter(department=user_profile.department)
-        for data in template:
+        template = Teamplates.objects.filter(department=user_profile.department).order_by('-is_active') 
+        """ for data in template:
             for template_data in data.TemplateData.all():
                 print(template_data.text)
             # แสดงข้อมูลจากโมเดล CLO ที่เชื่อมโยงกับ Teamplates นี้
-            """ for clo in data.CLO.all():
+            for clo in data.CLO.all():
                 print(clo.text) """
     return render(request, 'manage_template.html', {'form': template, 'user_profile': user_profile})
 
@@ -200,7 +200,7 @@ def edit_template(request, form_id):
 
     return render(request, 'edit_template.html', {'template': template})
 
-#อัพเดตข้อมูล PLO&O ใน Temlplate ที่มีอยู่ก่อน ลบด้วย
+#อัพเดตข้อมูล PLO&O ใน Temlplate ที่มีอยู่ก่อน ลบ
 def delete_update_template_data(request):
     if request.method == 'POST':
         data_id = request.POST.get('data_id')

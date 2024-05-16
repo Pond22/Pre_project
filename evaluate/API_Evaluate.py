@@ -5,6 +5,11 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import *
 
+def get_sections(request, course_id):
+    sections = Section.objects.filter(course_id=course_id)
+    section_list = [(section.id, section.session_number) for section in sections]
+    return JsonResponse(section_list, safe=False)
+
 def API_addnew_tempaltedata (request):
     if request.method == 'POST':
         data = json.loads(request.body)

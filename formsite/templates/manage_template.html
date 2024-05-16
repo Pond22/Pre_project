@@ -51,49 +51,121 @@
     
 </style>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payap University</title>
-    <link rel="stylesheet" href="styles.css">
+<style>
+    .relative {
+        position: relative;
+    }
+
+    .inline-block {
+        display: inline-block;
+    }
+
+    .w-14 {
+        width: 3.5rem;
+    }
+
+    .toggle-checkbox {
+        display: none;
+    }
+
+    .toggle-label {
+        display: block;
+        overflow: hidden;
+        cursor: pointer;
+        border-radius: 9999px;
+        background-color: #d1d5db;
+        transition: background-color 0.2s ease-in-out;
+        padding: 2px;
+        height: 1.75rem; /* Set a specific height */
+    }
+
+    .toggle-label:before {
+        content: "";
+        display: block;
+        width: 1.75rem;
+        height: 1.75rem;
+        background: white;
+        border-radius: 9999px;
+        transition: transform 0.2s ease-in-out;
+    }
+
+    .toggle-checkbox:checked + .toggle-label {
+        background-color: #22c55e; /* Color when toggle is active */
+    }
+
+    .toggle-checkbox:checked + .toggle-label:before {
+        transform: translateX(85%);
+    }
+</style>
 </head>
 <body>
-    <div class="main-container">
-        <h1>จัดการหัวข้อประเมินการสอน (PLO) สาขา{{user_profile.department}}</h1>
-        <div class="form-list">
-            {% for data in form%}
-            <div class="form-card">
-                <label>
-                    <input type="checkbox">
-                    Create by: {{data.created}}
-                    Form ID: {{data.id}}
-                            {{data.semester}}/{{data.year_number}}
-                    {% comment %} {% for clo_data in data.CLO.all %}
-                        CLO {{ clo_data.text }}
-                    {% endfor %} {% endcomment %}
-                    <a href="{% url 'edit_template' form_id=data.id %}">
-                        <button onclick="viewForm({{data.id}})">จัดการแบบฟอร์ม {{data.semester}}/{{data.year_number}} </button>
-                    </a>
-                </label>
+<div class="main-container">
+    <h1>จัดการหัวข้อประเมินการสอน (PLO) สาขา {{ user_profile.department }}</h1>
+    <div class="form-list">
+        {% for data in form %}
+        <div class="form-card">
+            <div class="relative inline-block w-14 h-8">
+                <input
+                    id="toggle_{{ forloop.counter }}"
+                    class="toggle-checkbox"
+                    type="checkbox"
+                    onclick="set_active({{data.id}})"
+                    {% if data.is_active %} checked {% endif %}
+                />
+                <label
+                    for="toggle_{{ forloop.counter }}"
+                    class="toggle-label block overflow-hidden h-8 rounded-full bg-gray-300 cursor-pointer"
+                ></label>
             </div>
-            {% endfor %}
-            <a href="create_plo">
-                <button>Create Template!</button>
+            Create by: {{ data.created_by }} ii {{data.is_active}}
+            Form ID: {{ data.id }}
+            {{ data.semester }}/{{ data.year_number }}
+            <a href="{% url 'edit_template' form_id=data.id %}">
+                <button onclick="viewForm({{ data.id }})">จัดการแบบฟอร์ม {{ data.semester }}/{{ data.year_number }} </button>
             </a>
         </div>
+        {% endfor %}
+        <a href="create_plo">
+            <button>Create Template!</button>
+        </a>
     </div>
-</body>
-</html>
+</div>
 
 <script>
-    function viewForm(formId) {
-        alert("Viewing details for Form ID: " + formId);
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
     }
-    
-    {% comment %} document.getElementById('create-form').addEventListener('click', function() {
-        alert('Create new form functionality goes here.');
-    }); {% endcomment %}
-    
+    return cookieValue;
+}
+
+function set_active(tem_id) {
+    fetch('/set_active/', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRFToken': getCookie('csrftoken') 
+        },
+    body: `&form_id=${encodeURIComponent(tem_id)}`
+    })
+    .then(response => response.json())
+    .then(data => console.log('Success:', data))
+    .catch(error => console.error('Error:', error));
+      
+    //location.reload();    
+}
+    {% comment %} function viewForm(formId) {
+        alert("Viewing details for Form ID: " + formId);
+    } {% endcomment %}
 </script>
+</body>
+</html>
