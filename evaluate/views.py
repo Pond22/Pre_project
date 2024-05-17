@@ -74,24 +74,6 @@ def evaluate_form(request, form_id):
 
     return render(request, 'evaluate/evaluate_form.html', {'form': form})
 
-    
-@login_required(login_url="sign_in")   #Not used here
-def create_plo(request):
-    if request.method == "POST":
-        form = PLOsForm(request.POST)  # สร้าง ModelForm จากข้อมูลที่ผู้ใช้ส่งมา
-        if form.is_valid():
-           
-            plo_instance = form.save(commit=False)
-            plo_instance.created_by = request.user
-            plo_instance.save()
-        return redirect('eva_home')  # ให้ redirect ไปที่หน้าหลักหลังจากบันทึกสำเร็จ
-    else:
-        form = PLOsForm()  # สร้างฟอร์มใหม่สำหรับการกรอกข้อมูล
-        
-    context = {'form': form}
-    return render(request, 'evaluate/create_plo.html', context)
-
-
 #@login_required(login_url="sign_in")
 @teacher_required
 def create_form(request):
@@ -222,25 +204,7 @@ def create_form(request):
             print(f"ตอบโดย: {response.respondent.username}, คำตอบ: {response.response}, ความเห็น: {response.response_comment}")'''
 
     
-@login_required(login_url="sign_in")  
-def create_clo(request, form_id): #Not use here
-    create_form = get_object_or_404(form_model, id=form_id)
-    if request.method == "POST":
-        form = ClosForm(request.POST)
-        if form.is_valid():
-            clo_instance = form.save(commit=False)
-            print("testr")
-            clo_instance.text = request.POST['text']
-            print(clo_instance.text)
-            clo_instance.created_by = request.user
-            clo_instance.form = create_form
-            clo_instance.save()
-            return redirect('eva_home')
-        else : print ("Error creating")
-    else:
-        form = ClosForm()
-    context = {'form': form, 'form_id': form_id}
-    return render(request, 'evaluate/create_clo.html', {'context': context})
+
 
 
 @login_required(login_url="sign_in") #อาจารย์ดูแบบฟอร์มของตัวเอง
@@ -441,49 +405,4 @@ def handle_sub_clo_delete(request):
     except AssessmentItem.DoesNotExist:
         return False
 
-#สำหรับการบันทึก 2 รอบรอบแรกจะเป็น form สำหรับนักศึกษาที่มีสิทธ์ประเมินรายวิชานั้นๆ รอบที่ 2 จะบันทึกสำหรับอาจารย์
-'''
-@login_required(login_url="sign_in")
-def create_form(request):
-    if request.method == 'POST':
-        for i in range(2):
-            
-            le = request.POST.get('length')
-            if le is None:
-                le = 0
-            else:
-                le = int(le)
 
-            new_form = Form(request.POST)
-            if new_form.is_valid():
-                new_in = new_form.save(commit=False)
-                new_in.created_by = request.user
-                if i==1 :
-                    new_in.Active = True
-                new_in.save()
-                
-                #somthing = 'main_field0'
-                
-                if 'main_field0' in request.POST:
-                    for i in range(le + 1):
-                        create_form = get_object_or_404(form_model, id=new_in.id)
-                        name_main = 'main_field' + str(i)
-                        main_fields = request.POST.get(name_main)  # ใช้ค่าว่างในกรณีที่ไม่พบค่า
-                        print('main_fields =', name_main)
-                        main_field = AssessmentItem.objects.create(text=main_fields, form=create_form, created_by=request.user)
-                        
-                        name_sub = 'sub_field_' + str(name_main)
-                        sub_fields = request.POST.getlist(name_sub)
-                        print(sub_fields)
-                        print('name_sub =', name_sub)
-
-                        for sub_field_text in sub_fields:
-                            sub_field = AssessmentItem.objects.create(text=sub_field_text, parent=main_field, form=create_form, created_by=request.user)
-
-                    return HttpResponse("Data saved successfully!")
-                else:
-                    return HttpResponse("Error: No data for 'main_field0'")  
-    else:
-        new_form = Form()
-        return render(request, 'evaluate/create_form.html', {'new_form': new_form})
-        '''
