@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import os
 from celery.schedules import crontab
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -48,10 +49,19 @@ CELERY_TIMEZONE = 'Asia/Bangkok'
 CELERY_BEAT_SCHEDULE = {
     'check-expired-forms': {
         'task': 'formsite.tasks.check_expired_forms',
-        'schedule': crontab(minute='*'),  # รันทุกนาที
+        'schedule': crontab(minute='*'),  # รันทุกนาที 
     },
 }
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL ='cas.payap@gmail.com'
+
+print(config('EMAIL_HOST_PASSWORD'))
 LOGOUT_REDIRECT_URL = '/sign_in/'
 #เพิ่มเอง
 
@@ -91,7 +101,8 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'evaluate', 'templates')
+            os.path.join(BASE_DIR, 'evaluate', 'templates'),
+            os.path.join(BASE_DIR, 'member', 'templates', 'member')
             ],
         'APP_DIRS': True,
         'OPTIONS': {
