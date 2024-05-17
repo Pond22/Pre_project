@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,8 +32,6 @@ ALLOWED_HOSTS = []
 #เพิ่มเอง
 DATA_UPLOAD_MAX_NUMBER_FIELDS = None
 
-
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication'
@@ -41,6 +40,17 @@ REST_FRAMEWORK = {
 
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Bangkok'
+
+CELERY_BEAT_SCHEDULE = {
+    'check-expired-forms': {
+        'task': 'formsite.tasks.check_expired_forms',
+        'schedule': crontab(minute='*'),  # รันทุกนาที
+    },
+}
 
 LOGOUT_REDIRECT_URL = '/sign_in/'
 #เพิ่มเอง
@@ -141,7 +151,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Bangkok'
 
 USE_I18N = True
 

@@ -11,6 +11,7 @@ from rest_framework.response import Response
 import pandas as pd
 import time
 from django.utils import timezone
+from django.utils.timezone import localtime
 import json
 # Create your views here.
 
