@@ -4,6 +4,8 @@ from django.utils import timezone
 from django.utils.timezone import localtime
 from .models import *
 import requests
+from django.core.mail import send_mail
+from django.conf import settings
 
 def send_line_notify(message, token):
     url = 'https://notify-api.line.me/api/notify'
@@ -15,40 +17,61 @@ def send_line_notify(message, token):
     response = requests.post(url, headers=headers, data=data)
     return response.status_code, response.text
 
+def send_email_notify(subject, message, recipient_list):
+    send_mail(
+        subject,
+        message,
+        settings.DEFAULT_FROM_EMAIL,
+        recipient_list,
+        fail_silently=False,
+    )
+
 @shared_task
 def check_expired_forms():
     now = localtime(timezone.now())
     expired_forms = Form.objects.filter(expired=False)
     print(f"เวลาปัจจุบัน {now}")
     for form in expired_forms:
-        if form.end_date and form.end_date <= now: 
-            form.expired = True
-            form.save()
-            message = f"ฟอร์ม {form.name} หมดเวลา"
-            authorized_users = AuthorizedUser.objects.filter(form=form)
-            
-            for authorized_user in authorized_users:
-                try:
-                    user_profile = UserProfile.objects.get(user=authorized_user.users)
-                    print("ine ====",{user_profile.line_token})
-                    if user_profile.line_token:
-                        send_line_notify(message, user_profile.line_token)
-                        print(f"Sent notification to {authorized_user.users.username}")
-                except UserProfile.DoesNotExist:
-                    print(f"UserProfile does not exist for user {authorized_user.users.username}")
-        else:
-            message = "Form {{form.id}} has not expired yet or end_date is None."
-            authorized_users = AuthorizedUser.objects.filter(form=form)
-  
-            for authorized_user in authorized_users:
-                try:
-                    user_profile = UserProfile.objects.get(user=authorized_user.users)
-                    print("ine ====",{user_profile.line_token})
-                    if user_profile.line_token:
-                        send_line_notify(message, user_profile.line_token)
-                        print(f"Sent notification to {authorized_user.users.username}")
-                except UserProfile.DoesNotExist:
-                    print(f"UserProfile does not exist for user {authorized_user.users.username}")
+        authorized_users = AuthorizedUser.objects.filter(form=form)
+        for authorized_user in authorized_users:
+            try:
+                user_profile = UserProfile.objects.get(user=authorized_user.users)
+                email = user_profile.user.email
+                line_token = user_profile.line_token
+                """ if form.start_date and form.start_date == now:
+                    # Notify for start date
+                    message = f"ฟอร์ม {form.name} ถึงเวลาประเมินแล้ว"
+                    if line_token:
+                        send_line_notify(message, line_token)
+                        print(f"Sent LINE notification to {authorized_user.users.username}")
+                    if email:
+                        send_email_notify("ถึงเวลาประเมินแบบฟอร์ม", message, [email])
+                        print(f"Sent email notification to {authorized_user.users.username}") """
+                
+                if form.end_date and form.end_date <= now:
+                    # Notify for end date
+                    form.expired = True
+                    form.save()
+                    message = f"ฟอร์ม {form.name} หมดเวลาแล้ว"
+                    if line_token:
+                        send_line_notify(message, line_token)
+                        print(f"Sent LINE notification to {authorized_user.users.username}")
+                    if email:
+                        send_email_notify("แบบฟอร์มหมดเวลา", message, [email])
+                        print(f"Sent email notification to {authorized_user.users.username}")
+
+                elif form.end_date and (form.end_date - now).days == 1:
+                    # Notify for 1 day remaining
+                    message = f"ฟอร์ม {form.name} จะหมดเวลาใน 1 วัน"
+                    if line_token:
+                        send_line_notify(message, line_token)
+                        print(f"Sent LINE notification to {authorized_user.users.username}")
+                    if email:
+                        send_email_notify("แบบฟอร์มจะหมดเวลาใน 1 วัน", message, [email])
+                        print(f"Sent email notification to {authorized_user.users.username}")
+                
+            except UserProfile.DoesNotExist:
+                print(f"UserProfile does not exist for user {authorized_user.users.username}")
 
 
 '''

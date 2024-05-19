@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from .serializers import CSVUploadForm as CSV_API
 from .models import TemplateData, Teamplates
 from django.http import JsonResponse
+from django.db.models import Avg
 # Create your views here.
 
 #def index(request):
@@ -178,6 +179,69 @@ def manage_course(request):
             print(section.session_number) 
     
     return render(request, 'manage_course.html', {'courses':courses, 'templates':templates})
+
+def report_main(request):
+    forms = Form.objects.filter(expired=True)
+
+    department = request.GET.get('department')
+    template = request.GET.get('template')
+    
+    if department:
+        forms = Form.objects.filter(template__department=department, expired=True)
+
+    if template:
+        forms = Form.objects.filter(template=template, expired=True)
+
+    departments = Departments.objects.all().distinct()
+    
+    """ courses = Course.objects.values_list('name', flat=True).distinct() """
+    
+    return render(request, 'report_main.html', {'form':forms, 'departments': departments})
+
+def report(request, form_id):
+    form = get_object_or_404(Form, id=form_id)
+    assessment_items = AssessmentItem.objects.filter(form=form, parent__isnull=True,template_select__isnull=True).annotate(average_response=Avg('assessmentresponse__response'))
+    plo = AssessmentItem.objects.filter(form=form, parent__isnull=True,template_select__isnull=False).annotate(average_response=Avg('assessmentresponse__response'))
+    comment = CommentForm.objects.filter(form=form,comment__isnull=False)
+
+    # สำหรับแต่ละ assessment item, กรอง sub_items และคำนวณค่าเฉลี่ย
+    for item in assessment_items:
+        sub_items_with_avg = item.sub_items.annotate(
+            average_response=Avg('assessmentresponse__response')
+        )
+        item.sub_items_with_avg = sub_items_with_avg
+        
+         # คำนวณค่าเฉลี่ยรวมของหัวข้อใหญ่
+        sub_avg_list = [sub.average_response for sub in sub_items_with_avg if sub.average_response is not None]
+        if sub_avg_list:
+            item.overall_average = sum(sub_avg_list) / len(sub_avg_list)
+        else:
+            item.overall_average = None
+            
+    total_sub_avg_list = []   
+         
+    # สำหรับ plo
+    for item in plo:
+        sub_items_with_avg = item.sub_items.annotate(
+            average_response=Avg('assessmentresponse__response')
+        )
+        item.sub_items_with_avg = sub_items_with_avg
+        
+        # คำนวณค่าเฉลี่ยรวมของหัวข้อใหญ่
+        sub_avg_list = [sub.average_response for sub in sub_items_with_avg if sub.average_response is not None]
+        total_sub_avg_list.extend(sub_avg_list)  # รวมค่าเฉลี่ยของ sub_items ทั้งหมดใน total_sub_avg_list
+        if sub_avg_list:
+            item.overall_average = sum(sub_avg_list) / len(sub_avg_list)
+        else:
+            item.overall_average = None
+
+    # คำนวณค่าเฉลี่ยรวมของทุก PLO
+    if total_sub_avg_list:
+        overall_plo_average = sum(total_sub_avg_list) / len(total_sub_avg_list)
+    else:
+        overall_plo_average = None
+    
+    return render(request, 'report.html', {'form':form, 'assessment_items': assessment_items, 'plo':plo, 'overall_plo_average':overall_plo_average, 'comment':comment})
     
 '''
 def edit_template(request):

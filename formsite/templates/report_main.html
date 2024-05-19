@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>จัดการหัวข้อประเมินการสอน (PLO)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main-container {
+            background: white;
+            width: 80%;
+            margin: 20px auto;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .form-list {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .form-card {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px;
+            width: 95%;
+            background: #e9e9e9;
+        }
+
+        .form-card label {
+            display: block;
+        }
+
+        .form-card input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        .relative {
+            position: relative;
+        }
+
+        .inline-block {
+            display: inline-block;
+        }
+
+        .w-14 {
+            width: 3.5rem;
+        }
+
+        .toggle-checkbox {
+            display: none;
+        }
+
+        .toggle-label {
+            display: block;
+            overflow: hidden;
+            cursor: pointer;
+            border-radius: 9999px;
+            background-color: #d1d5db;
+            transition: background-color 0.2s ease-in-out;
+            padding: 2px;
+            height: 1.75rem; /* Set a specific height */
+        }
+
+        .toggle-label:before {
+            content: "";
+            display: block;
+            width: 1.75rem;
+            height: 1.75rem;
+            background: white;
+            border-radius: 9999px;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #22c55e; /* Color when toggle is active */
+        }
+
+        .toggle-checkbox:checked + .toggle-label:before {
+            transform: translateX(85%);
+        }
+
+        .filter-form {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .filter-form select {
+            margin-right: 10px;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="main-container">
+    <h1>แบบรายงานผลการทวนสอบผลสัมฤทธิ์</h1>
+
+    <!-- ฟอร์มสำหรับกรองข้อมูล -->
+    <form method="GET" action="{% url 'report_main' %}" class="filter-form">
+        <select name="department" id="department-select">
+            <option value="">เลือกสาขา</option>
+            {% for department in departments %}
+            <option value="{{ department.id }}" {% if request.GET.department == department.id|stringformat:"s" %}selected{% endif %}>{{ department.name }}</option>
+            {% endfor %}
+        </select>
+        
+        <select name="template" id="course-select">
+            <option value="">ภาค/ปีการศึกษา</option>
+        </select>
+        
+        <button id="se" type="submit">กรองข้อมูล</button>
+    </form>
+
+    <div class="form-list">
+        {% for data in form %}
+        <div class="form-card">
+            {% comment %} <div class="relative inline-block w-14 h-8">
+                <label
+                    for="toggle_{{ forloop.counter }}"
+                    class="toggle-label block overflow-hidden h-8 rounded-full bg-gray-300 cursor-pointer"
+                ></label>
+            </div> {% endcomment %}
+            วิชา : {{ data.course.name }}  {{data.course.class_code}}
+                {% if data.is_teacher_form %}
+                รายงานผลการทวนสอบผลสัมฤทธิ์ โดยอาจารย์ (ทส.02)
+                {% else %}
+                รายงานผลการทวนสอบผลสัมฤทธิ์ โดยนักศึกษา (ทส.01)
+                {% endif%}
+            <a href="{% url 'report' form_id=data.id %}">
+                <button onclick="viewForm({{ data.id }})">แสดงรายงาน</button>
+            </a>
+                <button type="button" class="download-pdf-btn" data-form-id="{{ data.id }}">ดาวน์โหลด PDF</button>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+document.getElementById("department-select").addEventListener("change", function() {
+    var departmentId = this.value;
+    var courseSelect = document.getElementById("course-select");
+
+    // Clear current options
+    courseSelect.innerHTML = '<option value="">ภาค/ปีการศึกษา</option>';
+
+    if (departmentId) {
+        fetch(`/get_Templates_by_departmen/?department_id=${departmentId}`)
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(template => {
+                var option = document.createElement("option");
+                option.value = template.id;
+                option.textContent = template.semester+'/'+template.year_number;
+                courseSelect.appendChild(option);
+            });
+
+        })
+        .catch(error => console.error("Error fetching templates:", error));
+    }
+});
+
+document.addEventListener('click', function(event) {
+    if (event.target.classList.contains('download-pdf-btn')) {
+        const formId = event.target.getAttribute('data-form-id');
+        fetch(`/report/${formId}/pdf/`, {
+            method: 'GET',
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `report_${formId}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+    }
+});
+
+</script>
+</body>
+</html>
