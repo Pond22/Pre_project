@@ -13,10 +13,13 @@ from .serializers import CSVUploadForm as CSV_API
 from .models import TemplateData, Teamplates
 from django.http import JsonResponse
 from django.db.models import Avg
+from django.contrib.auth.decorators import login_required, user_passes_test
+from formsite.user_detect import*
 # Create your views here.
 
 #def index(request):
     #return render(request, '/index.html')
+
 
 def home(request):
     #x = form.objects.filter(id__range=(1,4), name__in=("วิชาภาษาไทย", "วิชาภาษาซี"))
@@ -35,6 +38,8 @@ def write_to_file(time, name):
 
     return print("END")
 
+@login_required(login_url="sign_in")
+@admin_required 
 def create_plo(request):
     user_profile = get_object_or_404(UserProfile, user=request.user) #คิวรี่แอดมินที่เข้าหน้านั้นตอนนั้นมาหาสาขา
     
@@ -89,6 +94,8 @@ def create_plo(request):
         #print(user_profile.department)
         return render(request, 'create_plos.html', {'form': form, 'user_profile':user_profile})
     
+@login_required(login_url="sign_in")
+@admin_required      
 def manage_template(request):
     user_profile = get_object_or_404(UserProfile, user=request.user)
     template = Teamplates.objects.filter(department=user_profile.department)
@@ -105,9 +112,15 @@ def manage_template(request):
                 print(clo.text) """
     return render(request, 'manage_template.html', {'form': template, 'user_profile': user_profile})
 
+@login_required(login_url="sign_in") 
 def edit_template(request, form_id):
-
+    user_profile = get_object_or_404(UserProfile, user=request.user)
     template = Teamplates.objects.filter(id=form_id)
+    tem = get_object_or_404(Teamplates, id=form_id)
+    
+    if  not tem.department == user_profile.department:
+        return redirect('/manage_template')
+        
 
     return render(request, 'edit_template.html', {'template': template})
 
@@ -167,7 +180,8 @@ def addnew_template_data(request):
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
     
-    
+@login_required(login_url="sign_in") 
+@admin_required    
 def manage_course(request):
 
     user_profile = get_object_or_404(UserProfile, user=request.user)
@@ -180,6 +194,9 @@ def manage_course(request):
     
     return render(request, 'manage_course.html', {'courses':courses, 'templates':templates})
 
+@login_required(login_url="sign_in") 
+@committee_required
+@teacher_required
 def report_main(request):
     forms = Form.objects.filter(expired=True)
 
@@ -198,11 +215,18 @@ def report_main(request):
     
     return render(request, 'report_main.html', {'form':forms, 'departments': departments})
 
+@login_required(login_url="sign_in") 
+@committee_required
+@teacher_required
 def report(request, form_id):
+    
     form = get_object_or_404(Form, id=form_id)
     assessment_items = AssessmentItem.objects.filter(form=form, parent__isnull=True,template_select__isnull=True).annotate(average_response=Avg('assessmentresponse__response'))
     plo = AssessmentItem.objects.filter(form=form, parent__isnull=True,template_select__isnull=False).annotate(average_response=Avg('assessmentresponse__response'))
     comment = CommentForm.objects.filter(form=form,comment__isnull=False)
+
+    if form.created_by != request.user and not request.user.groups.filter(name='กรรมการ').exists():
+        return redirect('/report_main')
 
     # สำหรับแต่ละ assessment item, กรอง sub_items และคำนวณค่าเฉลี่ย
     for item in assessment_items:

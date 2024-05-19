@@ -13,22 +13,12 @@ import time
 from django.utils import timezone
 from django.utils.timezone import localtime
 import json
+from formsite.user_detect import*
 # Create your views here.
 
-def user_is_teacher(user):
-    return user.groups.filter(name='อาจารย์').exists() or user.is_superuser
-
-def teacher_required(view_func):
-    decorated_view_func = user_passes_test(user_is_teacher)
-    
-    def wrapper(request, *args, **kwargs):
-        if not user_is_teacher(request.user):
-            return HttpResponse("TEACHER ONLY!")
-        return view_func(request, *args, **kwargs)
-    
-    return wrapper
-
 @login_required(login_url="sign_in")   #แสดงฟอร์มที่สามารถประเมินได้ทั้งหมด
+@student_required
+@teacher_required
 def eva_home(request):
     user = request.user
     current_time = timezone.now()
@@ -44,6 +34,9 @@ def eva_home(request):
     
     return render(request, 'evaluate/evaluate_home.html', {'form':forms_not_answered})
 
+@login_required(login_url="sign_in")
+@student_required
+@teacher_required
 def evaluate_form(request, form_id):
     if AssessmentResponse.objects.filter(respondent=request.user, assessment_item__form=form_id).exists():
         return redirect('/evaluate/')
@@ -74,7 +67,7 @@ def evaluate_form(request, form_id):
 
     return render(request, 'evaluate/evaluate_form.html', {'form': form})
 
-#@login_required(login_url="sign_in")
+@login_required(login_url="sign_in")
 @teacher_required
 def create_form(request):
     user_profile = get_object_or_404(UserProfile, user=request.user)
@@ -208,13 +201,18 @@ def create_form(request):
 
 
 @login_required(login_url="sign_in") #อาจารย์ดูแบบฟอร์มของตัวเอง
+@teacher_required
 def form_detail(request):
     user = request.user
     forms = form_model.objects.filter(created_by=user, expired=False)
     """ context = {'forms': forms, 'user':user} """
     return render(request, 'evaluate/form_detail.html', {'forms':forms})
 
+@login_required(login_url="sign_in")
+@teacher_required
 def edit_form(request, form_id): #แก้ไขฟอร์มหลังสร้าง
+    if  not form_model.objects.filter(created_by=request.user, expired=False, id = form_id):
+        return redirect('/form/form_detail')
     form = form_model.objects.filter(id=form_id)
     formID = form_model.objects.get(id=form_id)
     user_profile = get_object_or_404(UserProfile, user=request.user)
@@ -289,7 +287,7 @@ def edit_form(request, form_id): #แก้ไขฟอร์มหลังส�
     
 
 
-
+""" 
 @login_required(login_url="sign_in")   
 def view_form(request, form_id):
     name_who_created = get_object_or_404(form_model, id=form_id)
@@ -405,4 +403,4 @@ def handle_sub_clo_delete(request):
     except AssessmentItem.DoesNotExist:
         return False
 
-
+ """

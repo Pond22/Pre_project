@@ -3,12 +3,16 @@ from django.http.response import HttpResponse
 from django.contrib.auth import authenticate, login, logout
 from member.forms import RegisterForm
 from django.contrib.auth.models import Group, User
-from formsite.models import TemplateData, AssessmentItem, Teamplates, UserProfile, AuthorizedUser
+from formsite.models import TemplateData, AssessmentItem, Teamplates, UserProfile, AuthorizedUser, Departments
 import re
+from formsite.user_detect import*
+from django.http import JsonResponse
 # Create your views here.
 def clean_string(value):
     return re.sub(r'\s+', '', value)
 
+@login_required(login_url="sign_in") 
+@admin_required
 def manage_member(request):
     user_profile = get_object_or_404(UserProfile, user=request.user) #คิวรี่แอดมินที่เข้าหน้านั้นตอนนั้นมาหาสาขา
     group = Group.objects.get(name="อาจารย์")
@@ -93,20 +97,22 @@ def sign_up(request: HttpResponse):
     context = {'form': form}
     return render(request, 'member/sign_up.html', context)
 
-'''
-แนวคิด
+def add_teacher(request):
+    if request.method == 'POST':
+        first_id = request.POST.get('first_id')
+        prefix_name = request.POST.get('prefix_name')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        department = request.POST.get('department')
 
-def import_users_from_csv(file_path):
-    with open(file_path, 'r') as file:
-        reader = csv.reader(file)
-        for row in reader:
-            email = row[0] + '@payap.ac.th'  
-            password = row[0]  # ใช้คอลัมน์ที่ 0 เป็นรหัสผ่าน
-            user = User.objects.create_user(username=email, email=email, password=password)
-            group = Group.objects.get(name='นักศึกษา')
-            user.groups.add(group)  # เพิ่มเข้ากลุ่มที่ 2
-
-import_users_from_csv('/path/to/your/csv/file.csv') เรียกใช้
-
-แบบนี้จะกำหนดกลุ่มผู้ใช้ (นักศึกษา) ทั้งหมดในทีเดียวโดยที่แต่ละฟอร์มที่เอามาลงจะสามารถตรวจสอบได้ว่านักศึกษาคนไหนมีสิทธิ์ในการประเมินแบบฟอร์มนี้และเป็นการสร้างผู้ใช้ใหม่ไปในตัว
-'''
+        if first_id and prefix_name and first_name and last_name and email and department:
+            tem_po = get_object_or_404(Departments, id=department)
+            user = User.objects.create_user(username=first_id, email=email, first_name=first_name, last_name=last_name, password=first_id)
+            group = Group.objects.get(name='อาจารย์')
+            user.groups.add(group)
+            user_profile = UserProfile.objects.create(user=user, prefix=prefix_name, department=tem_po)
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'error': 'กรุณากรอกข้อมูลให้ครบถ้วน'})
+    return JsonResponse({'success': False, 'error': 'เฉพาะคำขอแบบ POST เท่านั้น'})

@@ -9,7 +9,7 @@ urlpatterns = [
     path('evaluate/create_form', views.create_form, name='create_form'),#u
     #เอาไว้ดูรายละเอียดฟอมร์ที่มีทั้งหมด
     path('form/form_detail', views.form_detail, name='form_detail'),#u
-    path('form/<int:form_id>/', views.view_form, name='view_form'),#u
+   # path('form/<int:form_id>/', views.view_form, name='view_form'),#u
     path('edit_form/<int:form_id>/', views.edit_form, name='edit_form'), #u
     path('save-new-items/', API_addnew_tempaltedata, name='API_addnew_tempaltedata'),#u API ไม่ต้องทำอะไร
     path('addnew_form_data/', addnew_form_data, name='addnew_form_data'),#u API ไม่ต้องทำอะไร
