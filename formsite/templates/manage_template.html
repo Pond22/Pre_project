@@ -1,115 +1,134 @@
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #f4f4f4;
-        margin: 0;
-        padding: 0;
-    }
-    
-    .main-container {
-        background: white;
-        width: 80%;
-        margin: 20px auto;
-        padding: 20px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    
-    .form-list {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .form-card {
-        border: 1px solid #ccc;
-        padding: 10px;
-        margin: 10px;
-        width: 95%;
-        background: #e9e9e9;
-    }
-    
-    .form-card label {
-        display: block;
-    }
-    
-    .form-card input[type="checkbox"] {
-        margin-right: 10px;
-    }
-    
-    button {
-        margin-top: 10px;
-        padding: 5px 10px;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        cursor: pointer;
-    }
-    
-    button:hover {
-        opacity: 0.8;
-    }
-    
-</style>
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>จัดการหัวข้อประเมินการสอน (PLO)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .main-container {
+            background: white;
+            width: 80%;
+            margin: 20px auto;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .form-list {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-<style>
-    .relative {
-        position: relative;
-    }
+        .form-card.move-up {
+            animation: moveUp 0.5s ease-in-out forwards;
+        }
+        
+        .form-card {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px;
+            width: 95%;
+            background: #e9e9e9;
+        }
+        
+        .form-card label {
+            display: block;
+        }
+        
+        .form-card input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        
+        button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            opacity: 0.8;
+        }
+        
+        
+        @keyframes moveUp {
+            from {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateY(-20px);
+                opacity: 0.5;
+            }
+        }
+        
 
-    .inline-block {
-        display: inline-block;
-    }
+        .relative {
+            position: relative;
+        }
 
-    .w-14 {
-        width: 3.5rem;
-    }
+        .inline-block {
+            display: inline-block;
+        }
 
-    .toggle-checkbox {
-        display: none;
-    }
+        .w-14 {
+            width: 3.5rem;
+        }
 
-    .toggle-label {
-        display: block;
-        overflow: hidden;
-        cursor: pointer;
-        border-radius: 9999px;
-        background-color: #d1d5db;
-        transition: background-color 0.2s ease-in-out;
-        padding: 2px;
-        height: 1.75rem; /* Set a specific height */
-    }
+        .toggle-checkbox {
+            display: none;
+        }
 
-    .toggle-label:before {
-        content: "";
-        display: block;
-        width: 1.75rem;
-        height: 1.75rem;
-        background: white;
-        border-radius: 9999px;
-        transition: transform 0.2s ease-in-out;
-    }
+        .toggle-label {
+            display: block;
+            overflow: hidden;
+            cursor: pointer;
+            border-radius: 9999px;
+            background-color: #d1d5db;
+            transition: background-color 0.2s ease-in-out;
+            padding: 2px;
+            height: 1.75rem; /* Set a specific height */
+        }
 
-    .toggle-checkbox:checked + .toggle-label {
-        background-color: #22c55e; /* Color when toggle is active */
-    }
+        .toggle-label:before {
+            content: "";
+            display: block;
+            width: 1.75rem;
+            height: 1.75rem;
+            background: white;
+            border-radius: 9999px;
+            transition: transform 0.2s ease-in-out;
+        }
 
-    .toggle-checkbox:checked + .toggle-label:before {
-        transform: translateX(85%);
-    }
-</style>
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #22c55e; /* Color when toggle is active */
+        }
+
+        .toggle-checkbox:checked + .toggle-label:before {
+            transform: translateX(85%);
+        }
+    </style>
 </head>
 <body>
 <div class="main-container">
     <h1>จัดการหัวข้อประเมินการสอน (PLO) สาขา {{ user_profile.department }}</h1>
-    <div class="form-list">
+    <div class="form-list" id="formList">
         {% for data in form %}
-        <div class="form-card">
+        <div class="form-card" id="formCard_{{ data.id }}">
             <div class="relative inline-block w-14 h-8">
                 <input
                     id="toggle_{{ forloop.counter }}"
                     class="toggle-checkbox"
                     type="checkbox"
-                    onclick="set_active({{data.id}})"
+                    onclick="set_active({{ data.id }}, event)"
                     {% if data.is_active %} checked {% endif %}
                 />
                 <label
@@ -117,7 +136,7 @@
                     class="toggle-label block overflow-hidden h-8 rounded-full bg-gray-300 cursor-pointer"
                 ></label>
             </div>
-            Create by: {{ data.created_by }} ii {{data.is_active}}
+            Create by: {{ data.created_by }}
             Form ID: {{ data.id }}
             {{ data.semester }}/{{ data.year_number }}
             <a href="{% url 'edit_template' form_id=data.id %}">
@@ -132,7 +151,6 @@
 </div>
 
 <script>
-
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -148,24 +166,44 @@ function getCookie(name) {
     return cookieValue;
 }
 
-function set_active(tem_id) {
+function set_active(tem_id, event) {
+    const checkbox = event.target;
+
     fetch('/set_active/', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'X-CSRFToken': getCookie('csrftoken') 
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken')
         },
-    body: `&form_id=${encodeURIComponent(tem_id)}`
+        body: `form_id=${encodeURIComponent(tem_id)}`
     })
     .then(response => response.json())
-    .then(data => console.log('Success:', data))
+    .then(data => {
+        console.log('Success:', data);
+
+        document.querySelectorAll('.toggle-checkbox').forEach((cb) => {
+            if (cb !== checkbox) {
+                cb.checked = false;
+            }
+        });
+        checkbox.checked = true;
+
+        const formList = document.getElementById('formList');
+        const activeCard = document.getElementById(`formCard_${tem_id}`);
+
+        document.querySelectorAll('.form-card').forEach((card) => {
+            card.classList.remove('move-up');
+        });
+
+        activeCard.classList.add('move-up');
+
+        activeCard.addEventListener('animationend', () => {
+            formList.prepend(activeCard);
+            activeCard.classList.remove('move-up');
+        }, { once: true });
+    })
     .catch(error => console.error('Error:', error));
-      
-    //location.reload();    
 }
-    {% comment %} function viewForm(formId) {
-        alert("Viewing details for Form ID: " + formId);
-    } {% endcomment %}
 </script>
 </body>
 </html>

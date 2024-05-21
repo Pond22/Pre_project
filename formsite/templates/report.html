@@ -59,7 +59,7 @@
                       <tr>
                         <th class="px-4 py-2 border-b">ประเด็นการประเมิน</th>
                         <th class="px-4 py-2 border-b"><h1 class="border-b ">บรรลุผลการเรียนรู้ ภายหลังเรียนรายวิชา</h1>
-                            <h1>ค่าเฉลี่ยที่ได้</h1>
+                            {% comment %} <h1>ค่าเฉลี่ยที่ได้</h1> {% endcomment %}
                         </th>
                       </tr>
                     </thead>
@@ -68,8 +68,10 @@
                         {% for main in assessment_items %}
                         {% if not main.template_select %}
                             <tr>
-                                <td class="border px-4 py-2 bg-gray-100" colspan="2">
+                                <td class="border px-4 py-2 bg-gray-100" colspan="1">
                                     <b>{{ forloop.counter }} {{ main.text }}</b>
+                                    <th class="px-4 py-2 border-b"><h1 class="border-b ">{% if forloop.first %}{%else%}บรรลุผลการเรียนรู้ {{main.text}} {% endif %}</h1>
+                                      {%if forloop.first %}ค่าเฉลี่ยที่ได้{%else%}<h1>ค่าเฉลี่ยที่ได้</h1>{%endif %}
                                 </td>
                             </tr>
                             <!-- ใส่ลูปแสดงข้อมูล หัวข้อย่อย และคะแนน -->
@@ -92,7 +94,9 @@
                     {% endfor %}
                     ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
                         <tr><!-- หัวข้อ PLO เป็น static -->
-                            <td class="border px-4 py-2  bg-gray-100" colspan="2"><b>ผลการเรียนรู้ของหลักสูตร (PLOs)</b></td>
+                            <td class="border px-4 py-2  bg-gray-100" colspan="1"><b>ผลการเรียนรู้ของหลักสูตร (PLOs)</b></td>
+                            <th class="px-4 py-2 border-b"><h1 class="border-b ">บรรลุผลการเรียนรู้ ภายหลังเรียนรายวิชา</h1>
+                              <h1>ค่าเฉลี่ยที่ได้</h1>
 
                             {%for main in plo%}
                             {% if  main.template_select %}

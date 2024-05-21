@@ -87,7 +87,7 @@ class Section(models.Model):
     session_number = models.IntegerField()
 
     def __str__(self):
-        return f"{self.course.name} - ตอนเรียนที่ {self.session_number} ~ ID = {self.id}"
+        return f"{self.course.name} - ตอนเรียนที่ {self.session_number}"
     
 
 class Form(models.Model):
@@ -147,13 +147,13 @@ class AssessmentItem(models.Model):
 
 class CommentForm(models.Model):
     id = models.BigAutoField(primary_key=True)
-    respondent = models.ForeignKey(User, on_delete=models.CASCADE)
+    respondent = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     comment = models.TextField(null=True, blank=True)
     form = models.ForeignKey(Form, related_name="comments", on_delete=models.CASCADE)
     
         
 class AssessmentResponse(models.Model):
-    respondent = models.ForeignKey(User, on_delete=models.CASCADE)
+    respondent = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     response_date = models.DateTimeField(auto_now_add=True)
     assessment_item  = models.ForeignKey(AssessmentItem, on_delete=models.CASCADE)
     response = models.IntegerField(choices=[(1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5')])

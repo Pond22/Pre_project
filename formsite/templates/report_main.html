@@ -116,6 +116,18 @@
 <div class="main-container">
     <h1>แบบรายงานผลการทวนสอบผลสัมฤทธิ์</h1>
 
+    <div class="flex justify-between px-5 py-1">
+        <!-- search bar -->
+        <div class="flex">
+          <div class="items-center max-w-sm mx-auto">
+            <label for="simple-search" class="sr-only">Search</label>
+            <div class="flex ">
+               <input type="text" id="simple-search" onkeyup="searchTable()" placeholder="ค้นหา"
+                            class="bg-gray-100 border border-gray-300 text-black text-sm focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
+          </div>
+        </div>
+        
     <!-- ฟอร์มสำหรับกรองข้อมูล -->
     <form method="GET" action="{% url 'report_main' %}" class="filter-form">
         <select name="department" id="department-select">
@@ -135,12 +147,6 @@
     <div class="form-list">
         {% for data in form %}
         <div class="form-card">
-            {% comment %} <div class="relative inline-block w-14 h-8">
-                <label
-                    for="toggle_{{ forloop.counter }}"
-                    class="toggle-label block overflow-hidden h-8 rounded-full bg-gray-300 cursor-pointer"
-                ></label>
-            </div> {% endcomment %}
             วิชา : {{ data.course.name }}  {{data.course.class_code}}
                 {% if data.is_teacher_form %}
                 รายงานผลการทวนสอบผลสัมฤทธิ์ โดยอาจารย์ (ทส.02)
@@ -223,6 +229,21 @@ document.addEventListener('click', function(event) {
     }
 });
 
+
+function searchTable() {
+    const input = document.getElementById('simple-search');
+    const filter = input.value.toLowerCase();
+    const cards = document.querySelectorAll('.form-card');
+    
+    cards.forEach(card => {
+        const textContent = card.textContent.toLowerCase();
+        if (textContent.includes(filter)) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
 </script>
 </body>
 </html>

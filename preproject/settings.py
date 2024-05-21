@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import os
 from celery.schedules import crontab
-from decouple import config
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -52,16 +52,18 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(minute='*'),  # รันทุกนาที 
     },
 }
-
+load_dotenv(os.path.join(BASE_DIR, '.env'))
+load_dotenv(override=True)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD =  os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL ='cas.payap@gmail.com'
 
-print(config('EMAIL_HOST_PASSWORD'))
+print("EMAIL_HOST_USER:", os.getenv('EMAIL_HOST_USER'))
+print("EMAIL_HOST_PASSWORD:", os.getenv('EMAIL_HOST_PASSWORD'))
 LOGOUT_REDIRECT_URL = '/sign_in/'
 #เพิ่มเอง
 
@@ -171,6 +173,8 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
+
+LOGIN_URL = '/sign_in'
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [

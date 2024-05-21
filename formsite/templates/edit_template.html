@@ -53,12 +53,12 @@
            </div>
         </div>
   
-        <div class="container" id="PLO">
+        <div class="container" id="PLO" data-type="CLO">
             วัตถุประสงค์ของรายวิชา (0) 
             {% for item in template %}
                 {% for clo_data in item.CLO.all %}
                 {% if not clo_data.parent %}
-                    <div class ='container' id="parent-container_{{ clo_data.id }}">
+                    <div class ='container' id="parent-container_{{ clo_data.id }}" data-type="CLO">
                         <!-- แม่ วัตถุประสงค์ของรายวิชา (0)-->
                         <input type="text" id="parent_{{ clo_data.id }}" name="parent_{{ clo_data.id }}" value="{{ clo_data.text }}" readonly  data-type="CLO"/>
                         {% comment %} <button type="button" onclick="editField('parent_{{ clo_data.id }}')">Edit</button> {% endcomment %}
@@ -83,7 +83,7 @@
             {% for template_data in item.TemplateData.all %}
            
             {% if not template_data.parent %}
-                <div class="container" id="parent-container_{{ template_data.id }}">
+                <div class="container" id="parent-container_{{ template_data.id }}" data-type="TemplateData">
                   <label>{{ forloop.counter }}</label>
                     <!-- แม่ -->
                     {% comment %} <label>{{ forloop.counter }}</label> {% endcomment %}
@@ -93,13 +93,13 @@
                
 
                     <!-- ลูก -->
-                    <div id="child-container_{{ template_data.id }}" style="margin-left: 20px;">
+                    <div id="child-container_{{ template_data.id }}" style="margin-left: 20px;"data-type="TemplateData">
                         {% for child in template_data.sub_items.all %}
                             <div>
                               <label>{{ forloop.parentloop.counter }}.{{ forloop.counter }}</label>
-                                <input type="text" id="clochild_{{ child.id }}" name="child_{{ child.id }}" value="{{ child.text }}" readonly  data-type="TemplateData" placeholder="กรุณาใส่หัวข้อประเด็นรอง"/>
+                                <input type="text" id="clochild_{{ child.id }}" class = '123' name="child_{{ child.id }}" value="{{ child.text }}" readonly  data-type="TemplateData" placeholder="กรุณาใส่หัวข้อประเด็นรอง"/>
                                 <button type="button" class="button_clochild_{{ child.id }}" onclick="editField('clochild_{{ child.id }}')">Edit</button>
-                                <button type="button" class="button_clochild_{{ child.id }}" onclick="deleteField('clochild_{{ child.id }}', 'button_clochild_{{ child.id }}')">ลบ</button>
+                                <button type="button" class="button" onclick="deleteField('clochild_{{ child.id }}', 'button_clochild_{{ child.id }}')">ลบ</button>
                             </div>
                         {% endfor %}
                     </div>
@@ -139,6 +139,7 @@
     xhr.onload = function () {
       if (xhr.status === 200) {
           console.log('Response:', xhr.responseText);
+          location.reload();
       } else {
           console.error('Error:', xhr.statusText);
       }
@@ -226,13 +227,15 @@ function saveNewParent(type, formID) {
 function addField(parentId, dataType, tem_id) {
   // Check if parentId is provided, adjust the container accordingly
   const containerId = parentId ? `child-container_${parentId}` : 'PLO';
-  const container = document.getElementById(containerId);
+  const container = document.querySelector(`[id="${containerId}"][data-type="${dataType}"]`);
   const newFieldId = new Date().getTime(); // Unique ID for new field
+
+  console.log(containerId)
 
   const div = document.createElement('div');
   //div.style.marginLeft = parentId ? '20px' : '';
   div.innerHTML = `
-      <input type="text" id="child_parentID_${parentId}" name="child_parentID_${parentId}" value=""  data-type="${dataType}" required> 
+      <input type="text" id="child_parentID_${parentId}" name="child_parentID_${parentId}" value=""  class ='123'data-type="${dataType}" required> 
       <button type="button" onclick="editField('new_${parentId}')">Edit</button>
   `;
 

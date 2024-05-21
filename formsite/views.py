@@ -195,11 +195,17 @@ def manage_course(request):
     return render(request, 'manage_course.html', {'courses':courses, 'templates':templates})
 
 @login_required(login_url="sign_in") 
-@committee_required
-@teacher_required
+@committee_or_teacher_required
 def report_main(request):
-    forms = Form.objects.filter(expired=True)
+    user = request.user
 
+    if user.groups.filter(name='กรรมการ').exists():
+        # กรรมการเห็นข้อมูลทั้งหมด
+        forms = Form.objects.filter(expired=True)
+    else:
+        # ผู้สร้างแบบฟอร์มเห็นเฉพาะข้อมูลฟอร์มที่ตนเองสร้าง
+        forms = Form.objects.filter(created_by=user, expired=True)
+    
     department = request.GET.get('department')
     template = request.GET.get('template')
     
@@ -216,17 +222,27 @@ def report_main(request):
     return render(request, 'report_main.html', {'form':forms, 'departments': departments})
 
 @login_required(login_url="sign_in") 
-@committee_required
-@teacher_required
+@committee_or_teacher_required
 def report(request, form_id):
     
     form = get_object_or_404(Form, id=form_id)
-    assessment_items = AssessmentItem.objects.filter(form=form, parent__isnull=True,template_select__isnull=True).annotate(average_response=Avg('assessmentresponse__response'))
+    """ assessment_items = AssessmentItem.objects.filter(form=form, parent__isnull=True,template_select__isnull=True).annotate(average_response=Avg('assessmentresponse__response'))
     plo = AssessmentItem.objects.filter(form=form, parent__isnull=True,template_select__isnull=False).annotate(average_response=Avg('assessmentresponse__response'))
-    comment = CommentForm.objects.filter(form=form,comment__isnull=False)
-
+    comment = CommentForm.objects.filter(form=form,comment__isnull=False) """
     if form.created_by != request.user and not request.user.groups.filter(name='กรรมการ').exists():
-        return redirect('/report_main')
+        return redirect('/manage_member')
+
+    if request.user.groups.filter(name='กรรมการ').exists():
+        # กรรมการเห็นข้อมูลทั้งหมด
+        assessment_items = AssessmentItem.objects.filter(form=form, parent__isnull=True, template_select__isnull=True).annotate(average_response=Avg('assessmentresponse__response'))
+        plo = AssessmentItem.objects.filter(form=form, parent__isnull=True,template_select__isnull=False).annotate(average_response=Avg('assessmentresponse__response'))
+        comment = CommentForm.objects.filter(form=form, comment__isnull=False)
+    else:
+         # ผู้สร้างแบบฟอร์มเห็นเฉพาะข้อมูลฟอร์มที่ตนเองสร้าง
+        assessment_items = AssessmentItem.objects.filter(form=form, parent__isnull=True, template_select__isnull=True, form__created_by=request.user).annotate(average_response=Avg('assessmentresponse__response'))
+        plo = AssessmentItem.objects.filter(form=form, parent__isnull=True, template_select__isnull=False, form__created_by=request.user).annotate(average_response=Avg('assessmentresponse__response'))
+        comment = CommentForm.objects.filter(form=form, comment__isnull=False, form__created_by=request.user)
+
 
     # สำหรับแต่ละ assessment item, กรอง sub_items และคำนวณค่าเฉลี่ย
     for item in assessment_items:

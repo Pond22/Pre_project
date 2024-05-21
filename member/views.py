@@ -3,7 +3,7 @@ from django.http.response import HttpResponse
 from django.contrib.auth import authenticate, login, logout
 from member.forms import RegisterForm
 from django.contrib.auth.models import Group, User
-from formsite.models import TemplateData, AssessmentItem, Teamplates, UserProfile, AuthorizedUser, Departments
+from formsite.models import *
 import re
 from formsite.user_detect import*
 from django.http import JsonResponse
@@ -42,6 +42,12 @@ def manage_member(request):
 
         elif action == 'delete':
             user = get_object_or_404(User, id=user_id)
+            
+            Form.objects.filter(created_by=user).update(created_by=None)
+            CommentForm.objects.filter(respondent=user).update(respondent=None)
+            AssessmentResponse.objects.filter(respondent=user).update(respondent=None)
+            Teamplates.objects.filter(created_by=user).update(created_by=None)
+            
             user.delete()
             return redirect('/manage_member')
         
@@ -50,6 +56,8 @@ def manage_member(request):
 
 def sign_in(request):
     if request.method == "POST":
+        if request.user.is_authenticated:
+            return redirect('/index')
         username = request.POST.get('username')
         password = request.POST.get('password')
         user = authenticate(

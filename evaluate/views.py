@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http.response import HttpResponse
 from django.contrib.auth.decorators import login_required, user_passes_test
-from formsite.models import TemplateData, AssessmentItem, Teamplates, UserProfile, AuthorizedUser, AssessmentResponse, CommentForm
+from formsite.models import TemplateData, AssessmentItem, Teamplates, UserProfile, AuthorizedUser, AssessmentResponse, CommentForm, CLO
 from formsite.models import Form as form_model
 from .forms import PLOsForm, Assessment_Form, ClosForm, CSVUploadForm, DynamicLikertForm, FormUpdateForm
 from django.contrib.auth.models import User, Group
@@ -17,8 +17,7 @@ from formsite.user_detect import*
 # Create your views here.
 
 @login_required(login_url="sign_in")   #แสดงฟอร์มที่สามารถประเมินได้ทั้งหมด
-@student_required
-@teacher_required
+@teacher_or_student_required
 def eva_home(request):
     user = request.user
     current_time = timezone.now()
@@ -35,8 +34,7 @@ def eva_home(request):
     return render(request, 'evaluate/evaluate_home.html', {'form':forms_not_answered})
 
 @login_required(login_url="sign_in")
-@student_required
-@teacher_required
+@teacher_or_student_required
 def evaluate_form(request, form_id):
     if AssessmentResponse.objects.filter(respondent=request.user, assessment_item__form=form_id).exists():
         return redirect('/evaluate/')
@@ -118,18 +116,31 @@ def create_form(request):
                 if 'main_field0' in request.POST:  
                     for i in range(le + 1):
                         if round == 1 :
+                            
                             name_main = 'main_field' + str(i)
                             main_fields = request.POST.get(name_main, '') 
                             #print('main_fields =', name_main)
-                            main_field = AssessmentItem.objects.create(text=main_fields, form=create_form)
-                            
-                            name_sub = 'sub_field_' + str(name_main)
-                            sub_fields = request.POST.getlist(name_sub)
-                            #print(sub_fields)
-                            #print('name_sub =', name_sub)
+                            if name_main == 'main_field0':
+                                o_data = CLO.objects.filter(form = Active_Template, parent__isnull=True)
+                                for o in o_data:
+                                    main_o = AssessmentItem.objects.create(text=o.text, form=create_form)
 
-                            for sub_field_text in sub_fields:
-                                sub_field = AssessmentItem.objects.create(text=sub_field_text, parent=main_field, form=create_form)
+                                    sub_items = o.sub_items.all()
+                                    
+                                    for sub_item in sub_items:
+                                        AssessmentItem.objects.create(text=sub_item.text, parent=main_o, form=create_form)
+                                        
+                            else:
+                                main_field = AssessmentItem.objects.create(text=main_fields, form=create_form)
+                                
+                                name_sub = 'sub_field_' + str(name_main)
+                                sub_fields = request.POST.getlist(name_sub)
+                                #print(sub_fields)
+                                #print('name_sub =', name_sub)
+
+                                for sub_field_text in sub_fields:
+                                    sub_field = AssessmentItem.objects.create(text=sub_field_text, parent=main_field, form=create_form)
+                                    
                         else :
                             name_main = 'main_field' + str(i)
                             main_fields = request.POST.get(name_main, '') 
@@ -154,16 +165,12 @@ def create_form(request):
                             main_id = request.POST[main_field_name]
                             main_template_data = TemplateData.objects.get(id=main_id)
 
-                            template_main_field = AssessmentItem.objects.create(
-                                template_select=main_template_data, form=create_form
-                            )
+                            template_main_field = AssessmentItem.objects.create(template_select=main_template_data, form=create_form)
 
                             sub_ids = request.POST.getlist(sub_field_name) 
                             for sub_id in sub_ids:
                                 sub_template_data = TemplateData.objects.get(id=sub_id)
-                                AssessmentItem.objects.create(
-                                    template_select=sub_template_data, parent=template_main_field, form=create_form
-                                )
+                                AssessmentItem.objects.create(template_select=sub_template_data, parent=template_main_field, form=create_form)
                         else:
                             break
 
