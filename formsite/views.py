@@ -53,7 +53,19 @@ def create_plo(request):
             plo_form_instance = form.save(commit=False)
             plo_form_instance.created_by = request.user
             plo_form_instance.department = user_profile.department
-            plo_form_instance.save()
+            
+            try:
+                plo_form_instance.full_clean()  # ตรวจสอบความถูกต้อง
+                plo_form_instance.save()
+            except ValidationError as e:
+                # เพิ่มข้อผิดพลาดในฟอร์ม
+                form.add_error(None, "ปีและเทอมนี้ซ้ำกัน")
+                return render(request, 'create_plos.html', {'form': form, 'user_profile': user_profile})
+        else:
+            # ถ้าฟอร์มไม่ valid
+            return render(request, 'create_plos.html', {'form': form, 'user_profile': user_profile})
+            
+            
         if le is None:
             le = 0
         else:

@@ -3,6 +3,7 @@ from django.contrib.auth.models import User, AbstractUser
 import datetime
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.conf import settings
+from django.core.exceptions import ValidationError
 # Create your models here.
 
 '''
@@ -46,13 +47,23 @@ class Teamplates(models.Model):
         validators=[MinValueValidator(2567), MaxValueValidator(2570)]
     )
     
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['semester', 'year_number'], name='unique_semester_year')
+        ]
+
     def save(self, *args, **kwargs):
+        self.full_clean()  # ตรวจสอบความถูกต้องก่อนที่จะบันทึก
         if self.is_active:
-            active_forms_count = Teamplates.objects.filter(is_active=True, semester=self.semester, year_number=self.year_number).count() #ตรวจ active
+            active_forms_count = Teamplates.objects.filter(is_active=True, semester=self.semester, year_number=self.year_number).count()
             if active_forms_count > 0:
                 self.is_active = False
-        
-        return super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
+    
+    def clean(self):
+        super().clean()
+        if Teamplates.objects.filter(semester=self.semester, year_number=self.year_number).exclude(id=self.id).exists():
+            raise ValidationError('ในปีการศึกษาและเทอมที่ท่านเลือกได้มีการสร้างแม่แบบอยู่ก่อนแล้ว')
     
 class TemplateData(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -118,11 +129,12 @@ class Form(models.Model):
     start_date = models.DateTimeField(null=True, blank=True)
     end_date = models.DateTimeField(null=True, blank=True)
     expired = models.BooleanField(default=False) #เก็บว่าแบบฟอร์มนั้นครบกำหนดเวลาหรือยัง
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='sub_items')
     #users = models.ManyToManyField(User, related_name='forms') #ทำให้เกี่ยวกันกับ User แบบ M to N 
      
     def __str__(self):
         return f"ไอดีฟอร์ม {self.id} secID {self.section.id}"
- 
+    
 class AuthorizedUser(models.Model):
     form = models.ForeignKey(Form, on_delete=models.CASCADE)  
     users = models.ForeignKey(User, on_delete=models.CASCADE)

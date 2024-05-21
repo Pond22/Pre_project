@@ -6,37 +6,49 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .forms import *
 
 def get_sections(request, course_id):
-    sections = Section.objects.filter(course_id=course_id)
+    active_template = Teamplates.objects.get(is_active=True, department=request.user.userprofile.department)
+    used_sections = Form.objects.filter(course_id=course_id, template=active_template).values_list('section_id', flat=True)
+    sections = Section.objects.filter(course_id=course_id).exclude(id__in=used_sections)
     section_list = [(section.id, section.session_number) for section in sections]
     return JsonResponse(section_list, safe=False)
 
-def API_addnew_tempaltedata (request):
+def API_addnew_tempaltedata(request): # สำหรับเลือกข้อมูลจากแม่แบบใหม่
     if request.method == 'POST':
         data = json.loads(request.body)
         form_id = data.get('form_id')
         items = data.get('items')
-     
+
         try:
             form = Form.objects.get(id=form_id)
 
-            # ลบ AssessmentItem จากแม่อบบเก่าออก
-            items_to_delete = AssessmentItem.objects.filter(form=form, template_select__isnull=False)
-            items_to_delete.delete()
-            for item in items:
-                parent = None
-                if item['isSub']:
-                    parent = AssessmentItem.objects.get(id=item_id)
-                
-                template_select = TemplateData.objects.get(id=item['template_select_id'])
-                assessment_item =AssessmentItem.objects.create(
-                    text=item['text'],
-                    form=form,
-                    template_select=template_select,
-                    parent=parent
-                )
-                if item['isSub'] == False :
-                    item_id = assessment_item.id
+            # อัปเดตฟอร์มทั้งหมดที่เชื่อมโยงกัน
+            forms_to_update = [form]
+            if form.parent:
+                forms_to_update.append(form.parent)
+            forms_to_update.extend(form.sub_items.all())
+
+            for f in forms_to_update:
+                # ลบ AssessmentItem จากแม่แบบเก่าออก
+                items_to_delete = AssessmentItem.objects.filter(form=f, template_select__isnull=False)
+                items_to_delete.delete()
+
+                parent_item_ids = {}  # เก็บ parent items ที่สร้างใหม่
+                for item in items:
+                    parent = None
+                    if item['isSub']:
+                        parent = AssessmentItem.objects.get(id=parent_item_ids[item['parentId']])
+                    template_select = TemplateData.objects.get(id=item['template_select_id'])
+                    assessment_item = AssessmentItem.objects.create(
+                        text=item['text'],
+                        form=f,
+                        template_select=template_select,
+                        parent=parent
+                    )
+                    if not item['isSub']:
+                        parent_item_ids[item['template_select_id']] = assessment_item.id
+
             return JsonResponse({'success': True})
+
         except Form.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Form not found'})
         except AssessmentItem.DoesNotExist:
@@ -45,6 +57,7 @@ def API_addnew_tempaltedata (request):
             return JsonResponse({'success': False, 'error': 'Template item not found'})
     else:
         return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
 
 #อัพเดตข้อมูล PLO&O ใน Temlplate ที่มีอยู่ก่อน ลบด้วย
 def API_updates_delete_form(request):

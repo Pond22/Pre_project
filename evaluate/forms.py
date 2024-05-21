@@ -6,6 +6,7 @@ import re
 from django.forms import DateTimeInput
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 
 class DateTimeInput(forms.DateTimeInput):
     input_type = 'datetime-local'
@@ -26,15 +27,45 @@ class FormUpdateForm(forms.ModelForm):
         ]
         widgets = {
             'section': forms.Select(choices=()),
-            #'section': forms.Select(choices=((1, 'ตอนเรียนที่ 1'), (2, 'ตอนเรียนที่ 2'), (3, 'ตอนเรียนที่ 3'), (4, 'ตอนเรียนที่ 4'), (5, 'ตอนเรียนที่ 5'), (6, 'ตอนเรียนที่ 6'), (7, 'ตอนเรียนที่ 7'), (8, 'ตอนเรียนที่ 8'), (9, 'ตอนเรียนที่ 9'), (10, 'ตอนเรียนที่ 10'))),
-            'start_date': DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control', 'class': 'form-control'}),
-            'end_date': DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control', 'class': 'form-control'}),
+            'start_date': DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+            'end_date': DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
         }
-        
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance.pk:
-            self.fields['section'].queryset = Section.objects.filter(course=self.instance.course)
+            active_template = self.instance.template
+            used_sections = Form.objects.filter(course=self.instance.course, template=active_template).exclude(id=self.instance.id).values_list('section_id', flat=True)
+            current_section_id = self.instance.section.id if self.instance.section else None
+            sections_filter = Q(course=self.instance.course) & (~Q(id__in=used_sections) | Q(id=current_section_id))
+            self.fields['section'].queryset = Section.objects.filter(sections_filter)
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        
+        if commit:
+            instance.save()
+
+            # อัปเดตฟอร์มลูกหรือฟอร์มแม่
+            if instance.parent:
+                parent_form = instance.parent
+                parent_form.section = instance.section
+                parent_form.start_date = instance.start_date
+                parent_form.end_date = instance.end_date
+                parent_form.description = instance.description
+                parent_form.save()
+            else:
+                child_forms = instance.sub_items.all()
+                for child in child_forms:
+                    child.section = instance.section
+                    child.start_date = instance.start_date
+                    child.end_date = instance.end_date
+                    child.description = instance.description
+                    child.save()
+
+        return instance
+
+
 
 class Assessment_Form(forms.ModelForm):
     class Meta:
@@ -53,8 +84,19 @@ class Assessment_Form(forms.ModelForm):
     def __init__(self, *args, custom_param=None, **kwargs):
         super().__init__(*args, **kwargs)
         print(custom_param)
-        courses = Course.objects.filter(teamplates=custom_param)
-        c_choices = [('', 'เลือกรายวิชา')] + [(c.id, f'{c.class_code} | {c.name}') for c in courses]
+        
+        # กรองรายวิชาที่มี section ว่างเท่านั้น
+        courses_with_sections = Course.objects.filter(teamplates=custom_param).distinct()
+        valid_courses = []
+        
+        for course in courses_with_sections:
+            sections = Section.objects.filter(course=course)
+            for section in sections:
+                if not Form.objects.filter(course=course, section=section, template=custom_param).exists():
+                    valid_courses.append(course)
+                    break  # มี section ว่างอยู่ใน course นี้
+        
+        c_choices = [('', 'เลือกรายวิชา')] + [(c.id, f'{c.class_code} | {c.name}') for c in valid_courses]
         self.fields['course'].widget = forms.Select(choices=c_choices)
         self.fields['course'].label = 'รายวิชา'
         self.fields['start_date'].label = 'วันเวลาเริ่มต้นการประเมิน'
@@ -65,11 +107,15 @@ class Assessment_Form(forms.ModelForm):
         if 'course' in self.data:
             try:
                 course_id = int(self.data.get('course'))
-                self.fields['section'].queryset = Section.objects.filter(course_id=course_id)
+                self.fields['section'].queryset = Section.objects.filter(course_id=course_id).exclude(
+                    id__in=Form.objects.filter(course_id=course_id, template=custom_param).values_list('section_id', flat=True)
+                )
             except (ValueError, TypeError):
                 pass
         elif self.instance.pk:
-            self.fields['section'].queryset = self.instance.course.sections.all()
+            self.fields['section'].queryset = self.instance.course.sections.exclude(
+                id__in=Form.objects.filter(course=self.instance.course, template=custom_param).values_list('section_id', flat=True)
+            )
         
 class ClosForm(forms.ModelForm):
     class Meta:

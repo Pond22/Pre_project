@@ -6,8 +6,7 @@ from formsite.models import Form as form_model
 from .forms import PLOsForm, Assessment_Form, ClosForm, CSVUploadForm, DynamicLikertForm, FormUpdateForm
 from django.contrib.auth.models import User, Group
 from django.http import JsonResponse
-from rest_framework.views import APIView
-from rest_framework.response import Response
+from django.core.exceptions import ValidationError
 import pandas as pd
 import time
 from django.utils import timezone
@@ -89,12 +88,14 @@ def create_form(request):
                 new_in.template = Active_Template      
                 if round == 1: #ถ้าเป็นครั้งที่สองสร้างของอาจารย์
                     new_in.is_teacher_form = True
+                    new_in.parent = parent_form
                     new_in.save()
                     AuthorizedUser.objects.create(form=new_in, users=request.user,is_teacher=True)
                 if round == 0: #ถ้าเป็นสร้างครั้งแรก ทำแบบฟอร์มของนักเรียนแล้วเอาชื่อเข้า
                     start_time = time.time()
                     print("PASS1")
                     new_in.save()
+                    parent_form = new_in
                     if (len(stu_num_list) == len(stu_name_list)):
                         print("PASS2")
                         for index in range(len(stu_num_list)):

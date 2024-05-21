@@ -64,7 +64,7 @@
                         {% comment %} <button type="button" onclick="editField('parent_{{ clo_data.id }}')">Edit</button> {% endcomment %}
           
 
-                            <div id="child-container_{{ clo_data.id }}" style="margin-left: 20px;">
+                            <div id="child-container_{{ clo_data.id }}" style="margin-left: 20px;" data-type="CLO">
                               {% for child in clo_data.sub_items.all %}
                                 <!-- ลูกวัตถุประสงค์ของรายวิชา (0) -->
                                 <input type="text" id="child_{{ child.id }}" name="child_{{ child.id }}" value="{{ child.text }}" readonly  data-type="CLO"/>

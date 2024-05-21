@@ -170,17 +170,26 @@ function add_user(form_id, type) {
 
 document.addEventListener('DOMContentLoaded', function() {
     const formElement = document.getElementById('editForm');
+    const formId = formElement.getAttribute('data-form-id');
+    const storageKey = `formData_${formId}`;
     const formFields = formElement.querySelectorAll('input, select, textarea');
-    
+
+    // Clear old form data
+    const allKeys = Object.keys(localStorage);
+    allKeys.forEach(key => {
+        if (key.startsWith('formData_') && key !== storageKey) {
+            localStorage.removeItem(key);
+        }
+    });
+
     const saveFormData = () => {
         const formData = new FormData(formElement);
         const data = Object.fromEntries(formData.entries());
-        localStorage.setItem('formData', JSON.stringify(data));
+        localStorage.setItem(storageKey, JSON.stringify(data));
     };
-    
 
     const loadFormData = () => {
-        const savedData = JSON.parse(localStorage.getItem('formData'));
+        const savedData = JSON.parse(localStorage.getItem(storageKey));
         if (savedData) {
             Object.keys(savedData).forEach(key => {
                 const field = formElement.querySelector(`[name="${key}"]`);
@@ -196,7 +205,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     loadFormData();
-
 
     const popupStatus = localStorage.getItem('popupStatus');
     const popup = document.getElementById("popup1");
@@ -231,10 +239,6 @@ function delete_user(id){
     })
     .then(response => {
         console.log('Status:', response.status);
-        /* var userRow = document.getElementById('user_' + id).closest('.user-row');
-        if (userRow) {
-            userRow.remove();
-        } */
         location.reload();
         if (!response.ok) {
             console.error('Error:', error)

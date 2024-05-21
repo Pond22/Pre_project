@@ -150,9 +150,9 @@ body.blur-background {
     </head>
   
     <body>
-      <form method="post"id="editForm">
+      <form method="post"id="editForm" data-form-id="{% for data in context.form %}{{data.id}} {%endfor%}">
           {% csrf_token %}
-  
+          
           <div class="container" >  
             <div class="form_name" name="form_name"> 
               {% for data in context.form%}
@@ -330,10 +330,6 @@ body.blur-background {
         </div>
       </div>
     </div>
-      {% comment %}
-      <script src="{% static 'js/script.js' %}"></script>
-      <!-- Your JS file -->
-      {% endcomment %}
     </body>
   </html>
   
@@ -519,7 +515,7 @@ body.blur-background {
     }, delayInMilliseconds);
   }
 
-  document.addEventListener('DOMContentLoaded', function() {// Function to save form data to localStorage
+{% comment %}   document.addEventListener('DOMContentLoaded', function() {// Function to save form data to localStorage
     const formElement = document.getElementById('editForm');
     const formFields = formElement.querySelectorAll('input, select, textarea');
     
@@ -551,7 +547,7 @@ body.blur-background {
     // Load form data on page load
     loadFormData();
 });
-
+ {% endcomment %}
 
 
 
