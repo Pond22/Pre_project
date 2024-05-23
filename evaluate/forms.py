@@ -151,14 +151,18 @@ class DynamicLikertForm(forms.Form):
     def __init__(self, *args, custom_param=None, **kwargs):
         super(DynamicLikertForm, self).__init__(*args, **kwargs)
         if custom_param:
+            # ดึงคำถามหลักที่ไม่ใช่ template_select
             questions = AssessmentItem.objects.filter(form=custom_param, parent__isnull=True, template_select__isnull=True)
             for question in questions:
                 # เพิ่มคำถามหลักในฟอร์มแบบไม่ต้องการคำตอบ
                 self.fields[f'question_{question.id}'] = forms.CharField(
                     label=f"{question.text}",
-                    #initial=question.text,
                     required=False,
-                    widget=forms.TextInput(attrs={'disabled': 'disabled', 'style': 'border: none; background-color: transparent;', 'class': 'text-input-disabled'})
+                    widget=forms.TextInput(attrs={
+                        'disabled': 'disabled',
+                        'style': 'border: none; background-color: transparent;',
+                        'class': 'text-input-disabled main-question'
+                    })
                 )
                 # ดึงคำถามย่อย
                 sub_questions = question.sub_items.all()
@@ -166,17 +170,24 @@ class DynamicLikertForm(forms.Form):
                     self.fields[f'sub_question_{sub_question.id}'] = forms.ChoiceField(
                         label=f"{sub_question.text}",
                         choices=LIKERT_CHOICES,
-                        widget=forms.RadioSelect(attrs={'class': 'radio-select'})
+                        widget=forms.RadioSelect(attrs={
+                            'class': 'radio-select sub-question',
+                            'style': 'margin-left: 20px;'  # เพิ่มระยะห่างสำหรับคำถามย่อย
+                        })
                     )
-                    
+            
+            # ดึงคำถามหลักที่เป็น template_select
             template_questions = AssessmentItem.objects.filter(form=custom_param, parent__isnull=True, template_select__isnull=False)
             for template_question in template_questions:
                 # เพิ่มคำถามหลักจาก TemplateData ในฟอร์มแบบไม่ต้องการคำตอบ
                 self.fields[f'template_question_{template_question.id}'] = forms.CharField(
                     label=f"{template_question.template_select.text}",
-                    #initial=template_question.template_select.text,
                     required=False,
-                    widget=forms.TextInput(attrs={'disabled': 'disabled', 'style': 'border: none; background-color: transparent;', 'class': 'text-input-disabled'})
+                    widget=forms.TextInput(attrs={
+                        'disabled': 'disabled',
+                        'style': 'border: none; background-color: transparent;',
+                        'class': 'text-input-disabled main-question'
+                    })
                 )
                 # ดึงคำถามย่อยจาก TemplateData
                 sub_template_questions = AssessmentItem.objects.filter(parent=template_question)
@@ -184,15 +195,8 @@ class DynamicLikertForm(forms.Form):
                     self.fields[f'template_sub_question_{sub_template_question.id}'] = forms.ChoiceField(
                         label=f"{sub_template_question.template_select.text}",
                         choices=LIKERT_CHOICES,
-                        widget=forms.RadioSelect(attrs={'class': 'radio-select'})
-                        
+                        widget=forms.RadioSelect(attrs={
+                            'class': 'radio-select sub-question',
+                            'style': 'margin-left: 20px;'  # เพิ่มระยะห่างสำหรับคำถามย่อย
+                        })
                     )
-
-""" sub_template_questions = AssessmentItem.objects.filter(parent=template_question)
-                for sub_template_question in sub_template_questions:
-                    self.fields[f'template_sub_question_{sub_template_question.id}'] = forms.ChoiceField(
-                        label=f"{sub_template_question.id} - {sub_template_question.template_select.text}",
-                        choices=LIKERT_CHOICES,
-                        widget=forms.RadioSelect(attrs={'class': 'radio-select'})
-                        
-                    ) """

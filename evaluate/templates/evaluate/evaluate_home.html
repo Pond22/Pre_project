@@ -1,5 +1,7 @@
+{% extends "evaluate/addon/nav_home.html" %}
+
 <style>
-    body, html {
+    /* body, html {
         font-family: Arial, sans-serif;
         margin: 0;
         padding: 0;
@@ -9,17 +11,17 @@
     .header img {
         width: 100%;
         height: auto;
-    }
+    } */
     
-    .container {
+    /* .container {
         width: 80%;
         margin: 20px auto;
         background: #fff;
         padding: 20px;
         box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
+    } */
     
-    table {
+    /* table {
         width: 100%;
         border-collapse: collapse;
     }
@@ -33,7 +35,7 @@
     th {
         background-color: #f2f2f2;
     }
-    
+     */
     .edit-btn, .delete-btn {
         padding: 5px 10px;
         margin-right: 5px;
@@ -89,55 +91,83 @@
 </style>
 
 {% block content %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payap University</title>
-    {% comment %} <link rel="stylesheet" href="style.css"> {% endcomment %}
-</head>
-<body>
-    <div class="container">
-        <div class="table">
-            <h2>แสดงรายชื่อแบบฟอร์มการประเมิน</h2>
-            <table>
-                <thead>
+
+
+   
+            <p class="flex items-center text-white text-2xl ml-5 px-4 py-4 "></p>
+            <div class="relative rounded-lg bg-gray-300 p-8 shadow-xl px-16 ">
+                <div class="rounded-md pb-5 bg-white ">
+                    <div class=" bg-white my-0 text-black bottom-5 p-5 shadow-inner border-2 ">
+                        <div class="flex-col">
+                            <p class="text-xl font-semibold">Welcome,</p>
+                            <div class=" h-8 flex items-center ">
+                              <p class="text-white px-3 bg-violet-700 px-5">{{request.user.Userprofile.prefix}} {{ request.user.first_name }}  {{request.user.last_name}}</p>
+                              
+                            </div>
+                            <!-- <div class="mt-2 text-black ">ปีการศึกษา {% for data in form %} {{ data.template.semester }}/{{ data.template.year_number }} {% endfor %}</div> -->
+                          </div>
+                        </div>
+
+    <!-- <div class="container flex justify-center"> -->
+        <div class="-my-2 max-w-full w-full px-10 overflow-x-auto sm:-mx lg:-mx-4">
+            <div class="mt-5 text-xl">รายวิชาที่ต้องประเมิน</div>
+        <table class="table-auto max-w-full w-full divide-y divide-gray-200 ">
+            
+                <div class="py-2 align-middle inline-block min-w-full sm:px-5 lg:px-5">
+                <div class=" shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">    
+                    <div class="px-6 ">
+       
+            <thead class="bg-gray-50 ">
                     <tr>
-                        <th>รหัสวิชา</th>
-                        <th>ชื่อวิชา</th>
-                        <th>ตอนเรียน</th>
-                        {% comment %} <th>นามสกุล</th>
-                        <th>Email</th>
-                        <th>Actions</th> {% endcomment %}
+                        <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">รหัสวิชา</th>
+                        <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">ชื่อวิชา</th>
+                        <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">ตอนเรียน</th>
+                        <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">เทมอ</th>
+                        <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">อาจารย์ผู้สอน</th>
+                        <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">วัน/เวลา สิ้นสุดการประเมิน</th>
+
                     </tr>
                 </thead>
                 <tbody>
                     {% for data in form %}
                     <tr>
-                        <td>{{ data.course.class_code }}</td>
-                        <td>{{ data.course.name }}</td>
-                        <td>{{ data.section }}</td>
-
-                        {% comment %} <td>{{ user.id }}</td>
-                        <td>{{ user.username }}</td>
+                        <td class="pl-6 py-3 whitespace-nowrap text-center">{{ data.course.class_code }}</td>
+                        <td class="pl-6 py-3 whitespace-nowrap text-center">{{ data.course.name }}</td>
+                        <td class="pl-6 py-3 whitespace-nowrap text-center">{{ data.section }}</td>
+                        <td class="pl-6 py-3 whitespace-nowrap text-center">{{ data.template.semester }}/{{ data.template.year_number }}</td>
+                        <td class="pl-6 py-3 whitespace-nowrap text-center">{{ data.create_by }}</td>
+                        <td class="pl-6 py-3 whitespace-nowrap text-center">{{ data.end_date }}</td>
+                        {% comment %} <td></td>
+                        <td class="pl-6 py-3 whitespace-nowrap text-center">{{ user.username }}</td>
                         <td>{{ user.prefix }}</td>
                         <td>{{ user.user.first_name }}</td>
                         <td>{{ user.user.last_name }}</td>
                         <td>{{ user.user.email }}</td> {% endcomment %}
                         <td>
                             <a href="{% url 'evaluate_form' form_id=data.id %}">
-                                <button onclick="viewForm({{data.id}})">จัดการแบบฟอร์ม {{data.semester}}/{{data.year_number}} </button>
+                                <button onclick="viewForm({{data.id}})" class="bg-blue-500 hover:bg-blue-700 p-4 px-8 my-1 rounded-full text-white">ประเมิน  </button>
                             </a>
                         </td>
                     </tr>
                     {% endfor %}
                    
                 </tbody>
-            </table>
+            </div>
         </div>
+        </div>
+        
+            </table>
+        
+        </div>
+    
+    <!-- </div> -->
+    </div>
+</div>
 
-</body>
-</html>
+
+
+
+
+
 
 {%endblock%}

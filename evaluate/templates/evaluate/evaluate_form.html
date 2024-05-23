@@ -4,42 +4,112 @@
         margin-right: 10px;  /* ห่างระหว่างปุ่ม */
         vertical-align: middle; /* ปรับให้ตรงกลางทางด้านตั้ง */
     }
-    
+    .radio-select {
+        display: flex;
+        float: left;
+        margin-left: auto; /* ดัน radio buttons ไปทางขวาสุด */
+        white-space: nowrap; /* ป้องกันการห่อของปุ่ม radio */
+    }
     .radio-select label {
-        display: inline-block; /* ทำให้เรียงกันเป็นแนวนอน */
-        margin-right: 15px; /* ห่างระหว่าง label */
+        margin-right: 8px; /* ห่างระหว่าง label */
+    }
+    .fieldWrapper {
+        margin-left: 20px; /* ระยะห่างจากขอบซ้าย */
+    }
+    .fieldWrapper.main {
+        padding-left: 0px; /* ระยะห่างจากขอบซ้ายสำหรับคำถามหลัก */
+    }
+    .fieldWrapper.sub {
+        padding-left: 40px; /* ระยะห่างจากขอบซ้ายสำหรับคำถามย่อย */
+    }
+    .main-question {
+        font-weight: bold;
+    }
+    .fieldWrapper .flex {
+        align-items: flex-start; /* จัดแนวด้านบนของคำถามและปุ่ม */
+    }
+    .fieldWrapper label {
+        white-space: normal; /* อนุญาตให้ขึ้นบรรทัดใหม่ */
+        display: inline-block;
+        max-width: 80%; /* ปรับให้ข้อความไม่กว้างเกินไป */
     }
 </style>
 <html>
 <head>
-    
-    <title>Survey</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Survey</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body>
-    <h1>Survey</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <div class="user_comment" id="user_comment"> ข้อเสนอแนะความคิดเห็นอื่น
-            <input type="text" name="user_comment" placeholder="พิมพ์ข้อเสนอแนะความคิดเห็นอื่ที่นี้"></input>
-        </div>
-        <button type="submit">Submit</button>
-    </form>
-</body>
+<div class="mx-auto max-w-screen-2xl ">
+<div class="rounded-lg bg-gray-800 mx-10 pl-5 pb-4 pt-5">
+<p class="flex items-center text-white text-2xl ml-5 px-4 py-4"></p>
+<div class="relative rounded-lg bg-gray-300 p-8 shadow-xl px-16">
+<div class="rounded-md pb-5 bg-white">
+<div class="bg-white my-0 text-black bottom-5 p-5 shadow-inner text-2xl border-2">
+    {% if data.is_teacher_form %}
+    <p>แบบฟอร์ม การทวนสอบผลสัมฤทธิ์ โดยอาจารย์ (02)</p>
+    {% else %}
+    <p>แบบฟอร์ม การทวนสอบผลสัมฤทธิ์ โดยนักศึกษา (01)</p>
+    {% endif %}
+</div>
 
-{% comment %} <form method="post">   โค๊ดนี้ใช้แทนอันข้างบนได้ทำงานเหมือนกัน
+<div class="border m-5">
+<div class="p-4">
+<div>ระดับการประเมิน 
+<div>5=มากที่สุด  4=มาก  3=ปานกลาง  2=น้อย  1=น้อยที่สุด</div>
+</div>
+</div>
+</div>
+
+<div class="flex justify-between mx-5 border py-4">
+    <div class="max-w-full w-full flex justify-center"> 
+        <h1 class="pl-3">ประเด็นการประเมิน / ระดับการประเมิน</h1>
+    </div>
+    <div class="flex justify-between" style="width: 300px;"> 
+        <div class="text-center" style="margin-right: -16px">5</div>
+        <div class="text-center" style="margin-right: -16px">4</div>
+        <div class="text-center" style="margin-right: -24px">3</div>
+        <div class="text-center" style="margin-right: -32px">2</div>
+        <div class="text-center">1</div>
+    </div>
+</div>
+
+<form method="post">   
     {% csrf_token %}
+
     {% for field in form %}
-        <div class="fieldWrapper">
-            {{ field.label_tag }} {{ field }}
+    <div class="fieldWrapper {% if 'disabled' in field.field.widget.attrs %}main{% else %}sub{% endif %}">
+        <div class="border flex justify-between mx-5 p-2">
+            {{ field.label_tag }}  {{ field }}
+    
             {% if field.help_text %}
-                <p class="help">{{ field.help_text }}</p>
+            <div class="flex justify-center">
+            <h1>{{ field.help_text }}</h1>
+            </div>
             {% endif %}
+    
             {% for error in field.errors %}
-                <p class="error">{{ error }}</p>
+            <p class="error">{{ error }}</p>
             {% endfor %}
         </div>
+    </div>
     {% endfor %}
-    <input type="text" name="user_comment" placeholder="พิมพ์ข้อเสนอแนะความคิดเห็นอื่ที่นี้"></input>
-    <button type="submit">Submit</button>
-</form> {% endcomment %}
+<div class="px-5">
+<textarea type="text" name="user_comment" class="mt-3 p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500" placeholder="ข้อเสนอแนะ/ความคิดเพิ่มเติม"></textarea></div>
+<div class="flex justify-between">
+<div></div>
+<div class="bg-blue-500 hover:bg-blue-700 mx-4 text-xl text-white p-2 px-4 border rounded-2xl font-semibold">
+<button type="Submit">Submit</button></div>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+</form> 
+</body>
+</html>

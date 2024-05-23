@@ -1,62 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payap University</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f4f4;
-            margin: 0;
-            padding: 0;
-        }
-        
-        .main-container {
-            background: white;
-            width: 80%;
-            margin: 20px auto;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        
-        .form-list {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .form-card {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin: 10px;
-            width: 95%;
-            background: #e9e9e9;
-        }
-        
-        .form-card label {
-            display: block;
-        }
-        
-        .form-card input[type="checkbox"] {
-            margin-right: 10px;
-        }
-        
-        button {
-            margin-top: 10px;
-            padding: 5px 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        
-        button:hover {
-            opacity: 0.8;
-        }
-    </style>
-</head>
-<body>
+{% extends "evaluate/addon/nav.html" %}
+    {% block content %}
+
     <div class="main-container">
         <div class="flex justify-between px-5 py-1">
             <!-- search bar -->
@@ -64,38 +8,62 @@
                 <div class="items-center max-w-sm mx-auto">
                     <label for="simple-search" class="sr-only">Search</label>
                     <div class="flex">
-                        <input type="text" id="simple-search" onkeyup="searchCards()" placeholder="ค้นหาข้อมูลอาจารย์"
+                        <input type="text" id="simple-search" onkeyup="searchCards()" placeholder="ค้นหาแบบฟอร์ม"
                             class="bg-gray-100 border border-gray-300 text-black text-sm focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500">
                     </div>
                 </div>
             </div>
         </div>
 
-        <h1>จัดการหัวข้อประเมินการสอน (PLO) สาขา{{user_profile.department}}</h1>
-        <div class="form-list">
-            {% for data in forms %}
-            <div class="form-card">
-                <label>
-                    {% if data.is_teacher_form %}
-                    แบบฟอร์ม การทวนสอบผลสัมฤทธิ์ โดยอาจารย์
-                    {% else %}
-                    แบบฟอร์ม การทวนสอบผลสัมฤทธิ์ โดยนักศึกษา
-                    {% endif %}
-                    {{ data.course.class_code }} {{ data.course.name }} ตอนเรียนที่ {{ data.section.session_number }}
-                    | Form ID: {{ data.id }} |
-                    {{ data.course.teamplates.semester }}/{{ data.course.teamplates.year_number }}
-                    <a href="{% url 'edit_form' form_id=data.id %}">
-                        <button onclick="viewForm({{ data.id }})">จัดการแบบฟอร์ม {{ data.course.class_code }} {{ data.course.name }}</button>
-                    </a>
-                </label>
+    <p class="flex items-center text-white text-2xl ml-5 px-4 py-4 ">สร้างแบบประเมินการทวนสอบผลสัมฤทธิ์   | Name : {{user_now}}</p>
+          <div class="relative rounded-lg bg-gray-300 p-8 shadow-xl px-16 ">
+            <div class="rounded-md pb-5 bg-white ">
+              <div class=" bg-white my-0 text-black bottom-5 p-5 shadow-inner text-2xl border-2 ">
+                <h1>จัดการหัวข้อประเมินการสอน (PLO) สาขา{{user_profile.department}}</h1>
             </div>
-            {% endfor %}
-            <a href="/evaluate/create_form">
-                <button>Create Form!</button>
-            </a>
+                
+    
+        <div class="main-container">
+           
+            <div class="form-list">
+                <div class="flex flex-wrap ">
+                {% for data in forms%}
+                
+                <div class="w-full md:w-1/2 lg:w-1/2 xl:w-1/2 px-2 my-5  justify-center">
+                    <div class="bg-gray-100 border rounded shadow-lg p-2 mx-2 my-2">
+                <div class="form-card">
+                    <label>
+                        {%if data.is_teacher_form %}
+                        แบบฟอร์ม การทวนสอบผลสัมฤทธิ์(02) โดยอาจารย์
+                        {%else%}
+                        แบบฟอร์ม การทวนสอบผลสัมฤทธิ์(01) โดยนักศึกษา
+                        {%endif%}
+                        <div class="">
+                            Form ID : {{data.id}}
+                        <p> รหัสวิชา : {{data.course.class_code}}</p> <p>วิชา : {{data.course.name}}</p> <p>ตอนเรียนที่ : {{data.section.session_number}}</p>
+                        <div>    
+                              ภาคการศึกษา : {{data.course.teamplates.semester}}/{{data.course.teamplates.year_number}}
+                              <a href="{% url 'edit_form' form_id=data.id %}">
+                        </div>
+                            <div>
+                            <button onclick="viewForm({{data.id}})" class="bg-green-500 hover:bg-green-700 text-white text-l font-semibold p-1 my-2">จัดการแบบฟอร์ม {{data.course.class_code}} {{data.course.name}}   </button>
+                        </div>
+                        </a>
+                    </div>
+                    </label>
+                </div>
+    
+            </div>
+        </div>
+                {% endfor %}
+            </div>
+                    <button class="bg-green-500 hover:bg-green-700 hover:ring-green-700 border rounded ml-5 text-white font-semibold p-3"><a href="/evaluate/create_form">Create Form!</button>
+                </a>
+            </div>
         </div>
     </div>
-
+    </div>
+{%block scripts%}
     <script>
         {% comment %} function viewForm(formId) {
             alert("Viewing details for Form ID: " + formId);
@@ -116,5 +84,7 @@
             });
         }
     </script>
-</body>
-</html>
+    {% endblock %}
+
+{% endblock %}
+
