@@ -210,7 +210,7 @@ class="fixed w-1/3 md:w-2/4 h-auto mx-justify-center my-52 mx-96 overflow-y-auto
             <table id="teacherTable" class="table-auto max-w-full w-full divide-y divide-gray-200 ">
                 <thead class="bg-gray-50 ">
                     <tr>
-                        <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">ID</th>
+                        {% comment %} <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">ID</th> {% endcomment %}
                         <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">รหัสอาจารย์</th>
                         <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">คำนำหน้า</th>
                         <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">ชื่อ</th>
@@ -223,7 +223,7 @@ class="fixed w-1/3 md:w-2/4 h-auto mx-justify-center my-52 mx-96 overflow-y-auto
                 <tbody class="divide-y bg-gray-100 ">
                     {% for user in users_in_department %}
                     <tr>
-                        <td class="pl-6 py-3 whitespace-nowrap text-center">{{ user.user.id }}</td>
+                        {% comment %} <td class="pl-6 py-3 whitespace-nowrap text-center">{{ user.user.id }}</td> {% endcomment %}
                         <td class="pl-6 py-3 whitespace-nowrap text-center">{{ user.user.username }}</td>
                         <td class="pl-6 py-3 whitespace-nowrap text-center">{{ user.prefix }}</td>
                         <td class="pl-6 py-3 whitespace-nowrap text-center">{{ user.user.first_name }}</td>
@@ -232,7 +232,13 @@ class="fixed w-1/3 md:w-2/4 h-auto mx-justify-center my-52 mx-96 overflow-y-auto
                         <td >
                             <div class="flex items-center justify-center ">
                               <input id="default-checkbox" type="checkbox" value=""
-                                class="bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                              {% for group in user.user.groups.all %}
+                                    {%if group.name == "กรรมการ"%}
+                                        checked="checked"
+                                       {%endif%} 
+                                {% endfor %}
+                                class="bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                onchange="updateUserGroup({{ user.user.id }}, this.checked)">
                               <label for="default-checkbox" class="ms-2 text-l font-mono">คณะกรรมการ</label>
                             </div>
                           </td>
@@ -324,6 +330,36 @@ class="fixed w-1/3 md:w-2/4 h-auto mx-justify-center my-52 mx-96 overflow-y-auto
 </div>
 
 <script>
+
+    function updateUserGroup(userId, isChecked) {
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const action = isChecked ? 'add' : 'remove';
+
+        fetch('/update_user_group/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({
+                user_id: userId,
+                group_name: 'กรรมการ',
+                action: action
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                console.log('User group updated successfully');
+            } else {
+                console.error('Error updating user group:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
     function openModal(modalId, userId, username, prefix, fname, lname, email) {
         var modal = document.getElementById(modalId);
         modal.style.display = "block";
@@ -382,6 +418,7 @@ class="fixed w-1/3 md:w-2/4 h-auto mx-justify-center my-52 mx-96 overflow-y-auto
     window.close_Dialog = close_Dialog;
     window.add_new_member = add_new_member;
     window.searchTable = searchTable;
+
 
     </script>
 {%endblock%}

@@ -38,7 +38,7 @@ def evaluate_form(request, form_id):
     if AssessmentResponse.objects.filter(respondent=request.user, assessment_item__form=form_id).exists():
         return redirect('/evaluate/')
     elif not AuthorizedUser.objects.filter(users=request.user, form=form_id).exists():
-        return redirect('/index')
+        return redirect('/evaluate/')
     if request.method == 'POST':
         form = DynamicLikertForm(request.POST, custom_param=form_id)
         if form.is_valid():

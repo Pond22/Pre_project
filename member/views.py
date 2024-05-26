@@ -8,12 +8,10 @@ import re
 from formsite.user_detect import*
 from django.http import JsonResponse
 from django.contrib.auth.views import PasswordResetView
+from django.core.mail import EmailMultiAlternatives
+import json
+
 # Create your views here.
-
-
-class CustomPasswordResetView(PasswordResetView): 
-    email_template_name = 'member/password_reset_email.html'
-    
     
 def clean_string(value):
     return re.sub(r'\s+', '', value)
@@ -57,9 +55,15 @@ def manage_member(request):
             
             user.delete()
             return redirect('/manage_member')
-        
+    else:
+            
+        for data in users_in_department:
+            print('check', data.user.username)
+            groups = data.user.groups.all()  
+            for group in groups:
+                print('check', group.name)
     
-    return render(request, 'member/manage_member.html', {'user_profile': user_profile, 'users_in_department':users_in_department})
+        return render(request, 'member/manage_member.html', {'user_profile': user_profile, 'users_in_department':users_in_department})
 
 def sign_in(request):
     if request.method == "POST":
@@ -139,3 +143,56 @@ def add_teacher(request):
         else:
             return JsonResponse({'success': False, 'error': 'กรุณากรอกข้อมูลให้ครบถ้วน'})
     return JsonResponse({'success': False, 'error': 'เฉพาะคำขอแบบ POST เท่านั้น'})
+
+def update_user_group(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            user_id = data.get("user_id")
+            group_name = data.get("group_name")
+            action = data.get("action") 
+            print(group_name)
+
+            user = get_object_or_404(User, id=user_id)
+            print(user)
+            group = Group.objects.get(name=group_name)
+
+            if action == 'add':
+                user.groups.add(group)
+            elif action == 'remove':
+                user.groups.remove(group)
+
+            user.save()
+            return JsonResponse({'status': 'success'}, status=200)
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
+        except Group.DoesNotExist:
+            return JsonResponse({'error': 'Group not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+    
+    
+def update_line_token(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            user_id = data.get("user_id")
+            line_token = data.get("line_token")
+            
+            if len(line_token) != 43:
+                return JsonResponse({'error': 'Invalid line token format'}, status=400)
+
+            if not user_id or not line_token:
+                return JsonResponse({'error': 'Missing parameters'}, status=400)
+
+            user_profile = get_object_or_404(UserProfile, user__id=user_id)
+            user_profile.line_token = line_token
+            user_profile.save()
+
+            return JsonResponse({'status': 'success'}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)

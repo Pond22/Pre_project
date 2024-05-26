@@ -1,3 +1,10 @@
+<style>
+  .disabled-input {
+      pointer-events: none;
+      opacity: 0.6;
+  }
+</style>
+
 <!doctype html>
 <html>
 {% load static %}
@@ -40,7 +47,12 @@
               <ul class="py-2 text-sm text-gray-700 " aria-labelledby="avatarButton">
                 <li>
                   <h class="block px-4 py-2 hover:bg-gray-100">Line Token</h>
-                  <div><input class="broder border-indigo-600 p-2 rounded w-full" placeholder="กรุณากรอก Line Token"></input></div>
+                  <form method="post">
+                    {% csrf_token %}
+                    <div ondblclick="enableInput('line-token-input')">
+                      <input id="line-token-input" class="disabled-input broder border-indigo-600 p-2 rounded w-full" placeholder="กรุณากรอก Line Token" value="{{ user.userprofile.line_token }}" disabled onblur="updateLineToken({{ user.id }})">
+                  </div>
+                </form>
                 </li>
                 <li>
                   <a href="/password_reset/"
@@ -164,6 +176,42 @@
           }
       });
     });
+
+    //จัดการไลน์
+  function enableInput(inputId) {
+    const input = document.getElementById(inputId);
+    input.classList.remove('disabled-input');
+    input.disabled = false;
+    input.focus();
+}
+
+function updateLineToken(userId) {
+    const lineTokenInput = document.getElementById('line-token-input');
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    fetch('/api/update_line_token/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({
+            user_id: userId,
+            line_token: lineTokenInput.value
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            console.log('Line Token updated successfully');
+        } else {
+            console.error('Error updating Line Token:', data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
   </script>
 </body>
 

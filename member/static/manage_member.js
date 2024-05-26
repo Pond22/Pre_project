@@ -4,13 +4,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     editButtons.forEach(button => {
         button.addEventListener('click', function() {
-            alert('Edit feature not implemented yet.');
+            /* alert('Edit feature not implemented yet.'); */
         });
     });
 
     deleteButtons.forEach(button => {
         button.addEventListener('click', function() {
-            alert('Delete feature not implemented yet.');
+            /* alert('Delete feature not implemented yet.'); */
         });
     });
 });
