@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     });
 
-
+// dropdown bar จัดการข้อมูล
 const dropdown = document.getElementById('userDropdown');
 // รับอ้างอิงไปยัง element ของปุ่มหรืออื่นๆ ที่ใช้ในการเปิด/ปิด dropdown
 const toggleButton = document.getElementById('avatarButton'); // สมมติว่ามีปุ่มที่ใช้ในการเปิด/ปิด dropdown 
@@ -29,3 +29,4 @@ toggleButton.addEventListener('click', function() {
         dropdown.classList.remove('hidden');
         }
 });
+    

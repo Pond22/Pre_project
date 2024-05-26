@@ -1,154 +1,66 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <title>จัดการหัวข้อประเมินการสอน (PLO)</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f4f4;
-            margin: 0;
-            padding: 0;
-        }
-        
-        .main-container {
-            background: white;
-            width: 80%;
-            margin: 20px auto;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        
-        .form-list {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .form-card.move-up {
-            animation: moveUp 0.5s ease-in-out forwards;
-        }
-        
-        .form-card {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin: 10px;
-            width: 95%;
-            background: #e9e9e9;
-        }
-        
-        .form-card label {
-            display: block;
-        }
-        
-        .form-card input[type="checkbox"] {
-            margin-right: 10px;
-        }
-        
-        button {
-            margin-top: 10px;
-            padding: 5px 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        
-        button:hover {
-            opacity: 0.8;
-        }
-        
-        
-        @keyframes moveUp {
-            from {
-                transform: translateY(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateY(-20px);
-                opacity: 0.5;
-            }
-        }
-        
-
-        .relative {
-            position: relative;
-        }
-
-        .inline-block {
-            display: inline-block;
-        }
-
-        .w-14 {
-            width: 3.5rem;
-        }
-
-        .toggle-checkbox {
-            display: none;
-        }
-
-        .toggle-label {
-            display: block;
-            overflow: hidden;
-            cursor: pointer;
-            border-radius: 9999px;
-            background-color: #d1d5db;
-            transition: background-color 0.2s ease-in-out;
-            padding: 2px;
-            height: 1.75rem; /* Set a specific height */
-        }
-
-        .toggle-label:before {
-            content: "";
-            display: block;
-            width: 1.75rem;
-            height: 1.75rem;
-            background: white;
-            border-radius: 9999px;
-            transition: transform 0.2s ease-in-out;
-        }
-
-        .toggle-checkbox:checked + .toggle-label {
-            background-color: #22c55e; /* Color when toggle is active */
-        }
-
-        .toggle-checkbox:checked + .toggle-label:before {
-            transform: translateX(85%);
-        }
-    </style>
-</head>
+{% extends "addon/nav.html" %}
+{% block title %}หัวข้อแม่แบบประเมิน{% endblock %}
+{% block content %}
+    
 <body>
+    <p class="flex items-center text-white text-2xl ml-5 px-4 py-4 ">หัวข้อแบบประเมินการทวนสอบผลสัมฤทธิ์ (O,PLO)  </p>
+    <div class="relative rounded-lg bg-gray-300 p-8 shadow-xl px-16 ">
+      <div class="rounded-md pb-5 bg-white ">
+        <div class=" bg-white my-0 text-black bottom-5 p-5 shadow-inner text-2xl border-2 ">
+          <h1>จัดการ/เลือกหัวข้อประเมินการสอน (O,PLO) สาขา{{user_profile.department}}</h1></div>
+
 <div class="main-container">
-    <h1>จัดการหัวข้อประเมินการสอน (PLO) สาขา {{ user_profile.department }}</h1>
-    <div class="form-list" id="formList">
-        {% for data in form %}
-        <div class="form-card" id="formCard_{{ data.id }}">
-            <div class="relative inline-block w-14 h-8">
-                <input
-                    id="toggle_{{ forloop.counter }}"
-                    class="toggle-checkbox"
-                    type="checkbox"
-                    onclick="set_active({{ data.id }}, event)"
-                    {% if data.is_active %} checked {% endif %}
-                />
-                <label
-                    for="toggle_{{ forloop.counter }}"
-                    class="toggle-label block overflow-hidden h-8 rounded-full bg-gray-300 cursor-pointer"
-                ></label>
-            </div>
-            Create by: {{ data.created_by }}
-            Form ID: {{ data.id }}
-            {{ data.semester }}/{{ data.year_number }}
-            <a href="{% url 'edit_template' form_id=data.id %}">
-                <button onclick="viewForm({{ data.id }})">จัดการแบบฟอร์ม {{ data.semester }}/{{ data.year_number }} </button>
-            </a>
+  
+
+
+    <div class="form-list">
+        <div class="flex flex-wrap">
+        {% for data in form%}
+        <div class="w-full md:w-2/3  px-2 my-3 pl-16 justify-center">
+            <div class="bg-gray-100 border rounded shadow-lg p-4 mx-4">
+        <div class="form-card">
+            
+          <input
+          id="toggle_{{ forloop.counter }}"
+          class="toggle-checkbox"
+          type="checkbox"
+          onclick="set_active({{data.id}},event)"
+          {% if data.is_active %} checked {% endif %}
+      />
+            <label
+                for="toggle_{{ forloop.counter }}"
+                class="toggle-label block overflow-hidden h-8 rounded-full bg-gray-300 cursor-pointer w-14"
+            ></label>
         </div>
-        {% endfor %}
-        <a href="create_plo">
-            <button>Create Template!</button>
-        </a>
+        <div>Create by: <a class="bg-purple-500 text-white w-auto p-1">{{ data.created_by }}</a> </div>
+        <div>tamplate ถูกใช้งาน: {{data.is_active}}</div>
+        <div> Form ID: {{ data.id }}</div>
+        {{ data.semester }}/{{ data.year_number }}
+                <a href="{% url 'edit_template' form_id=data.id %}">
+                    <div>
+                    <button onclick="viewForm({{data.id}}) " class="font-semibold text-white bg-green-600 hover:bg-green-900 ml-2 p-1 mt-3">จัดการแบบฟอร์ม {{data.semester}}/{{data.year_number}} </button>
+                </div>
+                </a>
+            
+        </div>
     </div>
-</div>
+    {% endfor %}
+    
+  </div>
+  <div class="flex justify-between">
+      {% comment %} <div></div> {% endcomment %}
+      <a href="create_plo">
+          <button class="border rounded shadow-lg font-semibold bg-green-600 hover:bg-green-900 text-white p-3 mt-5 mx-4">Create Template!</button>
+      </a>
+  </div>
+        
+       
+    </div>
+    
+  </div>
+  
+  
+  {%block scripts %}
 
 <script>
 function getCookie(name) {
@@ -207,3 +119,5 @@ function set_active(tem_id, event) {
 </script>
 </body>
 </html>
+{% endblock %}
+{% endblock %}

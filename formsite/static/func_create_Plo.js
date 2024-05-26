@@ -1,65 +1,4 @@
-{% extends "nav.html" %}
-{%load static%}
-  {% block title %}สร้างหัวข้อแบบประเมิน (O/PLO){% endblock %}
-    
-  {% block content %}
-  
-    <p class="flex items-center text-white text-2xl ml-5 px-4 py-4 ">สร้างหัวข้อการทวนสอบผลสัมฤทธิ์(O/PLO) </p>
-    <div class="relative rounded-lg bg-gray-300 p-8 shadow-xl px-16 ">
-      <div class="rounded-md pb-5 bg-white ">
-        <div class="my-0 text-black bottom-5 p-5 shadow-inner text-xl font-mono ">
-    
-          <div class="border rounded mb-3 bg-gray-100 ">
-          <h2 class="m-2">รายชื่ออาจารย์สาขา : {{user_profile.department}}</h2>
-    <form id="main" method="post">
-      <div class="m-2 ">
-      {% csrf_token %}
-      {{ form.as_p }}
-      </div>
-    </div>
-      <div class="">
-        <div class="p-4 border bg-gray-100 ">
-          <div id="parent">
-            <!-- div แม่ -->
-            <!-- ฟิลด์แรกของแม่ -->
-            <div id="main_field0" class="main_field0">
-              <!-- div ลูก -->
-              <input type="text" name="main_field0" placeholder="หัวข้อหลัก" readonly  value="วัตถุประสงค์ของรายวิชา (0)"
-                class="border border-gray-400 bg-gray-50 h-8 w-1/3 rounded p-2" ></input>
-              <!-- ปุ่มเพิ่มลูก -->
-              <button type="button" class="addSubField" onclick="addSubField(this)">
-
-                <div >
-                  + เพิ่มหัวข้อย่อย
-                </div>
-              </button>
-
-              
-              
-              <div class="subFields"></div>
-
-            </div>
-            <div class="m-3 border border-gray-300 px-2 rounded w-1/3 bg-white">ผลการเรียนรู้ของหลักสูตร (PLOs)
-            </div>
-            <div class="flex justify-between">
-              
-
-              <!-- ปุุ่มเพิ่มแม่ -->
-              <button type="button" class="add_main_Field" onclick="addMainField()" class="mt-8">
-                <div  >
-                  + เพิ่มหัวข้อหลัก PLO
-                </div>
-              </button>
-            </div>
-          </div>
-          <button type="submit" name="action" value="create"
-              class="mx-4 mt-8 bg-green-500 hover:bg-green-700 text-white font-semibold text-lg rounded-lg w-auto py-4 px-5 flex justify-center">Create</button>
-        </form>
-        {% endblock %}
-
-{%block script%}
-<script>
-  let dynamicFieldCounter = 1;
+let dynamicFieldCounter = 1;
   let num = 0;
 
   function addSubField(button) {
@@ -282,5 +221,3 @@
   }
 
   
-</script>
-{%endblock%}

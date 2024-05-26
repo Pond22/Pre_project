@@ -61,8 +61,8 @@ def evaluate_form(request, form_id):
             return HttpResponse("Successfully submitted!")
     else:
         form = DynamicLikertForm(custom_param=form_id)
-
-    return render(request, 'evaluate/evaluate_form.html', {'form': form})
+        detail = get_object_or_404(form_model, pk=form_id)
+    return render(request, 'evaluate/evaluate_form.html', {'form': form,'detail':detail})
 
 @login_required(login_url="sign_in")
 @teacher_required

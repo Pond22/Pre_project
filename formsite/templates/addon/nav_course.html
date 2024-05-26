@@ -12,18 +12,20 @@
   <!--<link rel="stylesheet" href="output1.css">-->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'styl_editeForm.css' %}">
+  <link rel="stylesheet" href="{% static 'style.css' %}">
+  <link rel="stylesheet" href="{% static 'cre_plo.css' %}">
   {% block scripts %}
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- <script src="{% static 'Func_Create_form.js' %}"></script> -->
-  <!-- <script src="{% static 'edit_form.js' %}"></script> -->
+  {% comment %} <script src="{% static 'func_for_edit-template.js' %}"></script> {% endcomment %}
+  {% comment %} <script src="{% static 'popup.js' %}"></script> {% endcomment %}
+  {% comment %} <script src="{% static 'func_create_Plo.js' %}"></script> {% endcomment %}
   <!-- <script src="{% static 'show_pop.js' %}"></script> -->
-  <!-- <script src="{% static 'func_detailForm.js' %}"></script> -->
-  <!-- <script src="{% static "func_editForm.js"%}"></script> -->
+  <script src="{% static 'manageCrours.js' %}"></script>
+  {% comment %} <script src="{% static "func_editForm.js"%}"></script>  {% endcomment %}
   {% endblock %} 
 </head>
 
-<body class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 min-h-screen max-h-screen">
+<body class="bg-gradient-to-b from-green-200 via-sky-200 to-green-200 min-h-screen max-h-screen">
   <header>
     <div class="container-2xl mx-auto mb-16">
       <nav class="fixed top-0 transition-all duration-300 ease-in-out w-full z-10 bg-blue-400 border-gray-700 shadow-md ">
@@ -87,25 +89,19 @@
               class="flex flex-col font-medium p-4 md:p-0 mt-4 border text-white rounded-lg bg-blue-400 md:flex-row md:space-x-8 md:mt-0 md:border-0 md:bg-blue-400 ">
               <li>
                 <a href="/evaluate"
-                  class="text-xl block py-2 pl-3 pr-4 text-blue-700 rounded hover:bg-gray-700 md:hover:bg-transparent md:border-0 md:hover:text-blue-500 md:p-0 "
+                  class="text-xl block py-2 pl-3 pr-4 text-white  rounded hover:bg-gray-700 md:hover:bg-transparent md:border-0 md:hover:text-blue-500 md:p-0 "
                   aria-current="page">Home</a>
               </li>
-              {% for group in request.user.groups.all %}
-              {% if forloop.first %}
-              {% if group.name == "อาจารย์" or group.name == "นักศึกษา" or group.name == "กรรมการ" or group.name == "หัวหน้าสาขา"%}
-              {% if group.name == "อาจารย์"%}
-              <li>
-                <a href="/form/form_detail "
-                  class="text-xl block py-2 pl-3 pr-4 text-white rounded hover:bg-gray-700 md:hover:bg-transparent md:border-0 md:hover:text-blue-500 md:p-0 ">แบบประเมิน</a>
-              </li>
-              {% endif%}
+            
               <!-- <li>
         <a href="#" class="block py-2 pl-3 pr-4 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Services</a>
       </li> -->
-      {% if group.name == "หัวหน้าสาขา"%}
+      {% for group in request.user.groups.all %}
+      {% if forloop.first %}
+        {% if group.name == "หัวหน้าสาขา" or group.name == "กรรมการ" %}
               <li>
                 <button id="dropdownNavbarLink" data-dropdown-toggle="dropdownNavbar"
-                  class="text-xl flex items-center justify-between w-full py-2 pl-3 pr-4 text-white rounded hover:bg-gray-700 md:hover:bg-transparent md:border-0 md:hover:text-blue-500 md:p-0 md:w-auto ">จัดการข้อมูล
+                  class="text-xl flex items-center justify-between w-full py-2 pl-3 pr-4 text-blue-700 rounded hover:bg-gray-700 md:hover:bg-transparent md:border-0 md:hover:text-blue-500 md:p-0 md:w-auto ">จัดการข้อมูล
                   <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
                     viewBox="0 0 10 6">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -117,7 +113,7 @@
                   class="absolute z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44 ">
                   <ul class="py-2 text-sm text-gray-700 " aria-labelledby="dropdownLargeButton">
                     <li>
-                      <a href="{% url 'manage_member' %}"
+                      <a href="/manage_member"
                         class="block px-4 py-2 hover:bg-gray-100 ">อาจารย์</a>
                     </li>
                     {% comment %} <li>
@@ -125,8 +121,8 @@
                         class="block px-4 py-2 hover:bg-gray-100 ">นักศึกษา</a>
                     </li> {% endcomment %}
                     <li>
-                      <a href="#"
-                        class="block px-4 py-2 hover:bg-gray-100 ">วิชา</a>
+                      <a href="/manage_course"
+                        class="block px-4 py-2 bg-gray-50 hover:bg-gray-100 text-blue-500">วิชา</a>
                     </li>
                   </ul>
                   <!-- <div class="py-1">
@@ -134,18 +130,17 @@
             </div> -->
                 </div>
               </li>
-              {% endif%}
-              {% if group.name == "อาจารย์" or group.name == "กรรมการ"%}
+              {% if group.name == "กรรมการ" %}
               <li>
-                <a href="#"
+                <a href="/report_main"
                   class="text-xl block py-2 pl-3 pr-4 text-white rounded hover:bg-gray-700 md:hover:bg-transparent md:border-0 md:hover:text-blue-500 md:p-0 ">รายงานการประเมิน</a>
               </li>
-              {%endif%}
-              {% endif%}
-              {% endif%}
-              {% endfor%}
-            </ul>
 
+              {%endif%}
+            </ul>
+            {%endif%}
+            {%endif%}
+            {%endfor%}
           </div>
 
         </div>
@@ -158,32 +153,11 @@
       
   {% block content %}
   {% endblock %}
-</div>
-</div>
-<script src="{% static 'popup.js' %}"></script>
-<script src="{% static 'scripBar.js' %}"></script>
-<script>
 
-  document.addEventListener('DOMContentLoaded', function() {
-      const formButton = document.getElementById('formButton');
-      const dropdownForm = document.getElementById('dropdownForm');
-    
-      formButton.addEventListener('click', function(event) {
-          event.stopPropagation();
-          dropdownForm.classList.toggle('hidden');
-      });
-    
-      // ซ่อน dropdown เมื่อคลิกที่อื่นในหน้าจอ
-      window.addEventListener('click', function(event) {
-          if (!event.target.matches('#formButton') && !event.target.closest('#dropdownForm')) {
-              if (!dropdownForm.classList.contains('hidden')) {
-                dropdownForm.classList.add('hidden');
-              }
-          }
-      });
-    });
-  </script>
+</div>
+</div>
+
 </body>
 
 </html>
-
+<script src="{% static 'scripBar.js' %}"></script>

@@ -1,7 +1,12 @@
-{% extends "evaluate/nav.html" %}
-{% load static %}
 
+{% extends "evaluate/addon/nav.html" %}
+{% load static%}
+{% block title %}สร้างแบบประเมินการทวนสอบผลสัมฤทธิ์{% endblock %}
 <style>
+  .Delete-subMain:hover{
+    background-color: rgb(255, 0, 0);
+  }
+
   .popup {
     position: fixed; /* Stay in place */
     z-index: 1; /* Sit on top */
@@ -29,12 +34,12 @@
     font-weight: bold;
   }
 
-  .close:hover,
+   .close:hover,
   .close:focus {
     color: black;
     text-decoration: none;
     cursor: pointer;
-  }
+  } 
 
   .template_item,
   .template_item {
@@ -46,30 +51,13 @@
   .template_item:hover {
     background-color: #f0f0f0;
   }
+  
 
   
-</style>
+</style> 
 
-{% block title %} Create Form By {{user_now}}{% endblock %} 
 
-<!doctype html>
-<html>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>สร้างแบบประเมิน</title>
-
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
-  <!-- link datetime pickle -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
-</head>
 
 {% block content %}
 <!-- <div class="container"> -->
@@ -78,7 +66,7 @@
 
 
 <div class="pt-6   mx-auto max-w-screen-2xl ">
-  <div class=" rounded-lg bg-gray-800 mx-10 pl-5 pb-4 pt-5">
+  <div class=" rounded-lg bg-gray-800 mx-10 pl-5 ">
     <p class="flex items-center text-white text-2xl ml-5 px-4 py-4 ">สร้างแบบประเมินการทวนสอบผลสัมฤทธิ์   | Name : {{user_now}}</p>
     <div class="relative rounded-lg bg-gray-300 p-8 shadow-xl px-16 ">
       <div class="rounded-md pb-5 bg-white ">
@@ -88,7 +76,7 @@
         <!-- เพิ่มหัวแรก -->
         {% csrf_token %}
         <div class="flex justify-between">
-          <h1>สร้าง FORM and CLOs</h1>
+          <h1></h1> 
           <button type="button" onclick="show_Dialog()"
             class="py-1 m-2 text-white text-center bg-blue-500 hover:bg-blue-600 items-center w-auto rounded-lg ">
             <h1 class="p-2 "><i class=" p-1 fa-solid fa-plus"></i>เพิ่มนักศึกษา</h1>
@@ -145,8 +133,6 @@
                 </div>
               </div>
 
-
-
               <form>
               </form>
               <!-- end Import file popup-->
@@ -155,13 +141,13 @@
               <div class="p-2 flex justify-between bg-white ">
                 <div></div>
                 <div class="pr-1">
-                  <button id="deleteAll"
-                    class="bg-white  rounded px-4 py-2 mr-2 text-black cursor-pointer border hover:bg-gray-500 focus:ring-4 focus:outline-none focus:ring-gray-500 dark:hover:bg-gray-300 dark:focus:ring-gray-400 items-center w-20 "
+                  <button id="deleteAll" type="button" 
+                    class="bg-white  rounded px-4 py-2 mr-2 text-black cursor-pointer border hover:bg-gray-500 focus:ring-4 focus:outline-none focus:ring-gray-500  items-center w-20 "
                     onclick="hide_dialog()">
                     ยกเลิก
                   </button>
-                  <button
-                    class="bg-blue-700  rounded px-4 py-2 mr-1 text-white cursor-pointer  hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-300 items-center w-20 "
+                  <button type="button" 
+                    class="bg-blue-700  rounded px-4 py-2 mr-1 text-white cursor-pointer  hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300  items-center w-20 "
                     onclick="">
                     ยืนยัน
                   </button>
@@ -173,7 +159,7 @@
         </div>
         <!-- End popup เพิ่มข้อมูล ++++++++++++++++++++++++++++++++++++++++++++++++++
         <form method="post" id="main">-->
-          <div class="p-4">
+          <div class="p-4 grid grid-cols-2 gap-2 mx-5 bg-gray-50 border rounded ">
             {% csrf_token %} {{new_form.as_p }}
               {% comment %} <div id="session-container">
                 <label for="id_section">Session</label>  ไม่ใช้
@@ -181,11 +167,17 @@
                     <option value="">---------</option>
                 </select> {% endcomment %}
             </div>
-          </div>
+          
+
+          
           <!-- ป๊อปอัพ แม่แบบ-->
-          <div id="popup" class="popup" style="display: none">
-            <div class="popup-content">
-              <span class="close" onclick="closePopup()">&times;</span>
+          <div id="popup" class="popup transition-all " style="display: none">
+            <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ">
+            <div class="bg-gray-300 p-8 border border-[#888888] w-10/12 md:w-2/3 lg:w-1/2">
+              
+              <div class="flex justify-end items-center">
+                <button type="button" onclick="closePopup()" class="bg-gray-800 hover:bg-gray-700 transition-all py-2 px-3 rounded-md text-lg text-center text-white font-bold">&times;</button>
+              </div>
               <div id="form_select_template">
                 <label for="template_select">เลือกแม่แบบ:</label>
                 <div id="template_list">
@@ -217,10 +209,13 @@
               <button onclick="confirmSelection()" type = "button">ยืนยัน</button>
             </div>
           </div>
+        </div>
+{% comment %} popup {% endcomment %}
+
 
           <div class="flex justify-center p-4">
             <textarea id="message" rows="4"
-              class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 "
               placeholder="คำชี้แจง"></textarea>
           </div>
             <div class="w-auto" id ="test_select">
@@ -235,11 +230,11 @@
                 <div id="main_field0" class="main_field0">
                   <!-- div ลูก -->
                   <input type="text" name="main_field0" placeholder="หัวข้อหลัก" required
-                    class="border border-gray-400 bg-gray-50 h-8 w-1/3 rounded-lg p-2" ></input>
+                    class="border border-gray-400 bg-gray-50 h-10 w-1/3 rounded-lg p-2" ></input>
                   <!-- ปุ่มเพิ่มลูก -->
                   <button type="button" class="addSubField" onclick="addSubField(this)">
 
-                    <div class="bg-blue-500 text-white rounded-lg w-auto p-1 flex justify-center">
+                    <div class="bg-blue-500 hover:bg-blue-700 text-white rounded-lg w-auto p-2 flex justify-center">
                       + เพิ่มหัวข้อย่อย
                     </div>
                   </button>
@@ -247,11 +242,11 @@
 
                 </div>
                 <div class="flex justify-between">
-                  <div></div>
+                  
 
                   <!-- ปุุ่มเพิ่มแม่ -->
                   <button type="button" class="add_main_Field" onclick="addMainField()">
-                    <div class="bg-blue-500 text-white rounded-xl w-auto p-2 hover:bg-blue-600 flex justify-center">
+                    <div class="bg-blue-500 text-white rounded-xl w-auto p-2 hover:bg-blue-700 flex justify-center mt-5">
                       + เพิ่มหัวข้อหลัก
                     </div>
                   </button>
@@ -263,7 +258,7 @@
               <h1>หัวข้อการประเมิน PLO</h1>
             </div>
             <button type="button" onclick="openPopup()"
-                class="bg-blue-500 text-white rounded-lg w-auto p-1 flex justify-center hover:bg-blue-600 mt-1 ml-2 mb-2">เลือกแม่แบบ</button>
+                class="bg-blue-500 text-white rounded-lg w-auto p-2 flex justify-center hover:bg-blue-700 mt-1 ml-2 mb-2">เลือกแม่แบบ PLO</button>
             <div id="Plo_div" class="Plo_div">
       
               <div class="Main_item"></div>
@@ -274,19 +269,18 @@
           <div class="flex justify-between">
             <div></div>
             <button type="submit" name="action" value="create"
-              class="mx-4 mt-8 bg-green-400 hover:bg-green-500 text-white text-lg rounded-lg w-auto py-2 px-4 flex justify-center">Create</button>
+              class="mx-4 mt-8 bg-green-500 hover:bg-green-700 text-white text-lg rounded-lg font-semibold w-auto py-2 px-4 flex justify-center">Create</button>
           </div>
       </div>
 
     </div>
-
+  </div>
   </div>
 </div>
 <!-- </div> -->
 </form>
 
 
-</div>
 
 {% endblock %}
 
@@ -315,7 +309,7 @@
               sectionSelect.innerHTML = '<option value="">---------</option>';
           }
       });
-  });
+    });
 </script>
 
 <script src="{% static "Func_Create_form.js"%}"></script>

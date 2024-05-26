@@ -141,3 +141,20 @@ def download_pdf(request, form_id):
     response['Content-Disposition'] = f'attachment; filename="report_{form_id}.pdf"'
 
     return response
+
+def update_course(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        course_id = data.get('id')
+        class_code = data.get('class_code')
+        name = data.get('name')
+        
+        a=course_id.split('-')
+
+        course = get_object_or_404(Course, id=a[1])
+        course.class_code = class_code
+        course.name = name
+        course.save()
+
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)

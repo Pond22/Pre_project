@@ -1,140 +1,178 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payap University</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f4f4;
-            margin: 0;
-            padding: 0;
-        }
-        
-        .main-container {
-            background: white;
-            width: 80%;
-            margin: 20px auto;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        
-        .form-list {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .form-card {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin: 10px;
-            width: 95%;
-            background: #e9e9e9;
-        }
-        
-        .form-card label {
-            display: block;
-        }
-        
-        .form-card input[type="checkbox"] {
-            margin-right: 10px;
-        }
-        
-        button {
-            margin-top: 10px;
-            padding: 5px 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        
-        button:hover {
-            opacity: 0.8;
-        }
+<style>
+     
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+  }
+  
+  .close:hover,
+  .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+  }  
+  .edit-btn,.delete-btn {
+      padding: 5px 10px;
+      margin-right: 5px;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 8px;
+  }
+  
+  .edit-btn {
+      background-color: #3b82f6;
+  }
 
-        .remove-btn {
-            background-color: #ff4c4c;
-        }
+  .edit-btn:hover{
+      background-color: #1d4ed8;
+  }
+  
+  .delete-btn {
+      background-color: #ef4444;
+  }
+  .delete-btn:hover {
+      background-color: #b91c1c;
+  }
+  .remove-btn {
+      background-color: #ff4c4c;
+  }
+  
+  .remove-btn:hover {
+      opacity: 0.8;
+  } 
+  
+  .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgb(0,0,0);
+      background-color: rgba(0,0,0,0.4);
+      padding-top: 60px;
+  }
+  
+  .modal-content {
+      background-color: #fefefe;
+      margin: 5% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+  } 
+</style> 
 
-        .remove-btn:hover {
-            opacity: 0.8;
-        }
+{% extends "addon/nav_course.html" %}
+{% block title %}จัดการข้อมูลรายวิชา{% endblock %}
 
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgb(0,0,0);
-            background-color: rgba(0,0,0,0.4);
-            padding-top: 60px;
-        }
-        
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-        }
-        
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-        
-    </style>
-</head> 
-<body>
-    <div class="main-container">
-        <h1>จัดการรายวิชา สาขา{{templates.department}} ภาคเรียนที่{{templates.semester}}/{{templates.year_number}}</h1>
-        <div class="form-list" id="form-list">
-            {% for data in courses %}
-            <div class="form-card">
-                <label>
-                    {{data.class_code}} {{data.name}} ตอนเรียนที่มีได้แก่ 
-                    {% for section in data.sections.all %}
-                        {{section.session_number}}, 
-                    {% endfor %}
-                        <button type="button" onclick="delete_c({{data.id}})">ลบรายวิชา {{data.class_code}} {{data.name}}</button>
-                </label>
-            </div>
-            {% endfor %}
+  {% block content %}
 
-            <button type="button" id="addCourseBtn">เพิ่มรายวิชา</button>
-        </div>
-    </div>
+ 
+  <p class="flex items-center text-white text-2xl ml-5 px-4 py-4 ">จัดการข้อมูลรายวิชา</p>
+  <div class="relative rounded-lg bg-gray-300 p-8 shadow-xl px-16 ">
+    <div class="rounded-md pb-5 bg-white ">
+      <div class=" bg-white my-0 text-black bottom-5 p-5 shadow-inner text-2xl border-2 ">
+          <h1>รายวิชา สาขา{{templates.department}} ภาคเรียนที่{{templates.semester}}/{{templates.year_number}}</h1></div>
 
-    <!-- Modal -->
-    <div id="addCourseModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <form id="addCourseForm">
-                <label>
-                    รหัสวิชา: <input type="text" id="class_code" required><br><br>
-                    ชื่อวิชา: <input type="text" id="name" required><br><br>
-                    จำนวนตอนเรียน: <input type="number" id="sections" required><br><br>
-                </label>
-                <button type="button" id="saveCourseBtn">บันทึก</button>
-            </form>
-        </div>
-    </div>
+  
+
+  <div class="main-container">
+      
+      <div class="form-list" id="form-list">
+          <div class="-my-2 overflow-x-auto sm:-mx lg:-mx-4">
+              
+              <div class="py-2 align-middle inline-block min-w-full sm:px-5 lg:px-5">
+                  
+                  <div class="flex justify-between px-5 py-1">
+                      <!-- search bar -->
+                      <div class="flex">
+                        <div class="items-center max-w-sm mx-auto">
+                          <label for="simple-search" class="sr-only">Search</label>
+                          <div class="flex ">
+                            <input type="text" id="simple-search"
+                              class="bg-gray-100 border border-gray-300 text-black text-sm  focus:ring-blue-500 focus:border-blue-500 block p-2.5 "
+                              placeholder="ค้นหาข้อมูลรายวิชา"   oninput="searchTable()"/></div>
+                          </div>
+                      </div>
+                     
+                  <div><button type="button" id="addCourseBtn" class="bg-blue-500 hover:bg-blue-700 p-3 py-3 text-white text-xl border mx-5 my-1 rounded-2xl ">+ เพิ่มรายวิชา</button></div>
+              </div>
+              <div class=" shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">    
+                  <div class="px-6 ">
+                     
+      <table class="table-auto max-w-full w-full divide-y divide-gray-200">
+    <thead class="bg-gray-50">
+        <tr>
+            <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">รหัสวิชา</th>
+            <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">ชื่อวิชา</th>
+            <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">ตอนเรียนทั้งหมด</th>
+            <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">Actions</th>
+        </tr>
+    </thead>
+    <tbody class="divide-y bg-gray-100 text-xl">
+        {% for data in courses %}
+        <tr id="row-{{ data.id }}">
+            <td class="pl-6 py-3 whitespace-nowrap text-center class-code">{{ data.class_code }}</td>
+            <td class="pl-6 py-3 whitespace-nowrap text-center name">{{ data.name }}</td>
+            <td class="pl-6 py-3 whitespace-nowrap text-center">{{ data.sections.all|length }}</td>
+            <td class="pl-6 py-3 whitespace-nowrap text-center">
+                <div>
+                    <button onclick="editCourse('row-{{ data.id }}', '{{ data.class_code }}', '{{ data.name|safe }}')" class="edit-btn">Edit</button>
+                    <button type="button" onclick="delete_c({{ data.id }})" class="delete-btn">Delete</button>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+  </div>
+</div>
+</div>
+          {% comment %} {% for data in courses %}
+          <div class="form-card">
+              <label>
+                  {{data.class_code}} {{data.name}} ตอนเรียนที่มีได้แก่ 
+                  {% for section in data.sections.all %}
+                      {{section.session_number}}, 
+                  {% endfor %}
+                      <button type="button" onclick="delete_c({{data.id}})">ลบรายวิชา {{data.class_code}} {{data.name}}</button>
+              </label>
+          </div>
+          {% endfor %} {% endcomment %}
+
+          
+      </div>
+  </div>
+</div>
+</div>
+  <!-- Modal -->
+  <div id="addCourseModal" class="modal">
+      <div class="max-w-full w-full  h-0 shadow-xl flex justify-center inset-0 mt-10  ">
+      <div class="w-2/3 h-96 ">
+      <div class="modal-content">
+          <span class="close">&times;</span>
+          <div class="border m-0.1 p-3">
+          
+          <form id="addCourseForm">
+              <label class="pl-5">
+                  <h1 class=" text-xl">รหัสวิชา: </h1><input type="text" id="class_code" class="text-xl border border-gray-300 p-1 rounded" required><br><br>
+                  <h1 class=" text-xl">ชื่อวิชา: </h1><input type="text" id="name" class="text-xl border border-gray-300 p-1 rounded" required><br><br>
+                  <h1 class=" text-xl">จำนวนตอนเรียน: </h1><input type="number" id="sections" class="text-xl border border-gray-300 p-1 rounded" required><br><br>
+              </label>
+              <button type="button" id="saveCourseBtn" class="text-xl bg-green-500 hover:bg-green-700 text-white font-semibold p-3 px-8 rounded-full">บันทึก</button>
+          </form>
+      </div>
+      </div>
+      </div>
+      </div>
+  </div>
+
+{%block scripts%}
 
     <script>
 
@@ -203,6 +241,93 @@
               })
               .catch(error => console.error("Error:", error));
         }
+
+        function searchTable() {
+            const input = document.getElementById('simple-search');
+            const filter = input.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr'); // เลือกแถวทั้งหมดใน tbody
+        
+            rows.forEach(row => {
+                const textContent = row.textContent.toLowerCase();
+                if (textContent.includes(filter)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function editCourse(rowId, classCode, name) {
+            var row = document.getElementById(rowId);
+        
+            var classCodeCell = row.querySelector('.class-code');
+            var nameCell = row.querySelector('.name');
+        
+            var classCodeInput = document.createElement('input');
+            classCodeInput.type = 'text';
+            classCodeInput.value = classCode;
+            classCodeInput.className = 'text-xl border border-gray-300 p-1 rounded';
+        
+            var nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.value = name;
+            nameInput.className = 'text-xl border border-gray-300 p-1 rounded';
+        
+            classCodeCell.innerHTML = '';
+            classCodeCell.appendChild(classCodeInput);
+        
+            nameCell.innerHTML = '';
+            nameCell.appendChild(nameInput);
+        
+            var editButton = row.querySelector('.edit-btn');
+            editButton.textContent = 'Save';
+            editButton.onclick = function() {
+                if (classCodeInput.value.trim() === '' || nameInput.value.trim() === '') {
+                    alert('กรุณากรอกข้อมูลทุกฟิลด์ก่อนบันทึก');
+                    return;
+                }
+                saveCourse(rowId, classCodeInput.value, nameInput.value);
+            };
+        }
+        
+        function saveCourse(rowId, classCode, name) {
+            fetch("/update_course/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({
+                    id: rowId,
+                    class_code: classCode,
+                    name: name
+                })
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      var row = document.getElementById(rowId);
+        
+                      var classCodeCell = row.querySelector('.class-code');
+                      var nameCell = row.querySelector('.name');
+        
+                      classCodeCell.textContent = classCode;
+                      nameCell.textContent = name;
+        
+                      var editButton = row.querySelector('.edit-btn');
+                      editButton.textContent = 'Edit';
+                      editButton.onclick = function() {
+                          editCourse(rowId, classCode, name);
+                      };
+                  } else {
+                      alert("เกิดข้อผิดพลาดในการบันทึกการแก้ไขรายวิชา");
+                  }
+              })
+              .catch(error => console.error("Error:", error));
+        }
+        
     </script>
 </body>
 </html>
+
+{% endblock %}
+{% endblock %}

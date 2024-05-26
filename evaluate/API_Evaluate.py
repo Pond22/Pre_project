@@ -17,7 +17,7 @@ def API_addnew_tempaltedata(request): # สำหรับเลือกข้�
         data = json.loads(request.body)
         form_id = data.get('form_id')
         items = data.get('items')
-
+        print('sdsadas', items)
         try:
             form = Form.objects.get(id=form_id)
 
@@ -32,11 +32,10 @@ def API_addnew_tempaltedata(request): # สำหรับเลือกข้�
                 items_to_delete = AssessmentItem.objects.filter(form=f, template_select__isnull=False)
                 items_to_delete.delete()
 
-                parent_item_ids = {}  # เก็บ parent items ที่สร้างใหม่
                 for item in items:
                     parent = None
                     if item['isSub']:
-                        parent = AssessmentItem.objects.get(id=parent_item_ids[item['parentId']])
+                        parent = AssessmentItem.objects.get(id=item_id)
                     template_select = TemplateData.objects.get(id=item['template_select_id'])
                     assessment_item = AssessmentItem.objects.create(
                         text=item['text'],
@@ -44,8 +43,8 @@ def API_addnew_tempaltedata(request): # สำหรับเลือกข้�
                         template_select=template_select,
                         parent=parent
                     )
-                    if not item['isSub']:
-                        parent_item_ids[item['template_select_id']] = assessment_item.id
+                    if item['isSub'] == False :
+                        item_id = assessment_item.id
 
             return JsonResponse({'success': True})
 

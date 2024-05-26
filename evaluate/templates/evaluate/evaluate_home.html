@@ -122,7 +122,7 @@
                         <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">รหัสวิชา</th>
                         <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">ชื่อวิชา</th>
                         <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">ตอนเรียน</th>
-                        <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">เทมอ</th>
+                        <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">เทอม</th>
                         <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">อาจารย์ผู้สอน</th>
                         <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">วัน/เวลา สิ้นสุดการประเมิน</th>
 
@@ -133,9 +133,9 @@
                     <tr>
                         <td class="pl-6 py-3 whitespace-nowrap text-center">{{ data.course.class_code }}</td>
                         <td class="pl-6 py-3 whitespace-nowrap text-center">{{ data.course.name }}</td>
-                        <td class="pl-6 py-3 whitespace-nowrap text-center">{{ data.section }}</td>
+                        <td class="pl-6 py-3 whitespace-nowrap text-center">{{ data.section.session_number }}</td>
                         <td class="pl-6 py-3 whitespace-nowrap text-center">{{ data.template.semester }}/{{ data.template.year_number }}</td>
-                        <td class="pl-6 py-3 whitespace-nowrap text-center">{{ data.create_by }}</td>
+                        <td class="pl-6 py-3 whitespace-nowrap text-center">{{ data.created_by.first_name }} {{ data.created_by.last_name }}</td>
                         <td class="pl-6 py-3 whitespace-nowrap text-center">{{ data.end_date }}</td>
                         {% comment %} <td></td>
                         <td class="pl-6 py-3 whitespace-nowrap text-center">{{ user.username }}</td>

@@ -18,6 +18,7 @@
     }
     .fieldWrapper.main {
         padding-left: 0px; /* ระยะห่างจากขอบซ้ายสำหรับคำถามหลัก */
+        text-align: left;  /* จัดให้อยู่ทางซ้าย */
     }
     .fieldWrapper.sub {
         padding-left: 40px; /* ระยะห่างจากขอบซ้ายสำหรับคำถามย่อย */
@@ -38,7 +39,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Survey</title>
+<title>ประเมินหลักสูตร{{detail.course.class_code}} {{detail.course.name}}</title>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
@@ -55,10 +56,12 @@
     {% else %}
     <p>แบบฟอร์ม การทวนสอบผลสัมฤทธิ์ โดยนักศึกษา (01)</p>
     {% endif %}
+    รายวิชา {{detail.course.class_code}} {{detail.course.name}} ตอนที่ {{detail.section.session_number}}
 </div>
 
 <div class="border m-5">
 <div class="p-4">
+    <p>{{detail.description}}</p>
 <div>ระดับการประเมิน 
 <div>5=มากที่สุด  4=มาก  3=ปานกลาง  2=น้อย  1=น้อยที่สุด</div>
 </div>
@@ -84,7 +87,7 @@
     {% for field in form %}
     <div class="fieldWrapper {% if 'disabled' in field.field.widget.attrs %}main{% else %}sub{% endif %}">
         <div class="border flex justify-between mx-5 p-2">
-            {{ field.label_tag }}  {{ field }}
+            <h1 class="field-counter"></h1> {{ field.label_tag }}  {{ field }}
     
             {% if field.help_text %}
             <div class="flex justify-center">
@@ -113,3 +116,24 @@
 </form> 
 </body>
 </html>
+<script>
+document.addEventListener('DOMContentLoaded', (event) => {
+    const mainFields = document.querySelectorAll('.fieldWrapper.main');
+    mainFields.forEach((mainField, mainIndex) => {
+        const mainCounter = mainIndex + 1;
+        const subFields = mainField.nextElementSibling && mainField.nextElementSibling.classList.contains('sub') ? [mainField.nextElementSibling] : [];
+        
+        let nextElement = mainField.nextElementSibling;
+        while (nextElement && nextElement.classList.contains('sub')) {
+            subFields.push(nextElement);
+            nextElement = nextElement.nextElementSibling;
+        }
+        
+        mainField.querySelector('.field-counter').textContent = mainCounter;
+
+        subFields.forEach((subField, subIndex) => {
+            subField.querySelector('.field-counter').textContent = `${mainCounter}.${subIndex + 1}`;
+        });
+    });
+});
+</script>

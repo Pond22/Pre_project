@@ -6,6 +6,8 @@ from .models import *
 import requests
 from django.core.mail import send_mail
 from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 
 def send_line_notify(message, token):
     url = 'https://notify-api.line.me/api/notify'
@@ -18,13 +20,19 @@ def send_line_notify(message, token):
     return response.status_code, response.text
 
 def send_email_notify(subject, message, recipient_list):
-    send_mail(
+    # เรนเดอร์ HTML template
+    html_content = render_to_string('noti_email_template.html', {'subject': subject, 'message': message})
+
+    
+    # สร้างอีเมล
+    email = EmailMultiAlternatives(
         subject,
         message,
         settings.DEFAULT_FROM_EMAIL,
-        recipient_list,
-        fail_silently=False,
+        recipient_list
     )
+    email.attach_alternative(html_content, "text/html")
+    email.send(fail_silently=False)
 
 @shared_task
 def check_expired_forms():
@@ -73,6 +81,11 @@ def check_expired_forms():
             except UserProfile.DoesNotExist:
                 print(f"UserProfile does not exist for user {authorized_user.users.username}")
 
+subject = "Test Email Subject"
+message = "This is a test email message."
+recipient_list = ["pondba22@gmail.com"]
+
+send_email_notify(subject, message, recipient_list)
 
 '''
 def check_form_deadline():

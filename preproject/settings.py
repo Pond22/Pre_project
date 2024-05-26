@@ -64,6 +64,8 @@ DEFAULT_FROM_EMAIL ='cas.payap@gmail.com'
 
 print("EMAIL_HOST_USER:", os.getenv('EMAIL_HOST_USER'))
 print("EMAIL_HOST_PASSWORD:", os.getenv('EMAIL_HOST_PASSWORD'))
+PASSWORD_RESET_EMAIL_TEMPLATE_NAME = 'member/password_reset_email.html'
+
 LOGOUT_REDIRECT_URL = '/sign_in/'
 #เพิ่มเอง
 

@@ -1,120 +1,133 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>จัดการหัวข้อประเมินการสอน (PLO)</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f4f4;
-            margin: 0;
-            padding: 0;
-        }
+<style>
+    /* body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+        margin: 0;
+        padding: 0;
+    } */
 
-        .main-container {
-            background: white;
-            width: 80%;
-            margin: 20px auto;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
+    /* .main-container {
+        background: white;
+        width: 80%;
+        margin: 20px auto;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
 
-        .form-list {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+    .form-list {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 
-        .form-card {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin: 10px;
-            width: 95%;
-            background: #e9e9e9;
-        }
+    .form-card {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin: 10px;
+        width: 95%;
+        background: #e9e9e9;
+    }
 
-        .form-card label {
-            display: block;
-        }
+    .form-card label {
+        display: block;
+    }
 
-        .form-card input[type="checkbox"] {
-            margin-right: 10px;
-        }
+    .form-card input[type="checkbox"] {
+        margin-right: 10px;
+    }
+    button {
+        margin-top: 10px;
+        padding: 5px 10px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
 
-        button {
-            margin-top: 10px;
-            padding: 5px 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
+    button:hover {
+        opacity: 0.8;
+    }
 
-        button:hover {
-            opacity: 0.8;
-        }
+    .relative {
+        position: relative;
+    }
 
-        .relative {
-            position: relative;
-        }
+    .inline-block {
+        display: inline-block;
+    }
 
-        .inline-block {
-            display: inline-block;
-        }
+    .w-14 {
+        width: 3.5rem;
+    }
 
-        .w-14 {
-            width: 3.5rem;
-        }
+    .toggle-checkbox {
+        display: none;
+    }
 
-        .toggle-checkbox {
-            display: none;
-        }
+    .toggle-label {
+        display: block;
+        overflow: hidden;
+        cursor: pointer;
+        border-radius: 9999px;
+        background-color: #d1d5db;
+        transition: background-color 0.2s ease-in-out;
+        padding: 2px;
+        height: 1.75rem; 
+    }
 
-        .toggle-label {
-            display: block;
-            overflow: hidden;
-            cursor: pointer;
-            border-radius: 9999px;
-            background-color: #d1d5db;
-            transition: background-color 0.2s ease-in-out;
-            padding: 2px;
-            height: 1.75rem; /* Set a specific height */
-        }
+    /* .toggle-label:before {
+        content: "";
+        display: block;
+        width: 1.75rem;
+        height: 1.75rem;
+        background: white;
+        border-radius: 9999px;
+        transition: transform 0.2s ease-in-out;
+    }
 
-        .toggle-label:before {
-            content: "";
-            display: block;
-            width: 1.75rem;
-            height: 1.75rem;
-            background: white;
-            border-radius: 9999px;
-            transition: transform 0.2s ease-in-out;
-        }
+    .toggle-checkbox:checked + .toggle-label {
+        background-color: #22c55e; 
+    }
 
-        .toggle-checkbox:checked + .toggle-label {
-            background-color: #22c55e; /* Color when toggle is active */
-        }
+    .toggle-checkbox:checked + .toggle-label:before {
+        transform: translateX(85%);
+    }
 
-        .toggle-checkbox:checked + .toggle-label:before {
-            transform: translateX(85%);
-        }
+    .filter-form {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
 
-        .filter-form {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
+    .filter-form select {
+        margin-right: 10px;
+        padding: 5px;
+    } */
+    .download-pdf-btn{
+        color: white;
+        background-color: #22c55e;
+        padding: 0.5rem;
+    }
+    .download-pdf-btn:hover{
+       background-color: #15803d;
+    }
 
-        .filter-form select {
-            margin-right: 10px;
-            padding: 5px;
-        }
-    </style>
-</head>
-<body>
+
+</style>
+{% extends "addon/nav_report.html" %}
+  {% block title %}สร้างหัวข้อแบบประเมิน (O/PLO){% endblock %}
+  
+    
+  {% block content %}
+  
+    <p class="flex items-center text-white text-2xl ml-5 px-4 py-4 ">แบบรายงานผลการทวนสอบผลสัมฤทธิ์</p>
+    <div class="relative rounded-lg bg-gray-300 p-8 shadow-xl px-16 ">
+      <div class="rounded-md pb-5 bg-white ">
+        <div class="my-0 text-black bottom-5 p-5 shadow-inner text-xl font-mono ">
+   
+
 <div class="main-container">
-    <h1>แบบรายงานผลการทวนสอบผลสัมฤทธิ์</h1>
+    
 
     <div class="flex justify-between px-5 py-1">
         <!-- search bar -->
@@ -122,14 +135,16 @@
           <div class="items-center max-w-sm mx-auto">
             <label for="simple-search" class="sr-only">Search</label>
             <div class="flex ">
-               <input type="text" id="simple-search" onkeyup="searchTable()" placeholder="ค้นหา"
+                <input type="text" id="simple-search" onkeyup="searchTable()" placeholder="ค้นหา"
                             class="bg-gray-100 border border-gray-300 text-black text-sm focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
           </div>
         </div>
-        
+    
     <!-- ฟอร์มสำหรับกรองข้อมูล -->
+    
     <form method="GET" action="{% url 'report_main' %}" class="filter-form">
+        <div class="flex  px-3 py-2 w-auto">
         <select name="department" id="department-select">
             <option value="">เลือกสาขา</option>
             {% for department in departments %}
@@ -141,27 +156,46 @@
             <option value="">ภาค/ปีการศึกษา</option>
         </select>
         
-        <button id="se" type="submit">กรองข้อมูล</button>
+        <button id="se" type="submit" class="ml-2 flex item-center justify-center border hover:bg-gray-100 w-auto text-black p-2 px-3 rounded"> <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="mt-2 h-4 w-4 mr-1 text-gray-400" viewbox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
+        </svg>กรอง
+    </button>
+</div>
     </form>
 
-    <div class="form-list">
-        {% for data in form %}
+</div>   
+
+
+    <div class="form-list"> 
+        <div class="border rounded shadow-xl p-3 mt-2">
+        {% for data in form %}  
         <div class="form-card">
-            วิชา : {{ data.course.name }}  {{data.course.class_code}}
+            วิชา : {{ data.course.name }}  {{data.course.class_code}} ตอนเรียนที่ {{data.section}} ปีการศึกษา {{data.template.semester}}/{{data.template.year_number}}
                 {% if data.is_teacher_form %}
                 รายงานผลการทวนสอบผลสัมฤทธิ์ โดยอาจารย์ (ทส.02)
                 {% else %}
                 รายงานผลการทวนสอบผลสัมฤทธิ์ โดยนักศึกษา (ทส.01)
                 {% endif%}
+                <div class="mt-2">
             <a href="{% url 'report' form_id=data.id %}">
-                <button onclick="viewForm({{ data.id }})">แสดงรายงาน</button>
+                <button onclick="viewForm({{ data.id }})" class="bg-green-500 hover:bg-green-700 text-white p-2 rounded">แสดงรายงาน</button>
             </a>
                 <button type="button" class="download-pdf-btn" data-form-id="{{ data.id }}">ดาวน์โหลด PDF</button>
+            </div>
         </div>
         {% endfor %}
     </div>
-</div>
 
+
+    </div>
+
+</div>
+</div>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
 <script>
 function getCookie(name) {
     let cookieValue = null;
@@ -178,28 +212,36 @@ function getCookie(name) {
     return cookieValue;
 }
 
-document.getElementById("department-select").addEventListener("change", function() {
-    var departmentId = this.value;
+document.addEventListener("DOMContentLoaded", function() {
+    var departmentSelect = document.getElementById("department-select");
     var courseSelect = document.getElementById("course-select");
 
-    // Clear current options
-    courseSelect.innerHTML = '<option value="">ภาค/ปีการศึกษา</option>';
+    if (departmentSelect && courseSelect) {
+        departmentSelect.addEventListener("change", function() {
+            var departmentId = this.value;
+            console.log(courseSelect);
+            // Clear current options
+            courseSelect.innerHTML = '<option value="">ภาค/ปีการศึกษา</option>';
 
-    if (departmentId) {
-        fetch(`/get_Templates_by_departmen/?department_id=${departmentId}`)
-        .then(response => response.json())
-        .then(data => {
-            data.forEach(template => {
-                var option = document.createElement("option");
-                option.value = template.id;
-                option.textContent = template.semester+'/'+template.year_number;
-                courseSelect.appendChild(option);
-            });
-
-        })
-        .catch(error => console.error("Error fetching templates:", error));
+            if (departmentId) {
+                fetch(`/get_Templates_by_departmen/?department_id=${departmentId}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(template => {
+                        var option = document.createElement("option");
+                        option.value = template.id;
+                        option.textContent = `${template.semester}/${template.year_number}`;
+                        courseSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error("Error fetching templates:", error));
+            }
+        });
+    } else {
+        console.error("department-select or course-select element not found in DOM");
     }
 });
+
 
 document.addEventListener('click', function(event) {
     if (event.target.classList.contains('download-pdf-btn')) {
@@ -235,6 +277,7 @@ function searchTable() {
     const filter = input.value.toLowerCase();
     const cards = document.querySelectorAll('.form-card');
     
+    console.log(input)
     cards.forEach(card => {
         const textContent = card.textContent.toLowerCase();
         if (textContent.includes(filter)) {
@@ -245,5 +288,4 @@ function searchTable() {
     });
 }
 </script>
-</body>
-</html>
+{% endblock %}

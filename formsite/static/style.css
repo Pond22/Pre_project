@@ -1,3 +1,138 @@
 .clickable {
     cursor: pointer;
 }
+
+/* .relative {
+    position: relative;
+} */
+
+.inline-block {
+    display: inline-block;
+}
+
+.w-14 {
+    width: 3.5rem;
+}
+
+.toggle-checkbox {
+    display: none;
+}
+
+.toggle-label {
+    display: block;
+    overflow: hidden;
+    cursor: pointer;
+    border-radius: 9999px;
+    background-color: #d1d5db;
+    transition: background-color 0.2s ease-in-out;
+    padding: 2px;
+    height: 1.75rem; /* Set a specific height */
+}
+
+.toggle-label:before {
+    content: "";
+    display: block;
+    width: 1.75rem;
+    height: 1.75rem;
+    background: white;
+    border-radius: 9999px;
+    transition: transform 0.2s ease-in-out;
+}
+
+.toggle-checkbox:checked + .toggle-label {
+    background-color: #22c55e; /* Color when toggle is active */
+}
+
+.toggle-checkbox:checked + .toggle-label:before {
+    transform: translateX(85%);
+}
+
+.button_child_edit{
+    background-color:#3b82f6;
+    padding: 3px 8px 3px 8px;
+    color:white;
+    border-radius:  8px;
+    margin-top: 3px;
+}
+
+.button_child_delete{
+    background-color:#ef4444;
+    padding: 3px 8px 3px 8px;
+    color:white;
+    border-radius:  8px;
+    margin-top: 3px;
+}
+
+.button_child_delete:hover{
+    background-color:#b91c1c;
+}
+.add_main_botton:hover,
+.button_child_edit:hover{
+    background-color:#1d4ed8;
+}
+
+.text_Box{
+    padding: 5px ;
+    border: 1px solid;
+    width: 70%;
+    margin-top: 3px;
+    height: 40px;
+    
+}
+.add_main_botton{
+    padding: 5px;
+    background-color: #3b82f6 ;
+    color: white;
+    margin-bottom: 5px;
+    margin-top: 5px;
+    border-radius: 8px;
+    
+}
+
+
+/* .button[type="botton"]{
+    color: blue;
+} */
+
+/* .form-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.form-card {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 10px;
+    width: 95%;
+    background: #e9e9e9;
+}
+
+.form-card label {
+    display: block;
+}
+
+.form-card input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+button {
+    margin-top: 10px;
+    padding: 5px 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+
+input[type="text"],
+input[type="submit"] {
+  width: 80%;
+  padding: 10px;
+  margin-top: 5px;
+  box-sizing: border-box; 
+} */

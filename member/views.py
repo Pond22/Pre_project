@@ -7,7 +7,14 @@ from formsite.models import *
 import re
 from formsite.user_detect import*
 from django.http import JsonResponse
+from django.contrib.auth.views import PasswordResetView
 # Create your views here.
+
+
+class CustomPasswordResetView(PasswordResetView): 
+    email_template_name = 'member/password_reset_email.html'
+    
+    
 def clean_string(value):
     return re.sub(r'\s+', '', value)
 
@@ -58,6 +65,7 @@ def sign_in(request):
     if request.method == "POST":
         if request.user.is_authenticated:
             return redirect('/index')
+        
         username = request.POST.get('username')
         password = request.POST.get('password')
         user = authenticate(
@@ -68,7 +76,14 @@ def sign_in(request):
 
         if user is not None:
             login(request, user)
-            return redirect('/')
+
+            # Check the user's group and redirect accordingly
+            if user.groups.filter(name='หัวหน้าสาขา').exists():
+                return redirect('/manage_template')
+            elif user.groups.filter(name='กรรมการ').exists():
+                return redirect('/report_main')
+            else:
+                return redirect('/evaluate/')
             
     return render(request, 'member/sign_in.html')
 

@@ -12,18 +12,20 @@
   <!--<link rel="stylesheet" href="output1.css">-->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'styl_editeForm.css' %}">
+  <link rel="stylesheet" href="{% static 'style.css' %}">
+  <link rel="stylesheet" href="{% static 'cre_plo.css' %}">
   {% block scripts %}
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- <script src="{% static 'Func_Create_form.js' %}"></script> -->
-  <!-- <script src="{% static 'edit_form.js' %}"></script> -->
+  <script src="{% static 'func_for_edit-template.js' %}"></script>
+  {% comment %} <script src="{% static 'popup.js' %}"></script> {% endcomment %}
+  <script src="{% static 'func_create_Plo.js' %}"></script>
   <!-- <script src="{% static 'show_pop.js' %}"></script> -->
-  <!-- <script src="{% static 'func_detailForm.js' %}"></script> -->
-  <!-- <script src="{% static "func_editForm.js"%}"></script> -->
+  <script src="{% static 'manageCrours.js' %}"></script>
+  <script src="{% static "func_editForm.js"%}"></script> 
   {% endblock %} 
 </head>
 
-<body class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 min-h-screen max-h-screen">
+<body class="bg-gradient-to-b from-green-200 via-sky-200 to-green-200 min-h-screen max-h-screen">
   <header>
     <div class="container-2xl mx-auto mb-16">
       <nav class="fixed top-0 transition-all duration-300 ease-in-out w-full z-10 bg-blue-400 border-gray-700 shadow-md ">
@@ -83,26 +85,50 @@
             </svg>
           </button>
           <div class="hidden w-full md:block md:w-auto" id="navbar-dropdown">
+           
             <ul
               class="flex flex-col font-medium p-4 md:p-0 mt-4 border text-white rounded-lg bg-blue-400 md:flex-row md:space-x-8 md:mt-0 md:border-0 md:bg-blue-400 ">
+              
               <li>
+                
                 <a href="/evaluate"
-                  class="text-xl block py-2 pl-3 pr-4 text-blue-700 rounded hover:bg-gray-700 md:hover:bg-transparent md:border-0 md:hover:text-blue-500 md:p-0 "
+                  class="text-xl block py-2 pl-3 pr-4 text-white  rounded hover:bg-gray-700 md:hover:bg-transparent md:border-0 md:hover:text-blue-500 md:p-0 "
                   aria-current="page">Home</a>
               </li>
+
               {% for group in request.user.groups.all %}
-              {% if forloop.first %}
-              {% if group.name == "อาจารย์" or group.name == "นักศึกษา" or group.name == "กรรมการ" or group.name == "หัวหน้าสาขา"%}
-              {% if group.name == "อาจารย์"%}
+                {% if forloop.first %}
+                  {% if group.name == "อาจารย์" or group.name == "กรรมการ" %}
               <li>
-                <a href="/form/form_detail "
-                  class="text-xl block py-2 pl-3 pr-4 text-white rounded hover:bg-gray-700 md:hover:bg-transparent md:border-0 md:hover:text-blue-500 md:p-0 ">แบบประเมิน</a>
+                <!--  -->
+                {% if group.name == "อาจารย์"%}
+                <button id="formButton"
+                  href = "/form/form_detail"
+                  class="text-xl flex items-center justify-between w-full py-2 pl-3 pr-4 text-white rounded hover:bg-gray-700 md:hover:bg-transparent md:border-0 md:hover:text-blue-500 md:p-0 md:w-auto ">แบบประเมิน
+                  <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                  viewBox="0 0 10 6">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="m1 1 4 4 4-4" />
+                </svg>
+              </button>
+              
+
+                  <div id="dropdownForm" class="absolute z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44">
+                    <ul class="py-2">
+
+                        <li><a href="{% url 'form_detail' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">จัดการแบบประเมิน</a></li>
+                        
+                        {% comment %} <li><a href="#" class="block px-4  py-2 text-gray-800 hover:bg-gray-100">จัดการหัวข้อ O/PLO</a></li> {% endcomment %}
+                        
+                    </ul>
+                </div>
+                {%endif%}
               </li>
-              {% endif%}
+              
               <!-- <li>
         <a href="#" class="block py-2 pl-3 pr-4 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Services</a>
       </li> -->
-      {% if group.name == "หัวหน้าสาขา"%}
+          {% if group.name == "หัวหน้าสาขา"  %}
               <li>
                 <button id="dropdownNavbarLink" data-dropdown-toggle="dropdownNavbar"
                   class="text-xl flex items-center justify-between w-full py-2 pl-3 pr-4 text-white rounded hover:bg-gray-700 md:hover:bg-transparent md:border-0 md:hover:text-blue-500 md:p-0 md:w-auto ">จัดการข้อมูล
@@ -125,7 +151,7 @@
                         class="block px-4 py-2 hover:bg-gray-100 ">นักศึกษา</a>
                     </li> {% endcomment %}
                     <li>
-                      <a href="#"
+                      <a href="{% url 'manage_course' %}"
                         class="block px-4 py-2 hover:bg-gray-100 ">วิชา</a>
                     </li>
                   </ul>
@@ -134,18 +160,16 @@
             </div> -->
                 </div>
               </li>
-              {% endif%}
-              {% if group.name == "อาจารย์" or group.name == "กรรมการ"%}
               <li>
-                <a href="#"
-                  class="text-xl block py-2 pl-3 pr-4 text-white rounded hover:bg-gray-700 md:hover:bg-transparent md:border-0 md:hover:text-blue-500 md:p-0 ">รายงานการประเมิน</a>
+                <a href="{% url 'report_main' %}"
+                  class="text-xl block py-2 pl-3 pr-4 text-blue-700 rounded hover:bg-gray-700 md:hover:bg-transparent md:border-0 md:hover:text-blue-500 md:p-0 ">รายงานการประเมิน</a>
               </li>
               {%endif%}
-              {% endif%}
-              {% endif%}
-              {% endfor%}
-            </ul>
 
+            </ul>
+            {%endif%}
+            {%endif%}
+            {%endfor%}
           </div>
 
         </div>
@@ -160,8 +184,6 @@
   {% endblock %}
 </div>
 </div>
-<script src="{% static 'popup.js' %}"></script>
-<script src="{% static 'scripBar.js' %}"></script>
 <script>
 
   document.addEventListener('DOMContentLoaded', function() {
@@ -187,3 +209,4 @@
 
 </html>
 
+<script src="{% static 'scripBar.js' %}"></script>

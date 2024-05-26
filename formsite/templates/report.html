@@ -1,60 +1,41 @@
-<!doctype html>
-{% load static  %}
-<html>
+{% extends "addon\nav_report.html" %}
+  {% block title %}สร้างหัวข้อแบบประเมิน (O/PLO){% endblock %}
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Report</title>
-  <style type="text/css">
-    {% comment %} @font-face {
-        font-family: 'THSarabunNew';
-        src: url('{% static "/static/THSarabunNew.ttf" %}') format('truetype');
-    }
-    body {
-        font-family: 'THSarabunNew';
-    }
-    .border { border: 1px solid black; }
-    .px-4 { padding-left: 16px; padding-right: 16px; }
-    .py-2 { padding-top: 8px; padding-bottom: 8px; }
-    .bg-gray-100 { background-color: #f7fafc; }
-    .bg-white { background-color: #fff; }
-    .text-center { text-align: center; }
-    .pl-8 { padding-left: 32px; }
-    b { font-weight: bold; } {% endcomment %}
-</style>
 
-  <link rel="stylesheet" href="output1.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-
-<body class="bg-gray-200 min-h-screen max-h-screen">
   
-
+{% block content %}
 <!-- start from -->
-<div class=" mx-auto max-w-screen-2xl ">
-    <div class="bg-white mx-10 pb-4 pt-5">
-      <p class="flex justify-center text-black text-2xl ml-5 px-4 py-4 ">แบบรายงานผลการทวนสอบผลสัมฤทธิ์ โดย{% if form.is_teacher_form%}อาจารย์ {%else%}นักศึกษา {%endif%}</p>
-      <div class="mx-20  border py-3 shadow-xl  ">
+<p class="flex items-center text-white text-2xl ml-5 px-4 py-4 ">รายงานผลการทวนสอบผลสัมฤทธิ์</p>
+          <div class="rounded-lg bg-gray-300 p-8 shadow-xl px-16 sm:px-5 md:max-w-full w-full">
+            <div class="rounded-md pb-5 bg-white sm:max-w-full w-full">
+              <div class=" bg-white my-0 text-black bottom-5 p-5 shadow-inner text-2xl border-2 ">
+                <h1>แบบรายงานผลการทวนสอบผลสัมฤทธิ์ โดย{% if form.is_teacher_form%}อาจารย์ {%else%}นักศึกษา {%endif%}</h1></div>
+        <!-- <div class="my-0 text-black mb-8 p-5 shadow-inner text-xl font-mono "> -->
+      
+      <div class="mx-20 w-auto  border rounded py-3 shadow-2xl mt-3 ">
         
-        
-        <div class=" w-auto" >
-            <div class="p-4 grid grid-cols-2 gap-2 mx-5 bg-white">
+        <div class="border mx-2">
+        <div class=" w-auto mx-10 " >
+            
+            <div class="flex justify-between item-center grid grid-cols-2 gap-3 mx-24 text-2xl bg-white">
+                
                 <!-- ใส่ ชื่อวิชา รหัสวิชา ภาค ปี ชื่ออาจารย์ วันที่ประเมิน -->
                 <p>วิชา: {{ form.course.name }}</p>
-                <p>รหัสวิชา: {{ form.course.class_code }}</p>
-                <p>ภาคการศึกษา: {{ form.template.semester }}</p>
-                <p>ปีการศึกษา: {{ form.template.year_number }}</p>
+                <p class="text-right">รหัสวิชา: {{ form.course.class_code }}</p>
+                <p>ภาคการศึกษาที่: {{ form.template.semester }}</p>
+                <p class="text-right">ปีการศึกษา: {{ form.template.year_number }}</p>
                 {% comment %} <p>วันที่เริ่ม: {{ form.start_date }}</p>
                 <p>วันที่สิ้นสุด: {{ form.end_date }}</p>
                 <p>สถานะ: {% if form.expired %} หมดอายุ {% else %} ใช้งานอยู่ {% endif %}</p> {% endcomment %}
-              </div>
+            
+            </div>
         </div>
-        <h1 class="px-10 py-3 ">ผลการประเมิน </h1>
+    
+        <h1 class="px-10 pt-3  text-xl">ผลการประเมิน </h1>
+    </div>
                 <!-- start table ตารางแสดงรายงานประเมิน -->
-                <table class="min-w-full bg-white border border-gray-300">
+                <div class="overflow-x-auto">
+                <table class="min-w-full  sm:-w-auto bg-white border border-gray-300">
                     <thead>
                       <tr>
                         <th class="px-4 py-2 border-b">ประเด็นการประเมิน</th>
@@ -92,7 +73,7 @@
                             </tr>
                         {% endif %}
                     {% endfor %}
-                    ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                    ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
                         <tr><!-- หัวข้อ PLO เป็น static -->
                             <td class="border px-4 py-2  bg-gray-100" colspan="1"><b>ผลการเรียนรู้ของหลักสูตร (PLOs)</b></td>
                             <th class="px-4 py-2 border-b"><h1 class="border-b ">บรรลุผลการเรียนรู้ ภายหลังเรียนรายวิชา</h1>
@@ -126,22 +107,21 @@
                       </tr>
                     </tbody>
                   </table>
+                
                 <!-- end table -->
 
-                  <div class="mt-5 pl-3 text-l"><b>6.ข้อเสนอแนะ/ความคิดเห็น</b></div>
+                  <div class="mt-5 pl-3 text-l mb-8"><b>6.ข้อเสนอแนะ/ความคิดเห็น</b></div>
                   <!-- ลูปแสดง text  -->
                   {% for c in comment  %}
                   <div class="border rounded  ">
                     <div class="p-5"> {{c.comment}} </div>
                   </div>
                   {% endfor  %}
-
+                </div>
           </div>
-        </div>
-    </div>
+        
+
 </div>
 </div>
-
-</body>
-
-</html>
+</div>
+{% endblock %}
