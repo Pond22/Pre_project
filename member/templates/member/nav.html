@@ -1,3 +1,4 @@
+{% load custom_filters %}
 <style>
   .disabled-input {
       pointer-events: none;
@@ -103,9 +104,8 @@
                   class="text-xl block py-2 pl-3 pr-4 text-white rounded hover:bg-gray-700 md:hover:bg-transparent md:border-0 md:hover:text-blue-500 md:p-0 "
                   aria-current="page">Home</a>
               </li>
-              {% for group in request.user.groups.all %}
-              {% if forloop.first %}
-                {% if group.name == "อาจารย์" or group.name == "หัวหน้าสาขา" %}
+              {% comment %} {% if request.user|in_group:"อาจารย์, นักศึกษา, กรรมการ, หัวหน้าสาขา" %} {% endcomment %}
+                {% if request.user|in_group:"อาจารย์,หัวหน้าสาขา"%}
               <li>
                 <button id="formButton"
                   class="text-xl flex items-center justify-between w-full py-2 pl-3 pr-4 text-white rounded hover:bg-gray-700 md:hover:bg-transparent md:border-0 md:hover:text-blue-500 md:p-0 md:w-auto ">แบบประเมิน
@@ -118,18 +118,22 @@
 
                   <div id="dropdownForm" class="absolute z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44">
                     <ul class="py-2">
-                      {% if group.name == "อาจารย์"%}
+  
+                      {%if request.user|in_group:"อาจารย์"%}
                         <li><a href="{% url 'form_detail' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">จัดการแบบประเมิน</a></li>
-                        {%else%}
+                      {%endif%}
+                        {%if request.user|in_group:"หัวหน้าสาขา"%}
                         <li><a href="{% url 'manage_template' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">จัดการหัวข้อ O/PLO</a></li>
                       {%endif%}
                         
                     </ul>
                 </div>
               </li>
+              {%endif%}
               <!-- <li>
         <a href="#" class="block py-2 pl-3 pr-4 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Services</a>
       </li> -->
+          {% if request.user|in_group:"หัวหน้าสาขา"  %}
               <li>
                 <button id="dropdownNavbarLink" data-dropdown-toggle="dropdownNavbar"
                   class="text-xl flex items-center justify-between w-full py-2 pl-3 pr-4 text-blue-700 rounded hover:bg-gray-700 md:hover:bg-transparent md:border-0 md:hover:text-blue-500 md:p-0 md:w-auto ">จัดการข้อมูล
@@ -138,7 +142,6 @@
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="m1 1 4 4 4-4" />
                   </svg></button>
-                  {% if group.name == "หัวหน้าสาขา"%}
                 <!-- Dropdown menu -->
                 <div id="dropdownNavbar"
                   class="absolute z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44 ">
@@ -156,21 +159,20 @@
                         class="block px-4 py-2 hover:bg-gray-100 ">วิชา</a>
                     </li>
                   </ul>
-                  {% endif%}
                   <!-- <div class="py-1">
               <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white">Sign out</a>
             </div> -->
                 </div>
               </li>
-              {% if group.name == "อาจารย์" or group.name == "กรรมการ"%}
+              {% endif%}
+              {% comment %} {%endif%} {% endcomment %}
+              {% if request.user|in_group:"อาจารย์,กรรมการ"%}
               <li>
                 <a href="{% url 'report_main' %}"
                   class="text-xl block py-2 pl-3 pr-4 text-white rounded hover:bg-gray-700 md:hover:bg-transparent md:border-0 md:hover:text-blue-500 md:p-0 ">รายงานการประเมิน</a>
               </li>
               {%endif%}
-              {%endif%}
-              {%endif%}
-              {% endfor %}
+         
             </ul>
 
           </div>

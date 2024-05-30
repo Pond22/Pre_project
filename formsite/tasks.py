@@ -9,6 +9,7 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.urls import reverse
+from datetime import timedelta
 
 def send_line_notify(message, token):
     url = 'https://notify-api.line.me/api/notify'
@@ -39,8 +40,9 @@ def check_expired_forms():
     expired_forms = Form.objects.filter(expired=False)
     
     protocol = 'http'  
-    domain = 'http://127.0.0.1:8000/'
-    print(f"เวลาปัจจุบัน {now}")
+    domain = '127.0.0.1:8000'
+    time_difference = timedelta(minutes=1)
+
     for form in expired_forms:
         authorized_users = AuthorizedUser.objects.filter(form=form)
         for authorized_user in authorized_users:
@@ -50,9 +52,10 @@ def check_expired_forms():
                 line_token = user_profile.line_token
                 form_url = reverse('evaluate_form', args=[form.id])
                 full_url = f"{protocol}://{domain}{form_url}"
-                if form.start_date and form.start_date == now:
+                
+                if form.start_date and (now - time_difference) <= form.start_date <= (now + time_difference):
                     # Notify for start date
-                    message = f"ฟอร์ม {form.course.name} ถึงเวลาประเมินแล้วคุณสามารถทำการประเมินได้ผ่านลิ้งค์ {full_url}"
+                    message = f"ฟอร์ม {form.course.name} ถึงเวลาประเมินแล้วท่านสามารถทำการประเมินได้ผ่านลิ้งค์ {full_url}"
                     if line_token:
                         send_line_notify(message, line_token)
                         print(f"Sent LINE notification to {authorized_user.users.username}")
@@ -64,7 +67,7 @@ def check_expired_forms():
                     # Notify for end date
                     form.expired = True
                     form.save()
-                    message = f"ฟอร์ม {form.course.name} หมดเวลาแล้วหากมีข้อสงสัยหรือติดขัดปัญหาใด โปรดติดต่ออาจารย์ประจำวิชา"
+                    message = f"ฟอร์ม {form.course.name} หมดเวลาแล้วหากมีข้อสงสัยโปรดติดต่ออาจารย์ประจำวิชา"
                     if line_token:
                         send_line_notify(message, line_token)
                         print(f"Sent LINE notification to {authorized_user.users.username}")
@@ -72,9 +75,9 @@ def check_expired_forms():
                         send_email_notify("แจ้งเตือนแบบฟอร์มหมดเวลา", message, [email])
                         print(f"Sent email notification to {authorized_user.users.username}")
 
-                elif form.end_date and (form.end_date - now).days == 1:
-                    # Notify for 1 day remaining
-                    message = f"ฟอร์ม {form.course.name} จะหมดเวลาใน 1 วัน"
+                elif form.end_date and (form.end_date - now).days == 1 and (now - time_difference) <= form.end_date <= (now + time_difference):
+   
+                    message = f"ฟอร์ม {form.course.name} จะหมดเวลาใน 1 วันท่านสามารถประเมินได้ที่ {full_url}"
                     if line_token:
                         send_line_notify(message, line_token)
                         print(f"Sent LINE notification to {authorized_user.users.username}")

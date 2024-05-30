@@ -41,6 +41,7 @@ function show_Dialog(){
               // สร้าง input text 
               rows.forEach((row, index) => {
                 // ข้ามแถวแรกที่เป็นหัวข้อคอลัมน์
+                
                 if (index !== 0) {
                     const dataRow = document.createElement('div');
                     dataRow.className = 'data-row';
@@ -48,16 +49,25 @@ function show_Dialog(){
                         const input = document.createElement('input');
                         input.setAttribute('type', 'text');
                         input.setAttribute('value', value);
-                        
+
                         // ตั้งชื่อของ input ตาม index ของคอลัมน์
                         if (columnIndex === 0) {
                             input.setAttribute('name', 'stu_num_list[]');
                         } else if (columnIndex === 1) {
                             input.setAttribute('name', 'stu_name_list[]');
                         }
-                        
+
                         dataRow.appendChild(input);
                     });
+
+                    const deleteButton = document.createElement('button');
+                    deleteButton.setAttribute('type', 'button');
+                    deleteButton.textContent = 'Delete';
+                    deleteButton.addEventListener('click', () => {
+                        dataRow.remove();
+                    });
+                    dataRow.appendChild(deleteButton);
+                    
                     document.getElementById('show_csv').appendChild(dataRow);
                 }
             });

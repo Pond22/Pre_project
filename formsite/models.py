@@ -35,6 +35,8 @@ class Teamplates(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     create = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=False)
+    start_date = models.DateTimeField(null=True, blank=True)
+    end_date = models.DateTimeField(null=True, blank=True)
     semester_choices = (
         (1, '1'),
         (2, '2'),
@@ -126,8 +128,8 @@ class Form(models.Model):
         verbose_name='ปีการศึกษา', 
         validators=[MinValueValidator(1999), MaxValueValidator(3100)]
     ) """           
-    start_date = models.DateTimeField(null=True, blank=True)
-    end_date = models.DateTimeField(null=True, blank=True)
+    """ start_date = models.DateTimeField(null=True, blank=True)
+    end_date = models.DateTimeField(null=True, blank=True) """
     expired = models.BooleanField(default=False) #เก็บว่าแบบฟอร์มนั้นครบกำหนดเวลาหรือยัง
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='sub_items')
     #users = models.ManyToManyField(User, related_name='forms') #ทำให้เกี่ยวกันกับ User แบบ M to N 
@@ -135,9 +137,18 @@ class Form(models.Model):
     def __str__(self):
         return f"ไอดีฟอร์ม {self.id} secID {self.section.id}"
     
+    @property
+    def start_date(self):
+        return self.template.start_date
+
+    @property
+    def end_date(self):
+        return self.template.end_date
+    
 class AuthorizedUser(models.Model):
     form = models.ForeignKey(Form, on_delete=models.CASCADE)  
     users = models.ForeignKey(User, on_delete=models.CASCADE)
+    done = models.BooleanField(default=False)
     is_teacher = models.BooleanField(default=False)
     def __str__(self):
         return f"ฟอร์มที่ = {self.form.id} Username = {self.users.username}"

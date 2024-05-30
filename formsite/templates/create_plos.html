@@ -1,70 +1,218 @@
-{% extends "nav.html" %}
-{%load static%}
-  {% block title %}สร้างหัวข้อแบบประเมิน (O/PLO){% endblock %}
-    
-  {% block content %}
-  
-    <p class="flex items-center text-white text-2xl ml-5 px-4 py-4 ">สร้างหัวข้อการทวนสอบผลสัมฤทธิ์(O/PLO) </p>
-    <div class="relative rounded-lg bg-gray-300 p-8 shadow-xl px-16 ">
-      <div class="rounded-md pb-5 bg-white ">
-        <div class="my-0 text-black bottom-5 p-5 shadow-inner text-xl font-mono ">
-    
-          <div class="border rounded mb-3 bg-gray-100 ">
-          <h2 class="m-2">รายชื่ออาจารย์สาขา : {{user_profile.department}}</h2>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Fields Dynamically</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+        padding: 20px;
+      }
+
+      #ploForm {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .main_field0 {
+        margin-bottom: 20px;
+        padding: 10px;
+        border-bottom: 1px solid #ccc;
+      }
+
+      .main_field0 input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+
+      .addSubField {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+      }
+
+      .addSubField:hover {
+        background-color: #0056b3;
+      }
+
+      .subFields {
+        margin-top: 10px;
+      }
+
+      .subFields input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+
+      .subFields button[type="button"] {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+      }
+
+      .subFields button[type="button"]:hover {
+        background-color: #0056b3;
+      }
+
+      .add_main_Field {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+      }
+
+      .add_main_Field:hover {
+        background-color: #0056b3;
+      }
+
+      button[type="submit"] {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+      }
+
+      button[type="submit"]:hover {
+        background-color: #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>รายชื่ออาจารย์สาขา : {{user_profile.department}}</h2>
     <form id="main" method="post">
-      <div class="m-2 ">
       {% csrf_token %}
       {{ form.as_p }}
-      </div>
-    </div>
+
       <div class="">
         <div class="p-4 border bg-gray-100 ">
           <div id="parent">
             <!-- div แม่ -->
             <!-- ฟิลด์แรกของแม่ -->
-            <div id="main_field0" class="main_field0">
+            {% comment %} วัตถุประสงค์ของรายวิชา (O) {% endcomment %}
+            <div id="static_field0" class="main_field0">
               <!-- div ลูก -->
-              <input type="text" name="main_field0" placeholder="หัวข้อหลัก" readonly  value="วัตถุประสงค์ของรายวิชา (0)"
-                class="border border-gray-400 bg-gray-50 h-8 w-1/3 rounded p-2" ></input>
+              <input type="text" name="static_field0" placeholder="หัวข้อหลัก" readonly value="วัตถุประสงค์ของรายวิชา (O)"
+                class="border border-gray-400 bg-gray-50 h-8 w-1/3 rounded p-2">
               <!-- ปุ่มเพิ่มลูก -->
               <button type="button" class="addSubField" onclick="addSubField(this)">
-
-                <div >
+                <div>
                   + เพิ่มหัวข้อย่อย
                 </div>
               </button>
-
-              
-              
               <div class="subFields"></div>
+            </div>
+            <hr class="border-4 border-black my-4">
 
+            <!-- ฟิลด์ที่สองของแม่ -->
+            {% comment %} แผนการสอนเนื้อหาสาระ (C) {% endcomment %}
+            <div id="static_field1" class="main_field0">
+              <!-- div ลูก -->
+              <input type="text" name="static_field1" placeholder="หัวข้อหลัก" readonly value="แผนการสอนเนื้อหาสาระ (C)"
+                class="border border-gray-400 bg-gray-50 h-8 w-1/3 rounded p-2">
+              <!-- ปุ่มเพิ่มลูก -->
+              <button type="button" class="addSubField" onclick="addSubField(this)">
+                <div>
+                  + เพิ่มหัวข้อย่อย
+                </div>
+              </button>
+              <div class="subFields"></div>
             </div>
-            <div class="m-3 border border-gray-300 px-2 rounded w-1/3 bg-white">ผลการเรียนรู้ของหลักสูตร (PLOs)
+
+            <hr class="border-4 border-black my-4">
+
+            <!-- ฟิลด์ที่สามของแม่ -->
+            {% comment %} กิจกรรมการเรียนการสอน (L) {% endcomment %}
+            <div id="static_field2" class="main_field0">
+              <!-- div ลูก -->
+              <input type="text" name="static_field2" placeholder="หัวข้อหลัก" readonly value="กิจกรรมการเรียนการสอน (L)"
+                class="border border-gray-400 bg-gray-50 h-8 w-1/3 rounded p-2">
+              <!-- ปุ่มเพิ่มลูก -->
+              <button type="button" class="addSubField" onclick="addSubField(this)">
+                <div>
+                  + เพิ่มหัวข้อย่อย
+                </div>
+              </button>
+              <div class="subFields"></div>
             </div>
-            <div class="flex justify-between">
-              
+
+            <hr class="border-4 border-black my-4">
+
+            <!-- ฟิลด์ที่สี่ของแม่ -->
+            {% comment %} การวัดและการประเมินการเรียนรู้ (E) {% endcomment %}
+            <div id="static_field3" class="main_field0">
+              <!-- div ลูก -->
+              <input type="text" name="static_field3" placeholder="หัวข้อหลัก" readonly value="การวัดและการประเมินการเรียนรู้ (E)"
+                class="border border-gray-400 bg-gray-50 h-8 w-1/3 rounded p-2">
+              <!-- ปุ่มเพิ่มลูก -->
+              <button type="button" class="addSubField" onclick="addSubField(this)">
+                <div>
+                  + เพิ่มหัวข้อย่อย
+                </div>
+              </button>
+              <div class="subFields"></div>
+            </div>
+
+
+            <hr class="border-4 border-black my-4">
+
+
+          </div>
+              <div class="flex justify-between">
+                <div></div>
 
               <!-- ปุุ่มเพิ่มแม่ -->
-              <button type="button" class="add_main_Field" onclick="addMainField()" class="mt-8">
-                <div  >
-                  + เพิ่มหัวข้อหลัก PLO
+              <button type="button" class="add_main_Field" onclick="addMainField()">
+                <div class="bg-blue-500 text-white rounded-xl w-auto p-2 hover:bg-blue-600 flex justify-center">
+                  + เพิ่มหัวข้อหลัก
                 </div>
               </button>
             </div>
           </div>
           <button type="submit" name="action" value="create"
-              class="mx-4 mt-8 bg-green-500 hover:bg-green-700 text-white font-semibold text-lg rounded-lg w-auto py-4 px-5 flex justify-center">Create</button>
+              class="mx-4 mt-8 bg-green-400 hover:bg-green-500 text-white text-lg rounded-lg w-auto py-2 px-4 flex justify-center">Create</button>
         </form>
-        {% endblock %}
+  </body>
+</html>
 
-{%block script%}
 <script>
   let dynamicFieldCounter = 1;
   let num = 0;
 
   function addSubField(button) {
     var parentDiv = button.parentElement;
-    var divName = button.parentNode.className;
+    var divName = button.parentNode.id;
     // สร้างฟิลด์ลูกใหม่
     var subField = document.createElement("input");
     subField.type = "text";
@@ -128,24 +276,23 @@
     mainField.placeholder = "หัวข้อหลัก";
     mainField.style.width = "33.333%";
     mainField.style.border = "1px solid gray";
-    mainField.style.height = "50px";
+    mainField.style.height = "30px";
     mainField.style.backgroundColor = "rgb(249,250 ,251)";
     mainField.style.marginTop = "8px";
-    mainField.style.borderRadius = "0.25rem";
+    mainField.style.borderRadius = "0.5rem";
     mainField.style.paddingLeft = "4px";
     console.log(dynamicFieldCounter);
 
     var addButton = document.createElement("button");
     addButton.type = "button";
     addButton.textContent = "+ เพิ่มหัวข้อย่อย";
-    // addButton.style.border = "1px solid gray";
+    addButton.style.border = "1px solid gray";
     addButton.style.backgroundColor = "rgb(59, 130, 246)"
     addButton.style.color = "white";
-    addButton.style.width = "auto";
-    addButton.style.padding = "10px";
-    addButton.style.margin = "8px"
+    addButton.style.width = "110px";
+    addButton.style.padding = "2px";
+    addButton.style.margin = "2px"
     addButton.style.borderRadius = "0.5rem"
-    addButton.style.fontSize="16px"
     addButton.onclick = function () {
       addSubField(addButton);
     };
@@ -187,16 +334,7 @@
     //ทำปุ่มลบฟิลด์แม่
     var deleteButton = document.createElement("button");
     deleteButton.type = "button";
-    deleteButton.textContent = "ลบหัวข้อหลัก";
-    deleteButton.style.border="1px solid gray";
-    deleteButton.style.width="115px";
-    deleteButton.style.height="40px";
-    deleteButton.style.backgroundColor="rgb(239,68,68)";
-    deleteButton.style.marginBottom="5px";
-    deleteButton.style.color="white";
-    deleteButton.style.fontSize="16px";
-    deleteButton.style.borderRadius="0.5rem";
-    deleteButton.style.padding="5px 5px";
+    deleteButton.textContent = "-";
     deleteButton.onclick = function () {
       //สำคัญสำหรับการลบ ห้ามแก้ ถ้าไม่มีมันตอนกด - ชื่อของฟิลด์ตอนหลังบ้านรับ POST จะผิด
 
@@ -280,7 +418,4 @@
 
     dynamicFieldCounter++;
   }
-
-  
 </script>
-{%endblock%}

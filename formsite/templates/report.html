@@ -24,6 +24,7 @@
                 <p class="text-right">รหัสวิชา: {{ form.course.class_code }}</p>
                 <p>ภาคการศึกษาที่: {{ form.template.semester }}</p>
                 <p class="text-right">ปีการศึกษา: {{ form.template.year_number }}</p>
+                <p> มีผู้เข้าประเมิน {{ context_user.user_eva|length }} คนจากทั้งหมด {{ context_user.user_all|length }} คน</p>
                 {% comment %} <p>วันที่เริ่ม: {{ form.start_date }}</p>
                 <p>วันที่สิ้นสุด: {{ form.end_date }}</p>
                 <p>สถานะ: {% if form.expired %} หมดอายุ {% else %} ใช้งานอยู่ {% endif %}</p> {% endcomment %}

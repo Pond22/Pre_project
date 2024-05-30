@@ -3,7 +3,7 @@ let dynamicFieldCounter = 1;
 
   function addSubField(button) {
     var parentDiv = button.parentElement;
-    var divName = button.parentNode.className;
+    var divName = button.parentNode.id;
     // สร้างฟิลด์ลูกใหม่
     var subField = document.createElement("input");
     subField.type = "text";

@@ -1,3 +1,4 @@
+{% load custom_filters %}
 <style>
   .disabled-input {
       pointer-events: none;
@@ -83,10 +84,8 @@
                   class="text-xl block py-2 pl-3 pr-4 text-white rounded hover:bg-gray-700 md:hover:bg-transparent md:border-0 md:hover:text-blue-500 md:p-0 "
                   aria-current="page">Home</a>
               </li>
-              {% for group in request.user.groups.all %}
-              {% if forloop.first %}
-                {% if group.name == "อาจารย์" or group.name == "นักศึกษา" or group.name == "หัวหน้าสาขา" %}
-                  {% if group.name == "อาจารย์" or group.name == "หัวหน้าสาขา" %}
+                {% comment %} {% if request.user|in_group:"อาจารย์, นักศึกษา, กรรมการ, หัวหน้าสาขา" %} {% endcomment %}
+                  {% if request.user|in_group:"อาจารย์,หัวหน้าสาขา"%}
                     <li>
                       <button id="formButton"
                         class="text-xl flex items-center justify-between w-full py-2 pl-3 pr-4 text-blue-700 rounded hover:bg-gray-700 md:hover:bg-transparent md:border-0 md:hover:text-blue-500 md:p-0 md:w-auto ">แบบประเมิน
@@ -99,16 +98,18 @@
 
                     <div id="dropdownForm" class="absolute z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44">
                       <ul class="py-2">
-                        {% if group.name == "อาจารย์" %}
-                          <li><a href="{% url 'form_detail' %}" class="block bg-gray-50 px-4 py-2 text-blue-700 hover:bg-gray-100">จัดการแบบประเมิน</a></li>
-                        {% else %}
+                    
+                        {%if request.user|in_group:"อาจารย์"%}
+                          <li><a href="{% url 'form_detail' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">จัดการแบบประเมิน</a></li>
+                        {%endif%}
+                          {%if request.user|in_group:"หัวหน้าสาขา"%}
                           <li><a href="{% url 'manage_template' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">จัดการหัวข้อ O/PLO</a></li>
                         {% endif %}
                       </ul>
                     </div>
                   </li>
                   {% endif %}
-                  {% if group.name == "หัวหน้าสาขา" %}
+                  {% if request.user|in_group:"หัวหน้าสาขา"  %}
                     <li>
                       <button id="dropdownNavbarLink" data-dropdown-toggle="dropdownNavbar"
                         class="text-xl flex items-center justify-between w-full py-2 pl-3 pr-4 text-white rounded hover:bg-gray-700 md:hover:bg-transparent md:border-0 md:hover:text-blue-500 md:p-0 md:w-auto ">จัดการข้อมูล
@@ -134,15 +135,14 @@
                       </div>
                     </li>
                   {% endif %}
-                  {% if group.name == "อาจารย์" %}
+                  {% comment %} {% endif %} {% endcomment %}
+      
+                  {% if request.user|in_group:"อาจารย์,กรรมการ"%}
                     <li>
                       <a href="/report_main"
                         class="text-xl block py-2 pl-3 pr-4 text-white rounded hover:bg-gray-700 md:hover:bg-transparent md:border-0 md:hover:text-blue-500 md:p-0 ">รายงานการประเมิน</a>
                     </li>
-                  {% endif %}
-                  {% endif%}
-                {% endif %}
-              {% endfor %}
+                    {% endif%}
             </ul>
           </div>
         </div>

@@ -107,22 +107,37 @@ def sign_up(request):
 
     return render(request, 'member/sign_up.html', {'form': form})
 '''
-def sign_up(request: HttpResponse):
+def sign_in(request):
+    if request.user.is_authenticated:
+        if request.user.groups.filter(name='หัวหน้าสาขา').exists():
+            return redirect('/manage_template')
+        elif request.user.groups.filter(name='กรรมการ').exists():
+            return redirect('/report_main')
+        else:
+            return redirect('/evaluate/')
+
     if request.method == "POST":
-        form = RegisterForm(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
-            x = user.email
-            user.username = x[:x.index("@")]
-           #user.username = user.email[:10] if user.email else ''  
-            user.save()
-            form.save()
-            return redirect('/index')
-    else:
-        form = RegisterForm()
-            
-    context = {'form': form}
-    return render(request, 'member/sign_up.html', context)
+
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(
+            request,
+            username=username,
+            password=password
+        )
+
+        if user is not None:
+            login(request, user)
+
+            # Check the user's group and redirect accordingly
+            if user.groups.filter(name='หัวหน้าสาขา').exists():
+                return redirect('/manage_template')
+            elif user.groups.filter(name='กรรมการ').exists():
+                return redirect('/report_main')
+            else:
+                return redirect('/evaluate/')
+
+    return render(request, 'member/sign_in.html')
 
 def add_teacher(request):
     if request.method == 'POST':
@@ -173,6 +188,23 @@ def update_user_group(request):
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
     
+def transfer_role(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        
+        user = get_object_or_404(User, id=data.get("user_id"))
+        admin = get_object_or_404(User, id=data.get("admin_id"))
+        
+        group = get_object_or_404(Group, name='หัวหน้าสาขา')
+        
+        if admin.groups.filter(name='หัวหน้าสาขา').exists():
+            admin.groups.remove(group)
+        
+        user.groups.add(group)
+        
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
+        
     
 def update_line_token(request):
     if request.method == 'POST':

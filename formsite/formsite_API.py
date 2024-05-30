@@ -38,6 +38,11 @@ def manage_courses_API(request):
         user_profile = get_object_or_404(UserProfile, user=request.user)
         template = Teamplates.objects.get(department=user_profile.department, is_active=True)
         
+        if Course.objects.filter(teamplates=template, name=name).exists():
+            return JsonResponse({'success': False, 'message': 'Course name already exists for this template'}, status=400)
+        if Course.objects.filter(teamplates=template, class_code=class_code).exists():
+            return JsonResponse({'success': False, 'message': 'Class code already exists for this template'}, status=400)
+        
         course = Course.objects.create(class_code=class_code, name=name, teamplates=template)
         for i in range(1, sections_count + 1):
             print(i)
@@ -118,13 +123,18 @@ def download_pdf(request, form_id):
         overall_plo_average = sum(total_sub_avg_list) / len(total_sub_avg_list)
     else:
         overall_plo_average = None
+        
+    user_eva = AuthorizedUser.objects.filter(form=form, done=True)
+    user_all = AuthorizedUser.objects.filter(form=form)
+    context_user = {'user_eva':user_eva, 'user_all':user_all}
 
     # โหลด HTML template
     html = render_to_string('report_pdf.html', {
         'form': form,
         'assessment_items': assessment_items,
         'plo': plo,
-        'overall_plo_average': overall_plo_average
+        'overall_plo_average': overall_plo_average,
+        'context_user':context_user
     })
 
     # ตั้งค่า options สำหรับ pdfkit

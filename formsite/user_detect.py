@@ -6,7 +6,7 @@ from django.shortcuts import redirect
 def user_is_in_group(user, group_names):
     return any(user.groups.filter(name=group_name).exists() for group_name in group_names) or user.is_superuser
 
-def group_required(*group_names, redirect_to='/index'):
+def group_required(*group_names, redirect_to='/sign_in'):
     def decorator(view_func):
         def _wrapped_view(request, *args, **kwargs):
             if not user_is_in_group(request.user, group_names):

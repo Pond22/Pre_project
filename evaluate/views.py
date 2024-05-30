@@ -20,26 +20,38 @@ from formsite.user_detect import*
 def eva_home(request):
     user = request.user
     current_time = timezone.now()
-    form = form_model.objects.filter(authorizeduser__users__username=user, expired=False, start_date__lte = current_time)
-    print(form)
-    for data in form:   
+    
+    # ใช้ select_related เพื่อเข้าถึงฟิลด์ใน Teamplates
+    forms = form_model.objects.filter(
+        authorizeduser__users__username=user.username, 
+        expired=False, 
+        template__start_date__lte=current_time
+    ).select_related('template')
+    
+    print(forms)
+    for data in forms:
         print(data.id)
-        
+    
     forms_not_answered = []
-    for data in form:
+    for data in forms:
         if not AssessmentResponse.objects.filter(respondent=user, assessment_item__form=data).exists():
             forms_not_answered.append(data)
     
-    return render(request, 'evaluate/evaluate_home.html', {'form':forms_not_answered})
+    return render(request, 'evaluate/evaluate_home.html', {'form': forms_not_answered})
 
 @login_required(login_url="sign_in")
 @teacher_or_student_required
 def evaluate_form(request, form_id):
-    if AssessmentResponse.objects.filter(respondent=request.user, assessment_item__form=form_id).exists():
+    detail = get_object_or_404(form_model, pk=form_id)
+    now = localtime(timezone.now())
+    if AssessmentResponse.objects.filter(respondent=request.user, assessment_item__form=form_id).exists(): #ดูว่าเคยประเมินแบบฟอร์มนี้ไปหรือยัง  ฟังก์ชันนี้ทำก่อนที่จะเพิ่มฟิลด์ done ในโมเดล AutUser 
         return redirect('/evaluate/')
-    elif not AuthorizedUser.objects.filter(users=request.user, form=form_id).exists():
+    elif not AuthorizedUser.objects.filter(users=request.user, form=form_id).exists(): #ตรวจว่ายูสมีสิทธิ์ประเมินแบบฟอร์มนี้ไหม
+        return redirect('/evaluate/')
+    if not detail.start_date <= now: #ตรวจว่ายูสเข้าถึงฟอร์มนี้ก่อนเวลาประเมิน start_date ไหม
         return redirect('/evaluate/')
     if request.method == 'POST':
+        user = get_object_or_404(AuthorizedUser, users=request.user, form=form_id)
         form = DynamicLikertForm(request.POST, custom_param=form_id)
         if form.is_valid():
             for field_name, response in form.cleaned_data.items():
@@ -58,10 +70,11 @@ def evaluate_form(request, form_id):
                 AssessmentResponse.objects.create(respondent=request.user, assessment_item=question, response=response)
                 
             CommentForm.objects.create(respondent=request.user, form=form_model.objects.get(id=form_id), comment=request.POST.get('user_comment'))
-            return HttpResponse("Successfully submitted!")
+            user.done = True
+            user.save()
+            return redirect('/evaluate')
     else:
         form = DynamicLikertForm(custom_param=form_id)
-        detail = get_object_or_404(form_model, pk=form_id)
     return render(request, 'evaluate/evaluate_form.html', {'form': form,'detail':detail})
 
 @login_required(login_url="sign_in")
@@ -69,6 +82,19 @@ def evaluate_form(request, form_id):
 def create_form(request):
     user_profile = get_object_or_404(UserProfile, user=request.user)
     Active_Template = Teamplates.objects.get(is_active=True, department=user_profile.department)
+    
+    fix_c = CLO.objects.filter(form = Active_Template, text='แผนการสอนเนื้อหาสาระ (C)')
+    fix_l = CLO.objects.filter(form = Active_Template, text='กิจกรรมการเรียนการสอน (L)')
+    fix_e = CLO.objects.filter(form = Active_Template, text='การวัดและการประเมินการเรียนรู้ (E)')
+    
+    fix_data ={'fix_c':fix_c, 'fix_l':fix_l, 'fix_e':fix_e}
+    
+    template_data = []
+    if Active_Template:
+        template_data = Active_Template.TemplateData.all()
+            
+    new_form = Assessment_Form(custom_param=Active_Template)
+    
     if request.method == 'POST':
         stu_name_list = request.POST.getlist('stu_name_list[]')
         stu_num_list = request.POST.getlist('stu_num_list[]')
@@ -86,13 +112,18 @@ def create_form(request):
                 new_in = new_form.save(commit=False)
                 new_in.created_by = request.user
                 new_in.template = Active_Template      
+                
+                if new_in.start_date >= new_in.end_date:
+                    # ถ้าเวลาเริ่มต้นมากกว่าหรือเท่ากับเวลาสิ้นสุด ไม่ผ่าน
+                    return render(request, 'evaluate/create_form.html', {'new_form': new_form, 'template_data': template_data,'error_message': 'เวลาเริ่มต้นต้องไม่น้อยกว่าเวลาสิ้นสุด'})
+                
                 if round == 1: #ถ้าเป็นครั้งที่สองสร้างของอาจารย์
                     new_in.is_teacher_form = True
                     new_in.parent = parent_form
                     new_in.save()
                     AuthorizedUser.objects.create(form=new_in, users=request.user,is_teacher=True)
                 if round == 0: #ถ้าเป็นสร้างครั้งแรก ทำแบบฟอร์มของนักเรียนแล้วเอาชื่อเข้า
-                    start_time = time.time()
+                    start_time = time.time() #วัดความเร็วเฉยๆ       
                     print("PASS1")
                     new_in.save()
                     parent_form = new_in
@@ -114,15 +145,15 @@ def create_form(request):
                 end_time = time.time()
                 print("เวลาในการสร้างรายชื่อ = ",end_time - start_time)            
                 create_form = get_object_or_404(form_model, id=new_in.id)
-                if 'main_field0' in request.POST:  
-                    for i in range(le + 1):
-                        if round == 1 :
+                if 'static_field0' in request.POST:  
+                    for i in range(4):
+                        if round == 1 : #ดูแบบฟอร์มว่าเป็น 02 ไหม
                             
-                            name_main = 'main_field' + str(i)
+                            name_main = 'static_field' + str(i)
                             main_fields = request.POST.get(name_main, '') 
                             #print('main_fields =', name_main)
-                            if name_main == 'main_field0':
-                                o_data = CLO.objects.filter(form = Active_Template, parent__isnull=True)
+                            if name_main == 'static_field0':
+                                o_data = CLO.objects.filter(form = Active_Template, parent__isnull=True, text='วัตถุประสงค์ของรายวิชา (O)')
                                 for o in o_data:
                                     main_o = AssessmentItem.objects.create(text=o.text, form=create_form)
 
@@ -132,7 +163,7 @@ def create_form(request):
                                         AssessmentItem.objects.create(text=sub_item.text, parent=main_o, form=create_form)
                                         
                             else:
-                                main_field = AssessmentItem.objects.create(text=main_fields, form=create_form)
+                                """ main_field = AssessmentItem.objects.create(text=main_fields, form=create_form)
                                 
                                 name_sub = 'sub_field_' + str(name_main)
                                 sub_fields = request.POST.getlist(name_sub)
@@ -140,10 +171,16 @@ def create_form(request):
                                 #print('name_sub =', name_sub)
 
                                 for sub_field_text in sub_fields:
-                                    sub_field = AssessmentItem.objects.create(text=sub_field_text, parent=main_field, form=create_form)
+                                    sub_field = AssessmentItem.objects.create(text=sub_field_text, parent=main_field, form=create_form) """
+                                main_fields = request.POST.get(name_main, '') 
+                                main_field = AssessmentItem.objects.create(text=main_fields, form=create_form)
+                                name_sub = 'sub_field_' + str(name_main)
+                                sub_fields = request.POST.getlist(name_sub)
+                                for sub_field_text in sub_fields:
+                                    AssessmentItem.objects.create(text=sub_field_text, parent=main_field, form=create_form) 
                                     
-                        else :
-                            name_main = 'main_field' + str(i)
+                        else : # 01 นักศึกษา
+                            """ name_main = 'main_field' + str(i)
                             main_fields = request.POST.get(name_main, '') 
                             #print('main_fields =', name_main)
                             main_field = AssessmentItem.objects.create(text=main_fields, form=create_form)
@@ -154,7 +191,23 @@ def create_form(request):
                             #print('name_sub =', name_sub)
 
                             for sub_field_text in sub_fields:
-                                sub_field = AssessmentItem.objects.create(text=sub_field_text, parent=main_field, form=create_form)
+                                sub_field = AssessmentItem.objects.create(text=sub_field_text, parent=main_field, form=create_form) """
+                                
+                            name_main = 'static_field' + str(i)
+                            if name_main == 'static_field0':
+                                main_fields = request.POST.get(name_main, '') 
+                                main_field = AssessmentItem.objects.create(text=main_fields, form=create_form)
+                                name_sub = 'sub_field_' + str(name_main)
+                                sub_fields = request.POST.getlist(name_sub)
+                                for sub_field_text in sub_fields:
+                                    AssessmentItem.objects.create(text=sub_field_text, parent=main_field, form=create_form) 
+                            else :
+                                main_fields = request.POST.get(name_main, '') 
+                                main_field = AssessmentItem.objects.create(text=main_fields, form=create_form)
+                                name_sub = 'sub_field_' + str(name_main)
+                                sub_fields = request.POST.getlist(name_sub)
+                                for sub_field_text in sub_fields:
+                                    AssessmentItem.objects.create(text=sub_field_text, parent=main_field, form=create_form) 
                         
                     count = 0 #ทำขั้นตอนบันทึก PLOs
                     while True:
@@ -176,7 +229,7 @@ def create_form(request):
                             break
 
                         count += 1
-        return HttpResponse("Data saved successfully!")
+        return redirect('/form/form_detail')
              
     else:
         
@@ -184,16 +237,15 @@ def create_form(request):
         for form in template_data:
             print(form) """
             
-        template_data = []
+        """ template_data = []
         if Active_Template:
             template_data = Active_Template.TemplateData.all()
             
-        #courses = Course.objects.filter(teamplates=Active_Template)
-        new_form = Assessment_Form(custom_param=Active_Template)
+        new_form = Assessment_Form(custom_param=Active_Template) """
       
         #new_form.set_courses_choices(courses)
-  
-        return render(request, 'evaluate/create_form.html', {'new_form': new_form, 'template_data':template_data})
+        """ time = form_model.objects.get(id=Active_Template.id) """
+        return render(request, 'evaluate/create_form.html', {'new_form': new_form, 'template_data':template_data, 'fix_data':fix_data, 'time':Active_Template})
     
     ''''
     form = Form.objects.get(id=form_id)
@@ -219,6 +271,7 @@ def form_detail(request):
 @login_required(login_url="sign_in")
 @teacher_required
 def edit_form(request, form_id): #แก้ไขฟอร์มหลังสร้าง
+    
     if  not form_model.objects.filter(created_by=request.user, expired=False, id = form_id):
         return redirect('/form/form_detail')
     form = form_model.objects.filter(id=form_id)
@@ -227,14 +280,6 @@ def edit_form(request, form_id): #แก้ไขฟอร์มหลังส�
     Active_Template = Teamplates.objects.get(is_active=True, department=user_profile.department)
     assessment_items = AssessmentItem.objects.filter(form=form_id, parent__isnull=True, template_select__isnull=True)
     selection_item = AssessmentItem.objects.filter(form=form_id, parent__isnull=True, template_select__isnull=False)
-    
-    if request.method == "POST":
-        form = FormUpdateForm(request.POST, instance=formID)
-        if form.is_valid():
-            form.save()
-            return redirect('/form/form_detail')
-        else:
-            return JsonResponse(form.errors, status=400)
     
     template_data = []
     if Active_Template:
@@ -255,6 +300,20 @@ def edit_form(request, form_id): #แก้ไขฟอร์มหลังส�
         'template_data':template_data,
         'form_update':form_update
     }
+    
+    if request.method == "POST":
+        form = FormUpdateForm(request.POST, instance=formID)
+        if form.is_valid():
+            start_date = form.cleaned_data['start_date']
+            end_date = form.cleaned_data['end_date']
+            if start_date >= end_date:
+                    # ถ้าเวลาเริ่มต้นมากกว่าหรือเท่ากับเวลาสิ้นสุด ไม่ผ่าน
+                    return render(request, 'evaluate/edit_form.html', {'context':context,'error_message': 'เวลาเริ่มต้นต้องไม่น้อยกว่าเวลาสิ้นสุด'})
+            form.save()
+            return redirect('/form/form_detail')
+        else:
+            return JsonResponse(form.errors, status=400)  
+    
     return render(request, 'evaluate/edit_form.html', {'context':context})
 
 """ def API_addnew_tempaltedata (request):

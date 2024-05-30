@@ -1,5 +1,5 @@
 from django import forms
-from formsite.models import TemplateData, Form, AssessmentItem, Course, Section
+from formsite.models import TemplateData, Form, AssessmentItem, Course, Section, Teamplates
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 import re
@@ -16,25 +16,26 @@ class PLOsForm(forms.ModelForm):
         model = TemplateData
         fields = ['text']
         
-class FormUpdateForm(forms.ModelForm):
+class FormUpdateForm(forms.ModelForm): #หน้าแก้ไขฟอร์ม
     class Meta:
         model = Form
         fields = [
             'section',
-            'start_date',
-            'end_date',
+            #'start_date',
+            #'end_date',
             'description',
         ]
         widgets = {
             'section': forms.Select(choices=()),
-            'start_date': DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
-            'end_date': DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+            #'start_date': DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control', 'required': True, 'readonly': True}),
+            #'end_date': DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control', 'required': True, 'readonly': True}),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):#แสดงตอนเรียนที่ไม่ซ้ำกับอันที่มีในระบบ
         super().__init__(*args, **kwargs)
         if self.instance.pk:
             active_template = self.instance.template
+
             used_sections = Form.objects.filter(course=self.instance.course, template=active_template).exclude(id=self.instance.id).values_list('section_id', flat=True)
             current_section_id = self.instance.section.id if self.instance.section else None
             sections_filter = Q(course=self.instance.course) & (~Q(id__in=used_sections) | Q(id=current_section_id))
@@ -50,7 +51,7 @@ class FormUpdateForm(forms.ModelForm):
             if instance.parent:
                 parent_form = instance.parent
                 parent_form.section = instance.section
-                parent_form.start_date = instance.start_date
+                """ parent_form.start_date = instance.start_date """
                 parent_form.end_date = instance.end_date
                 parent_form.description = instance.description
                 parent_form.save()
@@ -58,8 +59,8 @@ class FormUpdateForm(forms.ModelForm):
                 child_forms = instance.sub_items.all()
                 for child in child_forms:
                     child.section = instance.section
-                    child.start_date = instance.start_date
-                    child.end_date = instance.end_date
+                    """ child.start_date = instance.start_date
+                    child.end_date = instance.end_date """
                     child.description = instance.description
                     child.save()
 
@@ -67,17 +68,17 @@ class FormUpdateForm(forms.ModelForm):
 
 
 
-class Assessment_Form(forms.ModelForm):
+class Assessment_Form(forms.ModelForm): #หน้าสร้างแบบฟอร์ม
     class Meta:
         model = Form
-        fields = ['course', 'section', 'start_date', 'end_date', 'description', 'template']
+        fields = ['course', 'section', 'description', 'template']
         
         widgets = {
             'semester': forms.Select(choices=((1, '1'), (2, '2'), (3, '3'))),
             'section': forms.Select(choices=()),
             #'section': forms.Select(choices=((1, 'ตอนเรียนที่ 1'), (2, 'ตอนเรียนที่ 2'), (3, 'ตอนเรียนที่ 3'), (4, 'ตอนเรียนที่ 4'), (5, 'ตอนเรียนที่ 5'), (6, 'ตอนเรียนที่ 6'), (7, 'ตอนเรียนที่ 7'), (8, 'ตอนเรียนที่ 8'), (9, 'ตอนเรียนที่ 9'), (10, 'ตอนเรียนที่ 10'))),
-            'start_date': DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
-            'end_date': DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+            #'start_date': DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control', 'required': True, 'readonly': False}),
+            #'end_date': DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control', 'required': True, 'readonly': False}),
         }
         exclude = ['template'] 
            
@@ -85,6 +86,11 @@ class Assessment_Form(forms.ModelForm):
         super().__init__(*args, **kwargs)
         print(custom_param)
         
+        
+        """ template_instance = Teamplates.objects.get(id=custom_param) """
+        # ฟิคเวลาจากแม่แบบที่หัวหน้าสาขากำหนด
+        """ self.fields['start_date'].initial = custom_param.start_date
+        self.fields['end_date'].initial = custom_param.end_date """
         # กรองรายวิชาที่มี section ว่างเท่านั้น
         courses_with_sections = Course.objects.filter(teamplates=custom_param).distinct()
         valid_courses = []
@@ -99,8 +105,8 @@ class Assessment_Form(forms.ModelForm):
         c_choices = [('', 'เลือกรายวิชา')] + [(c.id, f'{c.class_code} | {c.name}') for c in valid_courses]
         self.fields['course'].widget = forms.Select(choices=c_choices)
         self.fields['course'].label = 'รายวิชา'
-        self.fields['start_date'].label = 'วันเวลาเริ่มต้นการประเมิน'
-        self.fields['end_date'].label = 'วันเวลาสิ้นสุดการประเมิน'
+        #self.fields['start_date'].label = 'วันเวลาเริ่มต้นการประเมิน'
+        #self.fields['end_date'].label = 'วันเวลาสิ้นสุดการประเมิน'
         
         self.fields['section'].queryset = Section.objects.none()
 
@@ -147,7 +153,7 @@ LIKERT_CHOICES = [
     (5, ''),
 ]
 
-class DynamicLikertForm(forms.Form):
+class DynamicLikertForm(forms.Form): #หน้าประเมิน
     def __init__(self, *args, custom_param=None, **kwargs):
         super(DynamicLikertForm, self).__init__(*args, **kwargs)
         if custom_param:

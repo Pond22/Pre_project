@@ -15,6 +15,7 @@ urlpatterns = [
     path('add_teacher/', views.add_teacher, name='add_teacher'),
     path('update_user_group/', views.update_user_group, name='update_user_group'),
     path('api/update_line_token/', views.update_line_token, name='update_line_token'),
+    path('transfer_role/', views.transfer_role, name='transfer_role'),
     
 
 ]

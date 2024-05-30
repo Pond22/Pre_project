@@ -1,23 +1,23 @@
 <style>
-    body, html {
+    /* body, html {
         font-family: Arial, sans-serif;
         margin: 0;
         padding: 0;
         background-color: #f0f0f0;
-    }
+    } */
     
     .header img {
         width: 100%;
         height: auto;
     }
     
-    .container {
+    /* .container {
         width: 80%;
         margin: 20px auto;
         background: #fff;
         padding: 20px;
         box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
+    } */
     
     table {
         width: 100%;
@@ -44,10 +44,19 @@
     
     .edit-btn {
         background-color: #4CAF50;
+        border-radius: 0.25rem;
     }
     
     .delete-btn {
         background-color: #f44336;
+        border-radius: 0.25rem;
+    }
+
+    .edit-btn:hover{
+        background-color: #15803d;
+    }
+    .delete-btn:hover {
+        background-color: #b91c1c;
     }
 
     .modal {
@@ -59,8 +68,8 @@
         width: 100%; 
         height: 100%; 
         overflow: auto; 
-        background-color: rgb(0,0,0); 
-        background-color: rgba(0,0,0,0.4); 
+        /* background-color: rgb(0,0,0);  */
+        /* background-color: rgba(0,0,0,0.4);  */
     }
     
     .modal-content {
@@ -95,50 +104,50 @@
     {% block content %}
 <!-- popup เพิ่มข้อมูล -->
 <div id="dialog2"
-          class="fixed z-50 opject-top inset-0 bg-inherit bg-current bg-opacity-100  opacity-0 hidden transition-opacity duration-500 ">
+          class="fixed z-50 opject-top inset-0 bg-inherit ml-20 bg-opacity-100  opacity-0 hidden transition-opacity duration-500 ">
 <div
-class="fixed w-1/3 md:w-2/4 h-auto mx-justify-center my-52 mx-96 overflow-y-auto overflow-x-auto  top-1/2 left-1/2 z-50 justify-center items-center md:inset-0  max-h-full">
-<div class="relative bg-white rounded-lg shadow-xl dark:bg-gray-700 ">
-  <div class="border shadow-xl">
-
-    <button type="button" onclick="close_Dialog()"
-      class="absolute top-3 end-2.5 text-gray-400  hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
-      <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-        viewBox="0 0 14 14">
-        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-      </svg>
-      <span class="sr-only">Close modal</span>
-    </button>
-    <div class="flex py-3 pl-2 ">
-      <div class="justify-center text-center py-1 text-black text-xl font-medium px-2 ">
+class="fixed w-1/3 md:w-2/4 h-auto mx-justify-center my-52 mx-96 overflow-y-auto overflow-x-auto top-1/2 left-1/2 z-50 justify-center items-center md:inset-0 max-h-full bg-opacity-100">
+<div class="relative bg-white rounded-lg shadow-xl  ">
+  <div class="border shadow-xl flex justify-between">
+      <div class="my-3 justify-center text-center py-1 text-black text-xl font-medium px-2 ">
         <h1>อาจารย์ท่านใหม่</h1>
-      </div>
+    </div>
+
+    <div>
+        <button type="button" onclick="close_Dialog()"
+          class=" mt-3 text-gray-400 hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center ">
+          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+            viewBox="0 0 14 14">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+          </svg>
+          <span class="sr-only">Close modal</span>
+        </button>
     </div>
   </div>
 
   <div id="add-Teacher">
     <form id="addTeacherForm">
         <div class="pl-4 mb-4 gap-1 md:grid-cols-2">
-            <label for="first_id" class="block mt-2 mb-2 text-sm font-medium text-gray-900 dark:text-white">รหัสอาจารย์ </label>
+            <label for="first_id" class="block mt-2 mb-2 text-sm font-medium text-gray-900 ">รหัสอาจารย์ </label>
             <input type="text" id="first_id" name="first_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-1/3 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" required />
             
             <div>
-                <label for="prefix_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">คำนำหน้า </label>
+                <label for="prefix_name" class="block mb-2 text-sm font-medium text-gray-900 ">คำนำหน้า </label>
                 <input type="text" id="prefix_name" name="prefix_name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg  block w-1/3 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" required />
             </div>
         </div>
         <div class="pl-4 grid">
             <div>
-                <label for="first_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">ชื่อ </label>
+                <label for="first_name" class="block mb-2 text-sm font-medium text-gray-900 ">ชื่อ </label>
                 <input type="text" id="first_name" name="first_name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg  block w-2/3 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" required />
             </div>
             <div>
-                <label for="last_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">นามสกุล</label>
+                <label for="last_name" class="block mb-2 text-sm font-medium text-gray-900 ">นามสกุล</label>
                 <input type="text" id="last_name" name="last_name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg  block w-2/3 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" required />
             </div>
             <div>
-                <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
+                <label for="email" class="block mb-2 text-sm font-medium text-gray-900 ">Email</label>
                 <input type="email" id="email" name="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg  block w-2/3 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" required />
             </div>
         </div>
@@ -152,8 +161,8 @@ class="fixed w-1/3 md:w-2/4 h-auto mx-justify-center my-52 mx-96 overflow-y-auto
     <div></div>
     <div class="pr-1">
         <div class="pr-1">
-            <button class="bg-white rounded px-4 py-2 mr-2 text-black cursor-pointer hover:bg-gray-500 focus:ring-4 focus:outline-none focus:ring-gray-500 dark:bg-white dark:hover:bg-gray-300 dark:focus:ring-gray-400 items-center w-20" onclick="close_Dialog()">ยกเลิก</button>
-            <button class="bg-blue-700 rounded px-4 py-2 mr-1 text-white cursor-pointer hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-300 items-center w-20" onclick="add_new_member({{ user_profile.department.id }})">ยืนยัน</button>
+            <button class="bg-white rounded px-4 py-2 mr-2 text-black cursor-pointer hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-500 items-center w-20" onclick="close_Dialog()">ยกเลิก</button>
+            <button class="bg-blue-700 rounded px-4 py-2 mr-1 text-white cursor-pointer hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300  items-center w-20" onclick="add_new_member({{ user_profile.department.id }})">ยืนยัน</button>
         </div>
     </div>
 </div>
@@ -170,6 +179,7 @@ class="fixed w-1/3 md:w-2/4 h-auto mx-justify-center my-52 mx-96 overflow-y-auto
             <div class="rounded-md pb-5 bg-white sm:max-w-full w-full">
               <div class=" bg-white my-0 text-black bottom-5 p-5 shadow-inner text-2xl border-2 ">
                 <h1>รายชื่ออาจารย์สาขา : {{user_profile.department}}</h1></div>
+
                 
     
 
@@ -181,7 +191,7 @@ class="fixed w-1/3 md:w-2/4 h-auto mx-justify-center my-52 mx-96 overflow-y-auto
                         <label for="simple-search" class="sr-only">Search</label>
                         <div class="flex ">
                            <input type="text" id="simple-search" onkeyup="searchTable()" placeholder="ค้นหาข้อมูลอาจารย์"
-                                        class="bg-gray-100 border border-gray-300 text-black text-sm focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                        class="bg-gray-100 border border-gray-300 text-black text-sm focus:ring-blue-500 focus:border-blue-500 block p-2.5 ">
                         
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
@@ -195,6 +205,7 @@ class="fixed w-1/3 md:w-2/4 h-auto mx-justify-center my-52 mx-96 overflow-y-auto
 
                     {% comment %} add อาจารย์ {% endcomment %}
                     <button type="button" onclick="open_Dialog()"
+                      {% comment %} onclick='add_new_member({{user_profile.department}})' {% endcomment %}
                       class="py-1 text-white text-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300  items-center w-auto md:w-30 md:ml-3 rounded-lg ">
                       <h1 class="p-2 "><i class=" p-1 fa-solid fa-plus"></i>เพิ่มอาจายร์ท่านใหม่</h1>
                     </button>
@@ -205,25 +216,25 @@ class="fixed w-1/3 md:w-2/4 h-auto mx-justify-center my-52 mx-96 overflow-y-auto
                 <head class="p-4">
                 <div class="-my-2 overflow-x-auto sm:-mx lg:-mx-4">
                     <div class="py-2 align-middle inline-block min-w-full sm:px-5 lg:px-5">
-                    <div class=" shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">    
+                    <div class=" shadow overflow-hidden border-b border-gray-100 sm:rounded-lg">    
                         <div class="px-6 ">
-            <table id="teacherTable" class="table-auto max-w-full w-full divide-y divide-gray-200 ">
+            <table id="teacherTable" class="table-auto max-w-full w-full divide-y divide-gray-100 ">
                 <thead class="bg-gray-50 ">
                     <tr>
-                        {% comment %} <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">ID</th> {% endcomment %}
-                        <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">รหัสอาจารย์</th>
-                        <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">คำนำหน้า</th>
-                        <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">ชื่อ</th>
-                        <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">นามสกุล</th>
-                        <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">Email</th>
-                        <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">สิทธิ์คณะกรรมการ</th>
-                        <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">Actions</th>
+                        <!-- <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider">ID</th> -->
+                        <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider text-center">รหัสอาจารย์</th>
+                        <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider text-center">คำนำหน้า</th>
+                        <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider text-center">ชื่อ</th>
+                        <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider text-center">นามสกุล</th>
+                        <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider text-center">Email</th>
+                        <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider text-center">สิทธิ์คณะกรรมการ</th>
+                        <th class="pl-6 py-3 text-xl font-mono text-gray-500 uppercase tracking-wider text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y bg-gray-100 ">
                     {% for user in users_in_department %}
                     <tr>
-                        {% comment %} <td class="pl-6 py-3 whitespace-nowrap text-center">{{ user.user.id }}</td> {% endcomment %}
+                        <!-- <td class="pl-6 py-3 whitespace-nowrap text-center">{{ user.user.id }}</td> -->
                         <td class="pl-6 py-3 whitespace-nowrap text-center">{{ user.user.username }}</td>
                         <td class="pl-6 py-3 whitespace-nowrap text-center">{{ user.prefix }}</td>
                         <td class="pl-6 py-3 whitespace-nowrap text-center">{{ user.user.first_name }}</td>
@@ -231,16 +242,17 @@ class="fixed w-1/3 md:w-2/4 h-auto mx-justify-center my-52 mx-96 overflow-y-auto
                         <td class="pl-6 py-3 whitespace-nowrap text-center">{{ user.user.email }}</td>
                         <td >
                             <div class="flex items-center justify-center ">
-                              <input id="default-checkbox" type="checkbox" value=""
-                              {% for group in user.user.groups.all %}
-                                    {%if group.name == "กรรมการ"%}
-                                        checked="checked"
-                                       {%endif%} 
-                                {% endfor %}
-                                class="bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                                onchange="updateUserGroup({{ user.user.id }}, this.checked)">
-                              <label for="default-checkbox" class="ms-2 text-l font-mono">คณะกรรมการ</label>
-                            </div>
+                                <input id="default-checkbox-{{ user.user.id }}" type="checkbox" value=""
+                                {% for group in user.user.groups.all %}
+                                      {%if group.name == "กรรมการ"%}
+                                          checked="checked"
+                                         {%endif%} 
+                                  {% endfor %}
+                                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                  style="width: 1.5rem; height: 1.5rem;"
+                                  onchange="updateUserGroup({{ user.user.id }}, this.checked)">
+                                <label for="default-checkbox-{{ user.user.id }}" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"> คณะกรรมการ</label>
+                              </div>
                           </td>
 
                         <td >
@@ -248,7 +260,9 @@ class="fixed w-1/3 md:w-2/4 h-auto mx-justify-center my-52 mx-96 overflow-y-auto
                             <button onclick="openModal('editModal', '{{ user.user.id }}', '{{user.user.username|safe}}', '{{user.prefix|safe}}', 
                             '{{user.user.first_name|safe}}', '{{user.user.last_name|safe}}', '{{user.user.email|safe}}')" class="edit-btn">Edit</button>
                             
-                            <button onclick="openModal('deleteModal', '{{ user.user.id }}')" class="delete-btn">Delete</button></div>
+                            <button onclick="openModal('deleteModal', '{{ user.user.id }}')" class="delete-btn">Delete</button>
+                            <button onclick="openTransferModal('{{ user.user.id }}', '{{user.user.first_name}} {{user.user.last_name}}', '{{user_profile.user.id}}')" class="bg-blue-500 hover:bg-blue-700 rounded text-white px-1">หัวหน้าสาขา</button>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
@@ -256,6 +270,7 @@ class="fixed w-1/3 md:w-2/4 h-auto mx-justify-center my-52 mx-96 overflow-y-auto
                 </tbody>
             </table>
         </div>
+
     </div>
   </div>
 </head>
@@ -264,7 +279,7 @@ class="fixed w-1/3 md:w-2/4 h-auto mx-justify-center my-52 mx-96 overflow-y-auto
         <!--สำหรับการแก้ไข -->
 <div id="editModal" class="modal">
     <div class="modal-content">
-        <span class="close">&times;</span>
+        <span id="close" class="close" onclick="closeModal('editModal')">&times;</span>
         <form id="editForm" method="POST" action="{% url 'manage_member' %}">
             
             {% csrf_token %}
@@ -273,23 +288,23 @@ class="fixed w-1/3 md:w-2/4 h-auto mx-justify-center my-52 mx-96 overflow-y-auto
     <input type="hidden" name="action" value="edit">
     <div class="mb-4">
         <label for="prefix" class="block text-gray-700 text-sm font-bold mb-2">Prefix:</label>
-        <input type="text" name="prefix" id="prefix" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-black focus:outline-none focus:shadow-outline" required>
+        <input type="text" name="prefix" id="prefix" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg  block w-2/3 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
     </div>
     <div class="mb-4">
         <label for="editUsername" class="block text-gray-700 text-sm font-bold mb-2">Username:</label>
-        <input type="text" name="username" id="editUsername" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+        <input type="text" name="username" id="editUsername" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg  block w-2/3 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
     </div>
     <div class="mb-4">
         <label for="editFirstName" class="block text-gray-700 text-sm font-bold mb-2">First name:</label>
-        <input type="text" name="first_name" id="editFirstName" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+        <input type="text" name="first_name" id="editFirstName" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg  block w-2/3 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
     </div>
     <div class="mb-4">
         <label for="editLastName" class="block text-gray-700 text-sm font-bold mb-2">Last name:</label>
-        <input type="text" name="last_name" id="editLastName" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+        <input type="text" name="last_name" id="editLastName" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg  block w-2/3 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
     </div>
     <div class="mb-6">
         <label for="editEmail" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
-        <input type="email" name="email" id="editEmail" class="shadow appearance-none border rounded w-1/3 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        <input type="email" name="email" id="editEmail" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg  block w-2/3 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
     </div>
     <div class="flex items-center justify-between">
         <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Save Changes</button>
@@ -299,11 +314,29 @@ class="fixed w-1/3 md:w-2/4 h-auto mx-justify-center my-52 mx-96 overflow-y-auto
     </div>
 </div>
 
+{% comment %} ปํอปอัพแสดงสำหรับโอนสิทธิ์หน้าหน้าสาขา {% endcomment %}
+<div id="Transfer_role" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('Transfer_role')">&times;</span>
+        <p id="transfer-text" class="text-red-500 text-2xl mb-5 mt-2">ท่านยืนยันที่จะสละสิทธิ์และส่งมอบให้แก่ อาจารย์</p>
+            {% csrf_token %}
+            <input type="hidden" name="user_id" id="transferUserId" value="">
+            <input type="hidden" name="admin_id" id="transferadmin_id" value="">
+            <div class="flex justify-between">
+                <div></div>
+                <div class="flex mt-5">
+                    <button type="button" onclick='confirmTransfer()' class="bg-red-500 hover:bg-red-700 w-16 text-center text-white border rounded p-2">Confirm</button>
+                    <button type="button" onclick="closeModal('Transfer_role')" class="bg-blue-500 hover:bg-blue-700 w-16 text-center text-white border rounded p-2">Cancel</button>
+                </div>
+            </div>
+    </div>
+</div>
+
 <!--สำหรับการลบ -->
 <div id="deleteModal" class="modal">
     
     <div class="modal-content">
-        <span class="close">&times;</span>
+        <span class="close" onclick="closeModal('deleteModal')">&times;</span>
         <p class="text-red-500 text-2xl mb-5 mt-2">Are you sure you want to delete this user?</p>
         <form id="deleteForm" method="POST" action="{% url 'manage_member' %}">
             {% csrf_token %}
@@ -382,17 +415,18 @@ class="fixed w-1/3 md:w-2/4 h-auto mx-justify-center my-52 mx-96 overflow-y-auto
     function closeModal(modalId) {
         var modal = document.getElementById(modalId);
         modal.style.display = "none";
+        
     }
     
     // When the user clicks anywhere outside of the modal, close it
-    {% comment %} window.onclick = function(event) {
+     window.onclick = function(event) {
         var modals = document.getElementsByClassName('modal');
         for (var i = 0; i < modals.length; i++) {
             if (event.target == modals[i]) {
                 modals[i].style.display = "none";
             }
         }
-    } {% endcomment %}
+    } 
 
     function searchTable() {
         const input = document.getElementById('simple-search');
@@ -420,5 +454,83 @@ class="fixed w-1/3 md:w-2/4 h-auto mx-justify-center my-52 mx-96 overflow-y-auto
     window.searchTable = searchTable;
 
 
+    function openTransferModal(userId, userName, adminID) {
+        var modal = document.getElementById('Transfer_role');
+        var transferText = document.getElementById('transfer-text');
+        var transferUserId = document.getElementById('transferUserId');
+
+        var transferadminId = document.getElementById('transferadmin_id');
+        transferText.textContent = 'ท่านยืนยันที่จะสละสิทธิ์และส่งมอบให้แก่ อาจารย์ ' + userName + ' ใช่หรือไม่?';
+        transferUserId.value = userId;
+        transferadminId.value = adminID;
+        modal.style.display = 'block';
+    }
+
+    function closeModal(modalId) {
+        var modal = document.getElementById(modalId);
+        modal.style.display = 'none';
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        var modals = document.getElementsByClassName('modal');
+        for (var i = 0; i < modals.length; i++) {
+            if (event.target == modals[i]) {
+                modals[i].style.display = 'none';
+            }
+        }
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function confirmTransfer() {
+        const userId = document.getElementById('transferUserId').value;
+        const adminId = document.getElementById('transferadmin_id').value;
+        const csrftoken = getCookie('csrftoken');
+
+        fetch('/transfer_role/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({
+                user_id: userId,
+                admin_id: adminId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                closeModal('Transfer_role');
+                location.reload();
+            } else {
+                alert("เกิดข้อผิดพลาดในการโอนสิทธิ์");
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('Transfer_role');
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    }
     </script>
 {%endblock%}

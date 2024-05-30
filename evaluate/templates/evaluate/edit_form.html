@@ -167,6 +167,22 @@ body.blur-background {
                   
                 <button type="button" onclick="togglePopup()" class="bg-blue-500 hover:bg-blue-700 mr-5 text-white p-4 rounded-lg">+ เพิ่มรายชื่อ</button></div>
                 {{ context.form_update.as_p }}
+                {% for data in context.form%}
+                  วันเวลาเริ่มต้น :{{ data.start_date}}
+                  วันเวลาสิ้นสุด :{{ data.end_date}}
+                {%endfor%}  
+
+                {% if error_message %}
+                <div class="flex items-center p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
+                  <svg class="flex-shrink-0 inline w-4 h-4 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+                  </svg>
+                  <span class="sr-only">Info</span>
+                  <div>
+                    <span class="font-medium">การบันทึกข้อมูลผิดพลาด!</span> {{ error_message }}
+                  </div>
+                </div>
+              {% endif %}
             
             </div>
               
@@ -223,16 +239,16 @@ body.blur-background {
                                 </div>
                             {% endfor %}
                         </div>
-                        <button class="bg-blue-500 hover:bg-blue-700 text-white p-3 rounded-lg mt-3" type="button" onclick="addField('{{ item.id }}', 'TemplateData', {{ item.form.id }}) ">เพิ่มหัวข้อย่อย</button>
+                        {% comment %} <button class="bg-blue-500 hover:bg-blue-700 text-white p-3 rounded-lg mt-3" type="button" onclick="addField('{{ item.id }}', 'TemplateData', {{ item.form.id }}) ">เพิ่มหัวข้อย่อย</button> {% endcomment %}
                       </div>
                     </div>
                 {% endif %}
               
             {% endfor %}
           
-            {% for data in context.form%}
+{% comment %}             {% for data in context.form%}
                           <button class="bg-blue-500 hover:bg-blue-700 text-white p-3 rounded-lg mt-3" type="button" onclick="saveNewParent('Newparent', {{ data.id }})">เพิ่มหัวข้อหลัก</button>
-                    {% endfor %}
+                    {% endfor %} {% endcomment %}
 
 
                     <div class="border bg-gray-100 shadow-lg p-4 m-5">

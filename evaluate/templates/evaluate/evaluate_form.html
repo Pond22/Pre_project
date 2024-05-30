@@ -51,7 +51,7 @@
 <div class="relative rounded-lg bg-gray-300 p-8 shadow-xl px-16">
 <div class="rounded-md pb-5 bg-white">
 <div class="bg-white my-0 text-black bottom-5 p-5 shadow-inner text-2xl border-2">
-    {% if data.is_teacher_form %}
+    {% if detail.is_teacher_form %}
     <p>แบบฟอร์ม การทวนสอบผลสัมฤทธิ์ โดยอาจารย์ (02)</p>
     {% else %}
     <p>แบบฟอร์ม การทวนสอบผลสัมฤทธิ์ โดยนักศึกษา (01)</p>
@@ -87,7 +87,8 @@
     {% for field in form %}
     <div class="fieldWrapper {% if 'disabled' in field.field.widget.attrs %}main{% else %}sub{% endif %}">
         <div class="border flex justify-between mx-5 p-2">
-            <h1 class="field-counter"></h1> {{ field.label_tag }}  {{ field }}
+            <h1 class="field-counter"></h1>
+             {{ field.label_tag }}  {{ field }}
     
             {% if field.help_text %}
             <div class="flex justify-center">

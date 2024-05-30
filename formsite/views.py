@@ -74,33 +74,46 @@ def create_plo(request):
         print(le)
         print('ไอดี = ',plo_form_instance.id)
         print('year = '+year)
+        """ print(request.POST) """
         create_form = get_object_or_404(Teamplates, id=plo_form_instance.id)
-        if 'main_field0' in request.POST:  
+        if 'static_field0' in request.POST:  
             for i in range(le + 1):
                 name_main = 'main_field' + str(i)
                 print(name_main,i)
+                
                 if (i ==0): # ถ้าเป็น 0 บันทุก O
-                    main_fields = request.POST.get(name_main, '') 
-                    main_field = CLO.objects.create(text=main_fields, form=create_form)
-                        
-                    name_sub = 'sub_field_' + str(name_main)
-                    sub_fields = request.POST.getlist(name_sub)
+                     for j in range(4):
+                        name_static = 'static_field' + str(j)
+                        static_fields = request.POST.get(name_static)
+                        static_field = CLO.objects.create(text=static_fields, form=create_form)
+                            
+                        static_sub = 'sub_field_static_field' + str(j)
+                        sub_fields = request.POST.getlist(static_sub)
+                        print('ชื่อฟิลด์ลูก static', static_sub)
+                        print(sub_fields)
+                        """ print(request.POST) """
 
-                    for sub_field_text in sub_fields:
-                        CLO.objects.create(text=sub_field_text, parent=main_field, form=create_form)
+                        for sub_field_text in sub_fields:
+                            CLO.objects.create(text=sub_field_text, parent=static_field, form=create_form)
                        
                 else:        
                  #  นอกเหนือจาก 0 บันทีกลง PLO   
                     main_fields = request.POST.get(name_main, '') 
+                    if main_fields:
+                         main_fields = f'PLO{i} ' + main_fields
                     main_field = TemplateData.objects.create(text=main_fields, form=create_form)
+    
                             
                     name_sub = 'sub_field_' + str(name_main)
                     sub_fields = request.POST.getlist(name_sub)
 
                     for sub_field_text in sub_fields:
-                        TemplateData.objects.create(text=sub_field_text, parent=main_field, form=create_form)
+                        sub_count = 1
+                        if sub_field_text:
+                            data = f'i.{sub_count} ' + sub_field_text
+                        TemplateData.objects.create(text=data, parent=main_field, form=create_form)
 
-        return HttpResponse("Data saved successfully!")
+        return redirect('/manage_template')
     else:
         form = Plo_form
         #print(user_profile.department)
@@ -256,6 +269,9 @@ def report(request, form_id):
         comment = CommentForm.objects.filter(form=form, comment__isnull=False, form__created_by=request.user)
 
 
+    user_eva = AuthorizedUser.objects.filter(form=form, done=True)
+    user_all = AuthorizedUser.objects.filter(form=form)
+    context_user = {'user_eva':user_eva, 'user_all':user_all}
     # สำหรับแต่ละ assessment item, กรอง sub_items และคำนวณค่าเฉลี่ย
     for item in assessment_items:
         sub_items_with_avg = item.sub_items.annotate(
@@ -293,7 +309,7 @@ def report(request, form_id):
     else:
         overall_plo_average = None
     
-    return render(request, 'report.html', {'form':form, 'assessment_items': assessment_items, 'plo':plo, 'overall_plo_average':overall_plo_average, 'comment':comment})
+    return render(request, 'report.html', {'form':form, 'assessment_items': assessment_items, 'plo':plo, 'overall_plo_average':overall_plo_average, 'comment':comment, 'context_user':context_user})
     
 '''
 def edit_template(request):

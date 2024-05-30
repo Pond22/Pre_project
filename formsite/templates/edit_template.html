@@ -293,7 +293,7 @@ setTimeout(function() {
             {% if not template_data.parent %}
                 <div class="container" id="parent-container_{{ template_data.id }}"data-type="TemplateData">
                   <div class="border rounded shadow-lg bg-white m-2 p-4"data-type="TemplateData">
-                  <label>{{ forloop.counter }}</label>
+                  {% comment %} <label>{{ forloop.counter }}</label> {% endcomment %}
                     <!-- แม่ -->
                     {% comment %} <label>{{ forloop.counter }}</label> {% endcomment %}
                       <input type="text" id="parent_{{ template_data.id }}" name="parent_{{ template_data.id }}" value="{{ template_data.text }}" readonly data-type="TemplateData" placeholder="กรุณาใส่หัวข้อประเด็นหลัก" class="w-2/3 border border-gray-300 border-2 rounded h-8 pl-2"/>
@@ -308,7 +308,7 @@ setTimeout(function() {
                         
                             <div>
                               
-                              <label>{{ forloop.parentloop.counter }}.{{ forloop.counter }}</label>
+                              {% comment %} <label>{{ forloop.parentloop.counter }}.{{ forloop.counter }}</label> {% endcomment %}
                               
                                 <input type="text" id="clochild_{{ child.id }}" name="child_{{ child.id }}" value="{{ child.text }}" readonly  data-type="TemplateData" placeholder="กรุณาใส่หัวข้อประเด็นรอง" class="w-2/3 border border-gray-300 border-2 rounded h-8 pl-2"/>
                                 <button type="button" class="button_child_edit" onclick="editField('clochild_{{ child.id }}')">Edit</button>
