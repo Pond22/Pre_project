@@ -89,7 +89,7 @@
   xhr.onload = function () {
     if (xhr.status === 200) {
         console.log('Response:', xhr.responseText);
-        location.reload;
+        location.reload();
     } else {
         console.error('Error:', xhr.statusText);
     }
@@ -165,12 +165,12 @@ xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
 xhr.onload = function () {
   if (xhr.status === 200) {
       console.log('Response:', xhr.responseText);
+      location.reload();
   } else {
       console.error('Error:', xhr.statusText);
   }
 };
 xhr.send('&form_id=' + encodeURIComponent(formID) + '&type=' + encodeURIComponent(type));
-location.reload();
 }
 
 //เพิ่มฟิลด์ลูก
@@ -221,6 +221,70 @@ setTimeout(function() {
     location.reload();
 }, delayInMilliseconds);
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  const start_date = document.getElementById('id_start_date');
+  const end_date = document.getElementById('id_end_date');
+  const form_id = document.getElementById('form_id');
+
+  if (start_date && end_date && form_id) {
+      console.log(start_date.value);
+      [start_date, end_date].forEach(input => {
+          input.addEventListener('change', function() {
+              const formData = new FormData();
+              formData.append('id', form_id.value);
+              formData.append('start_time', start_date.value);
+              formData.append('end_time', end_date.value);
+
+              fetch('/update_template/', {
+                  method: 'POST',
+                  body: formData,
+                  headers: {
+                      'X-Requested-With': 'XMLHttpRequest',
+                      'X-CSRFToken': getCookie('csrftoken') // ตรวจสอบว่าฟังก์ชัน getCookie ถูกกำหนดไว้อย่างถูกต้อง
+                  },
+              })
+              .then(response => response.json())
+              .then(data => {
+                  if (data.status === 'success') {
+                      console.log('Updated successfully');
+                      // อาจแสดงข้อความตอบรับหรืออัปเดตส่วนของหน้าเว็บ
+                  } else {
+                      console.error('Error updating', data.errors);
+                      // แสดงข้อผิดพลาดหรือรับมือกับปัญหา
+                  }
+              });
+          });
+      });
+  } else {
+      console.error('One or more elements not found');
+  }
+});
+
+
+// ทำให้ textarea ขยายความสูงตามเนื้อหา
+function autoResizeTextarea(textarea) {
+  textarea.style.height = 'auto';
+  textarea.style.height = (textarea.scrollHeight) + 'px';
+}
+
+// เรียกใช้ฟังก์ชัน autoResizeTextarea สำหรับ textarea ทุกตัวใน DOM
+document.addEventListener('DOMContentLoaded', function () {
+  const textareas = document.querySelectorAll('textarea');
+  textareas.forEach(textarea => {
+      autoResizeTextarea(textarea);
+      textarea.addEventListener('input', () => autoResizeTextarea(textarea));
+  });
+});
+
+// strน้อยกว่า 6 ไม่มี readonly
+{% comment %} document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('textarea[id^="parent_"]').forEach(function(textarea) {
+      if (textarea.value.length <= 6) {
+          textarea.removeAttribute('readonly');
+      }
+  });
+}); {% endcomment %}
 </script>
 
   {% endblock %}
@@ -229,17 +293,25 @@ setTimeout(function() {
       <div class="relative rounded-lg bg-gray-300 p-8 shadow-xl px-16 ">
         <div class="rounded-md pb-5 bg-white ">
           <div class=" bg-white my-0 text-black bottom-5 p-5 shadow-inner text-2xl border-2 ">
-            <h1>วัตถุประสงค์ของรายวิชา (O,PLO)</h1></div>
+            <h1>รายการหัวข้อประเด็นแม่แบบ</h1></div>
 
     <form method="post">
       {% comment %} head {% endcomment %}
         {% csrf_token %}
-        <div class="border w-52 bg-purple-400 text-center text-xl text-white mb-4">
+        <div class="border w-52 bg-gray-400 text-center text-xl text-black mb-4">
         <div class="head"> 
           <div class="form_name" name="form_name"> 
             {% for data in template%}
               {{data.semester}}/{{data.year_number}} 
             {% endfor %}
+
+           {% comment %}  แก้ไขเวลา-วันแม่แบบ {% endcomment %}
+           <form id="updateTemplateForm" method="post">
+            {{ update.as_p }}
+            <input type="hidden" id="form_id" name="form_id" value="{% for data in template %}{{ data.id }}{% if not forloop.last %},{% endif %}{% endfor %}">
+              </form>
+          {% comment %} จบแก้ไข {% endcomment %}
+
            </div>
         </div>
       </div>
@@ -265,7 +337,7 @@ setTimeout(function() {
                               {% for child in clo_data.sub_items.all %}
                                 <!-- ลูกวัตถุประสงค์ของรายวิชา (0) -->
                                 <div>
-                                <input type="text" id="child_{{ child.id }}" name="child_{{ child.id }}" value="{{ child.text }}" readonly  data-type="CLO" classs="w-2/3 border border-gray-300 h-8 mt-2 pl-2"/>
+                                <input type="text" id="child_{{ child.id }}" name="child_{{ child.id }}" value="{{ child.text }}" readonly  data-type="CLO" classs="ml-4 w-full px-0 text-sm  bg-white border-0  focus:ring-0 dark:text-black dark:placeholder-gray-400 resize"/>
                                 <button type = "button"  class="button_child_edit" onclick="editField('child_{{ child.id }}')" >Edit</button>
                                 <button type="button"  class="button_child_delete" onclick="deleteField('child_{{ child.id }}', 'button_child_{{ child.id }}')">Delete</button>
                               </div>
@@ -296,7 +368,7 @@ setTimeout(function() {
                   {% comment %} <label>{{ forloop.counter }}</label> {% endcomment %}
                     <!-- แม่ -->
                     {% comment %} <label>{{ forloop.counter }}</label> {% endcomment %}
-                      <input type="text" id="parent_{{ template_data.id }}" name="parent_{{ template_data.id }}" value="{{ template_data.text }}" readonly data-type="TemplateData" placeholder="กรุณาใส่หัวข้อประเด็นหลัก" class="w-2/3 border border-gray-300 border-2 rounded h-8 pl-2"/>
+                    <textarea id="parent_{{ template_data.id }}" name="parent_{{ template_data.id }}" readonly data-type="TemplateData" placeholder="กรุณาใส่หัวข้อประเด็นหลัก" class="w-2/3 border border-gray-300 border-2 rounded pl-2 resize-none overflow-hidden">{{ template_data.text }}</textarea>
                       <button type="button" id="button_child_edit" class="button_child_edit" onclick="editField('parent_{{ template_data.id }}')">Edit</button>
                       <button type="button" id="button_child_delete" class="button_child_delete" onclick="deleteField('parent_{{ template_data.id }}', 'button_parent_{{ template_data.id }}')">Delete</button>
                
@@ -310,7 +382,7 @@ setTimeout(function() {
                               
                               {% comment %} <label>{{ forloop.parentloop.counter }}.{{ forloop.counter }}</label> {% endcomment %}
                               
-                                <input type="text" id="clochild_{{ child.id }}" name="child_{{ child.id }}" value="{{ child.text }}" readonly  data-type="TemplateData" placeholder="กรุณาใส่หัวข้อประเด็นรอง" class="w-2/3 border border-gray-300 border-2 rounded h-8 pl-2"/>
+                              <textarea id="clochild_{{ child.id }}" name="child_{{ child.id }}" readonly data-type="TemplateData" placeholder="กรุณาใส่หัวข้อประเด็นรอง" class="w-2/3 border border-gray-300 border-2 rounded pl-2 resize-none overflow-hidden">{{ child.text }}</textarea>
                                 <button type="button" class="button_child_edit" onclick="editField('clochild_{{ child.id }}')">Edit</button>
                                 <button type="button" class="button_child_delete" onclick="deleteField('clochild_{{ child.id }}', 'button_clochild_{{ child.id }}')">Delete</button>
                               </div>

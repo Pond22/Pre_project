@@ -27,6 +27,9 @@ class FormUpdateForm(forms.ModelForm): #หน้าแก้ไขฟอร์�
         ]
         widgets = {
             'section': forms.Select(choices=()),
+            'description': forms.Textarea(attrs={
+                'rows':'4',
+                'class': 'block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 border-gray-500',}),
             #'start_date': DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control', 'required': True, 'readonly': True}),
             #'end_date': DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control', 'required': True, 'readonly': True}),
         }
@@ -71,7 +74,7 @@ class FormUpdateForm(forms.ModelForm): #หน้าแก้ไขฟอร์�
 class Assessment_Form(forms.ModelForm): #หน้าสร้างแบบฟอร์ม
     class Meta:
         model = Form
-        fields = ['course', 'section', 'description', 'template']
+        fields = ['course', 'section', 'template']
         
         widgets = {
             'semester': forms.Select(choices=((1, '1'), (2, '2'), (3, '3'))),
@@ -153,16 +156,20 @@ LIKERT_CHOICES = [
     (5, ''),
 ]
 
-class DynamicLikertForm(forms.Form): #หน้าประเมิน
+class DynamicLikertForm(forms.Form):  # หน้าแบบประเมิน
     def __init__(self, *args, custom_param=None, **kwargs):
         super(DynamicLikertForm, self).__init__(*args, **kwargs)
         if custom_param:
+            main_counter = 0
+
             # ดึงคำถามหลักที่ไม่ใช่ template_select
             questions = AssessmentItem.objects.filter(form=custom_param, parent__isnull=True, template_select__isnull=True)
             for question in questions:
+                main_counter += 1
+                main_question_text = f"{main_counter}. {question.text}"
                 # เพิ่มคำถามหลักในฟอร์มแบบไม่ต้องการคำตอบ
                 self.fields[f'question_{question.id}'] = forms.CharField(
-                    label=f"{question.text}",
+                    label=main_question_text,
                     required=False,
                     widget=forms.TextInput(attrs={
                         'disabled': 'disabled',
@@ -171,10 +178,13 @@ class DynamicLikertForm(forms.Form): #หน้าประเมิน
                     })
                 )
                 # ดึงคำถามย่อย
+                sub_counter = 0
                 sub_questions = question.sub_items.all()
                 for sub_question in sub_questions:
+                    sub_counter += 1
+                    sub_question_text = f"{main_counter}.{sub_counter} {sub_question.text}"
                     self.fields[f'sub_question_{sub_question.id}'] = forms.ChoiceField(
-                        label=f"{sub_question.text}",
+                        label=sub_question_text,
                         choices=LIKERT_CHOICES,
                         widget=forms.RadioSelect(attrs={
                             'class': 'radio-select sub-question',

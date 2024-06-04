@@ -26,7 +26,7 @@ urlpatterns = [
     path('get_Templates_by_departmen/', get_Templates_by_departmen, name='get_Templates_by_departmen'),
     path('report/<int:form_id>/pdf/', download_pdf, name='download_pdf'), #api ดาวห์โหลดรายงาน
     path('update_course/', update_course, name='update_course'),
-    
+    path('update_template/', update_template, name='update_course'),
     #path('', include(router.urls)),
     #path('api-csv/', include('rest_framework.urls', namespace='rest_framework'))
 ]

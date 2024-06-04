@@ -180,7 +180,12 @@
             <a href="{% url 'report' form_id=data.id %}">
                 <button onclick="viewForm({{ data.id }})" class="bg-green-500 hover:bg-green-700 text-white p-2 rounded">แสดงรายงาน</button>
             </a>
-                <button type="button" class="download-pdf-btn" data-form-id="{{ data.id }}">ดาวน์โหลด PDF</button>
+                {% comment %} <button type="button" class="download-pdf-btn" data-form-id="{{ data.id }}">ดาวน์โหลด PDF</button>  {% endcomment %}
+                <button id="download-pdf-{{ data.id }}" data-form-id="{{ data.id }}" class="download-pdf bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center">
+                    <svg class="fill-current w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z"/></svg>
+                    <div id='load-btn' style="display:block;">Download as PDF</div>
+                    <div id="loading-spinner" style="display:none;">Loading...</div>
+                </button>
             </div>
         </div>
         {% endfor %}
@@ -244,8 +249,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 document.addEventListener('click', function(event) {
-    if (event.target.classList.contains('download-pdf-btn')) {
-        const formId = event.target.getAttribute('data-form-id');
+    if (event.target.classList.contains('download-pdf') || event.target.closest('.download-pdf')) {
+        const button = event.target.closest('.download-pdf');
+        const formId = button.getAttribute('data-form-id');
+        document.getElementById('loading-spinner').style.display = 'block'; // แสดงสถานะการโหลด
+        document.getElementById('load-btn').style.display = 'none';
         fetch(`/report/${formId}/pdf/`, {
             method: 'GET',
         })
@@ -264,12 +272,17 @@ document.addEventListener('click', function(event) {
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
+            document.getElementById('loading-spinner').style.display = 'none';
+            document.getElementById('load-btn').style.display = 'block'; 
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
+            document.getElementById('loading-spinner').style.display = 'none'; // ซ่อนสถานะการโหลดเมื่อเกิดข้อผิดพลาด
+            document.getElementById('load-btn').style.display = 'block'; 
         });
     }
 });
+
 
 
 function searchTable() {

@@ -168,9 +168,17 @@ body.blur-background {
                 <button type="button" onclick="togglePopup()" class="bg-blue-500 hover:bg-blue-700 mr-5 text-white p-4 rounded-lg">+ เพิ่มรายชื่อ</button></div>
                 {{ context.form_update.as_p }}
                 {% for data in context.form%}
-                  วันเวลาเริ่มต้น :{{ data.start_date}}
-                  วันเวลาสิ้นสุด :{{ data.end_date}}
+                  <p class=" text-gray-500 md:text-lg dark:text-gray-400">วันเวลาเริ่มต้น : {{ data.start_date}}</p>
+                  <p class=" text-gray-500 md:text-lg dark:text-gray-400">วันเวลาสิ้นสุด : {{ data.end_date}} <i data-tooltip-target="tooltip-default" class="fas fa-info-circle text-blue-700 hover:text-blue-800 cursor-pointer"></i></p>
                 {%endfor%}  
+
+                
+
+                <div id="tooltip-default" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                    วันเวลาเริ่มต้นและวันเวลาเริ่มต้นนี้ได้ถูกกำหนดโดย หัวหน้าสาขาที่ท่านสังกัดอยู่หากพบปัญหาโปรดติดต่อหัวหน้าสาขาที่ท่านสังกัด
+                    <div class="tooltip-arrow" data-popper-arrow></div>
+                </div>
+
 
                 {% if error_message %}
                 <div class="flex items-center p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
@@ -273,7 +281,7 @@ body.blur-background {
                       <div id="child-container_{{ item.id }}" style="margin-left: 20px;">
                           {% for child in item.sub_items.all %}
                               <div>
-                                  <label>{{ forloop.parentloop.counter }}.{{ forloop.counter }}</label>
+                                  <label>{% comment %} {{ forloop.parentloop.counter }}.{{ forloop.counter }} {% endcomment %}</label>
                                   <input class="border boder-gray-700 w-2/3 h-8" type="text" id="selectionclochild_{{ child.id }}" name="selectionchild_{{ child.id }}" value="{{ child.template_select.text }}" readonly data-type="selectionTemplateData" placeholder="กรุณาใส่หัวข้อประเด็นรอง"/>
                           
                               </div>
@@ -294,7 +302,8 @@ body.blur-background {
 <div id="popup-background" class="fixed inset-0 bg-gray-800 bg-opacity-75 hidden" onclick="closePopup()"></div>
 
 <div id="popup" class="fixed inset-0 flex items-center justify-center hidden z-50">
-    <div class="bg-gray-300 p-8 border border-gray-500 w-10/12 md:w-2/3 lg:w-1/2 relative">
+  <div class="fixed inset-0  bg-opacity-50 flex items-start justify-center my-6 z-50 ">
+    <div class=" bg-white pt-3 p-5 border border-[#888888] w-10/12 md:w-2/3 lg:w-0.5/2 max-h-[calc(100vh-6rem)] max-h-screen overflow-y-auto">
         <div class="flex justify-end items-center">
             <button type="button" onclick="closePopup()" class="bg-gray-800 hover:bg-gray-700 transition-all py-2 px-3 rounded-md text-lg text-center text-white font-bold">&times;</button>
         </div>
@@ -305,12 +314,12 @@ body.blur-background {
                     {% if not item.parent %}
                         <div class="template_main_item">
                             <input type="checkbox" id="item_{{ item.id }}" name="template_choice" value="{{ item.id }}" onchange="handleParentCheckbox('{{ item.id }}')" data-is-sub="false" class="mr-2">
-                            <label for="item_{{ item.id }}" class="text-gray-700">&nbsp;&nbsp;{{ forloop.counter }} : {{ item.text }}</label>
+                            <label for="item_{{ item.id }}" class="text-gray-700">&nbsp;&nbsp;{{ item.text }}</label>
                         </div>
                         {% for sub in item.sub_items.all %}
                             <div class="template_sub_item ml-4">
                                 <input type="checkbox" id="sub_{{ sub.id }}" name="template_choice" value="{{ sub.id }}" onchange="checkHandle('sub_{{ sub.id }}', '{{ item.id }}')" data-is-sub="true" data-parent-id="{{ item.id }}" class="mr-2">
-                                <label for="sub_{{ sub.id }}" class="text-gray-500">: {{ sub.text }}</label>
+                                <label for="sub_{{ sub.id }}" class="text-gray-500">{{ sub.text }}</label>
                             </div>
                         {% endfor %}
                     {% endif %}
@@ -596,6 +605,6 @@ function reloadPageAfterDelay(delayInMilliseconds) {
 
 </script>
 <script src="{% static "edit_form.js"%}"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
 {% endblock %}
 {% endblock %}

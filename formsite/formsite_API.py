@@ -8,6 +8,35 @@ from django.db.models import Avg
 import pdfkit
 from django.template.loader import render_to_string
 import os
+from .forms import UpdateTemplateForm
+from datetime import datetime
+
+def update_template(request):
+    if request.method == 'POST':
+        template_id = request.POST.get('id')
+        start_time_str = request.POST.get('start_time')
+        end_time_str = request.POST.get('end_time')
+
+        try:
+            start_time = datetime.strptime(start_time_str, '%Y-%m-%dT%H:%M')
+            end_time = datetime.strptime(end_time_str, '%Y-%m-%dT%H:%M')
+        except ValueError:
+            return JsonResponse({'status': 'error', 'errors': 'Invalid datetime format'}, status=400)
+
+        try:
+            template = Teamplates.objects.get(id=template_id)
+        except Teamplates.DoesNotExist:
+            return JsonResponse({'status': 'error', 'errors': 'Template not found'}, status=404)
+
+        if template:
+            template.start_date = start_time
+            template.end_date = end_time
+            template.save()
+            return JsonResponse({'status': 'success'})
+        else:
+            return JsonResponse({'status': 'error', 'errors': 'Template not found'}, status=404)
+
+    return JsonResponse({'status': 'invalid request'}, status=400)
 
 def set_active (request):
     if request.method == 'POST':
@@ -126,7 +155,11 @@ def download_pdf(request, form_id):
         
     user_eva = AuthorizedUser.objects.filter(form=form, done=True)
     user_all = AuthorizedUser.objects.filter(form=form)
-    context_user = {'user_eva':user_eva, 'user_all':user_all}
+    if len(user_all) > 0:  
+        sum_user= (len(user_eva) / len(user_all)) * 100
+    else:
+        sum_user= 0  
+    context_user = {'user_eva':user_eva, 'user_all':user_all,'sum_user':sum_user}
 
     # โหลด HTML template
     html = render_to_string('report_pdf.html', {

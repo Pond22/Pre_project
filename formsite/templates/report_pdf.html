@@ -40,10 +40,10 @@
                   <div>วิชา: {{ form.course.name }}</div>
                   <div>ภาคการศึกษาที่: {{ form.template.semester }}</div>
                   <div>ชื่ออาจารย์ผู้สอน :</div>
-                  <p> มีผู้เข้าประเมิน {{ context_user.user_eva|length }} คนจากทั้งหมด {{ context_user.user_all|length }} คน</p>
+                  <p class="md:text-xl dark:text-dark-800"> จำนวนผู้ประเมิน {{ context_user.user_eva|length }} คน จำนวนผู้ลงทะเบียนเรียน {{ context_user.user_all|length }} คน <br>คิดเป็นร้อยละ {{ context_user.sum_user}}</p>
               </div>
               <div class="flex-1 text-right">
-                  <div>รหัสวิชา: {{ form.course.class_code }}</div>
+                  <p>รหัสวิชา: {{ form.course.class_code }}</p>
                   <div>ปีการศึกษา: {{ form.template.year_number }}</div>
                   <div>วันเดือนปีที่ประเมิน :{{ form.start_date }}</div>
               </div>

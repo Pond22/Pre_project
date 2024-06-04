@@ -9,15 +9,16 @@ function addSubField(button) {
   var subField = document.createElement("input");
   subField.type = "text";
   subField.name = "sub_field_"+divName;
+  subField.className ='ml-4 w-full px-0 text-sm  bg-white border-0  focus:ring-0 dark:text-black dark:placeholder-gray-400 resize'
   subField.setAttribute('required', '');
   console.log(divName)
   subField.placeholder = "หัวข้อย่อย";
-  subField.style.width = "100%";
+  subField.style.width = "90%";
   subField.style.border = "1px solid gray";
   subField.style.paddingTop = "8px";
   subField.style.paddingLeft = "4px";
   subField.style.borderRadius = "0.5rem";
-  subField.style.height = "50px";
+  subField.style.height = "40px";
   // subField.style.height = 'inherit';
   subField.setAttribute("required", "true");
 
@@ -71,10 +72,10 @@ function addMainField() {
   mainField.placeholder = "หัวข้อหลัก";
   mainField.style.width = "80%";
   mainField.style.border = "1px solid gray";  
-  mainField.style.height = "50px";
+  mainField.style.height = "40px";
   mainField.style.backgroundColor = "rgb(249,250 ,251)";
   mainField.style.marginTop = "8px";
-  mainField.style.borderRadius = "0.5rem";
+  mainField.style.borderRadius = "0.5rem";  
   mainField.style.paddingLeft = "4px";
   console.log(dynamicFieldCounter);
 
@@ -277,6 +278,7 @@ newInput.type = 'text';
 newInput.value = text;
 newInput.id = 'sub_item_form_template_' + id;
 newInput.className = 'sub_item_form_template';
+newInput.style.width="110 px";
 
 var hiddenInput = document.createElement('input');
 hiddenInput.type = 'hidden';
@@ -376,6 +378,7 @@ function confirmSelection() {
           if (!item.isSub) {
               // Main item
               inputField.name = 'plo_main_' + count;
+              inputField.setAttribute('readonly', '')
               hiddenInput.name = 'id_main_' + count;
 
               if (!parents[item.id]) {
@@ -394,6 +397,8 @@ function confirmSelection() {
           } else {
               // Sub-item
               inputField.name = 'plo_sub_' + parentCounts[item.parentId];
+              inputField.className = 'ml-10'
+              inputField.setAttribute('readonly', '')
               hiddenInput.name = 'id_sub_' + parentCounts[item.parentId];
 
               if (!parents[item.parentId]) {

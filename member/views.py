@@ -187,14 +187,20 @@ def update_user_group(request):
             return JsonResponse({'error': str(e)}, status=400)
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
-    
+
+@login_required
 def transfer_role(request):
     if request.method == 'POST':
         data = json.loads(request.body)
-        
+        user_now = request.user
+
+        if not user_now.groups.filter(name='หัวหน้าสาขา').exists():
+            return JsonResponse({'success': False, 'error': 'You do not have permission to perform this action.'}, status=403)
+
         user = get_object_or_404(User, id=data.get("user_id"))
         admin = get_object_or_404(User, id=data.get("admin_id"))
-        
+        print('adminNow', admin.username)
+        print('target', user.username)
         group = get_object_or_404(Group, name='หัวหน้าสาขา')
         
         if admin.groups.filter(name='หัวหน้าสาขา').exists():

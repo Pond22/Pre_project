@@ -1,7 +1,3 @@
-
-{% extends "evaluate/addon/nav.html" %}
-{% load static%}
-{% block title %}สร้างแบบประเมินการทวนสอบผลสัมฤทธิ์{% endblock %}
 <style>
   .Delete-subMain:hover{
     background-color: rgb(255, 0, 0);
@@ -15,15 +11,18 @@
    padding: 0.5rem 1rem; /* px-4 py-2 */
   transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* transition */
     width: 80%;
-    height: 50px;
+    height: 40px;
    margin-left: 10px;
    margin-bottom: 5px;
    resize: none; 
   }
+  
+  
 
   input[type="text"]:focus {
    outline: none; /* focus:outline-none */
-   border-color: black; /* focus:border-blue-500 */
+   border-color: black; 
+   /* width: 90%; */
     /* box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); focus:ring focus:ring-blue-200 */
   }   
   /* .popup {
@@ -83,8 +82,27 @@
     border: 1px solid #ccc;
     border-radius: 4px;
 }
+
+.addSubField{
+  background-color:  #007bff;
+  color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    margin-bottom: 5px;
+}
+.addSubField:hover {
+    background-color: #0056b3;
+  }
   
 </style> 
+{% extends "evaluate/addon/nav.html" %}
+{% load static%}
+{% block title %}สร้างแบบประเมินการทวนสอบผลสัมฤทธิ์{% endblock %}
+
 
 
 
@@ -95,13 +113,12 @@
 
 
 
-<div class="pt-6   mx-auto max-w-screen-2xl ">
-  <div class=" rounded-lg bg-gray-800 mx-10 pl-5 ">
+
     <p class="flex items-center text-white text-2xl ml-5 px-4 py-4 ">สร้างแบบประเมินการทวนสอบผลสัมฤทธิ์  </p>
     <div class="relative rounded-lg bg-gray-300 p-8 shadow-xl px-16 ">
-      <div class="rounded-md pb-5 bg-white ">
+      <div class="rounded-md pb-5 bg-white text-xl">
         <div class=" bg-white my-0 text-black bottom-5 p-5 shadow-inner text-xl border-2 ">
-          แบบประเมินการทวนสอบผลสัมฤทธิ์ของนักศึกษา(01)</div>
+          สร้างแบบประเมินการทวนสอบผลสัมฤทธิ์โดย {{ request.user.first_name }}  {{request.user.last_name}}</div>
 
         <!-- เพิ่มหัวแรก -->
         {% csrf_token %}
@@ -141,10 +158,12 @@
 
               
               <div id="upload-csv-section" class="m-3 border p-2">
-                <h2>Upload CSV File</h2>
+                {% comment %} <h2>Upload CSV File</h2> {% endcomment %}
                 <form method="post" enctype="multipart/form-data" class="border overflow-y-auto">
                   {% csrf_token %}
-                  <input type="file" name="csv_file" id="csv_file" class="border border-gray-200 bg-gray-50" />
+                  <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="file_input">Upload file</label>
+                  <input name="csv_file" id="csv_file" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-350 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" aria-describedby="file_input_help" type="file">
+                  <p class="mt-1 text-sm text-gray-500 dark:text-gray-300" id="file_input_help">xlsx, csv</p>
                   <!-- <button type="submit" name="import" id="import" class="border rounded-md p-1 bg-green-400 hover:bg-green-500 text-white ">Submit</button> -->
 
                  
@@ -197,13 +216,17 @@
         <form method="post" id="main">-->
           <div class="p-4 grid grid-cols-2 gap-2 mx-5 bg-gray-50 border rounded ">
             {% csrf_token %} {{new_form.as_p }}
-            วันเวลาเริ่มต้น : {{time.start_date}}
-            วันเวลาสิ้นสุด : {{time.end_date}}
+            <p class=" text-gray-500 md:text-lg dark:text-gray-400">วันเวลาเริ่มต้น : {{ time.start_date}}</p>  
+            <p class=" text-gray-500 md:text-lg dark:text-gray-400">วันเวลาสิ้นสุด : {{ time.end_date}} <i data-tooltip-target="tooltip-default" class="fas fa-info-circle text-blue-700 hover:text-blue-800 cursor-pointer"></i></p>
               {% comment %} <div id="session-container">
                 <label for="id_section">Session</label>  ไม่ใช้
                 <select id="id_section" name="section">
                     <option value="">---------</option>
                 </select> {% endcomment %}
+                <div id="tooltip-default" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                  วันเวลาเริ่มต้นและวันเวลาเริ่มต้นนี้ได้ถูกกำหนดโดย หัวหน้าสาขาที่ท่านสังกัดอยู่หากพบปัญหาโปรดติดต่อหัวหน้าสาขาที่ท่านสังกัด
+                  <div class="tooltip-arrow" data-popper-arrow></div>
+              </div>
 
                 {% if error_message %}
                 <div class="flex items-center p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
@@ -224,32 +247,37 @@
 
           
           <!-- ป๊อปอัพ แม่แบบ-->
-          <div id="popup" class="popup transition-all " style="display: none">
-            <div class="fixed inset-0  bg-opacity-50 flex items-center justify-center z-50 ">
-            <div class="bg-white pt-3 p-5 border border-[#888888] w-10/12 md:w-2/3 lg:w-1/2">
-              <div class="flex justify-end items-center">
-                <button type="button" onclick="closePopup()" class="bg-white hover:bg-gray-300 transition-all py-2 px-1 rounded-md text-lg text-center text-xl text-black font-bold">&times;</button>
+          <div id="popup-background" class="fixed inset-0 bg-gray-800 bg-opacity-75 hidden" onclick="closePopup()"></div>
+
+          <div id="popup" class="fixed inset-0 flex items-center justify-center hidden z-50">
+            <div class="fixed inset-0  bg-opacity-50 flex items-start justify-center my-6 z-50 ">
+              <div class=" bg-white pt-3 p-5 border border-[#888888] w-10/12 md:w-2/3 lg:w-0.5/2 max-h-[calc(100vh-6rem)] max-h-screen overflow-y-auto">
+                  <div class="flex justify-end items-center">
+                    <button type="button" onclick="closePopup()" class="bg-gray-800 hover:bg-gray-700 transition-all py-2 px-3 rounded-md text-lg text-center text-white font-bold">&times;</button>
               </div>
 
-              <div id="form_select_template">
-              
-              
-                <label for="template_select">เลือกแม่แบบ:</label>
-                <div id="template_list">
+              <div id="form_select_template"  class="text-left mt-4">
+  
+                <label for="template_select" class="block text-gray-700 font-bold mb-2">เลือกแม่แบบ:</label>
+                <div id="template_list" class="space-y-2">
                   {% for item in template_data %}
                       {% if not item.parent %}
                           <div class="template_main_item">
                               <input type="checkbox" id="item_{{ item.id }}" name="template_choice" value="{{ item.id }}"
+                                    onchange="handleParentCheckbox('{{ item.id }}')"
                                      {% comment %} onchange="checkboxHandle('item_{{ item.id }}', '{{ item.id }}', '{{ item.text }}', event, 'main')" {% endcomment %}
+                                     class ='w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600'
                                     data-is-sub="false" >
-                              <label for="item_{{ item.id }}">&nbsp;&nbsp;{{ forloop.counter }} : {{ item.text }}</label>
+                              <label for="item_{{ item.id }}" class="text-gray-700">&nbsp;&nbsp;{{ item.text }}</label>
                           </div>
                           {% for sub in item.sub_items.all %}
                               <div class="template_sub_item">
                                   <input type="checkbox" id="sub_{{ sub.id }}" name="template_choice" value="{{ sub.id }}"
                                          {% comment %} onchange="checkboxHandle('sub_{{ sub.id  }}', '{{ sub.id }}', '{{ sub.text }}', event, 'sub')" {% endcomment %}
+                                         onchange="checkHandle('sub_{{ sub.id }}', '{{ item.id }}')"
+                                         class='ml-4 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600'
                                         data-is-sub="true" data-parent-id="{{ item.id }}" >
-                                  <label for="sub_{{ sub.id }}">: {{ sub.text }}</label>
+                                  <label for="sub_{{ sub.id }}" class="text-gray-500">{{ sub.text }}</label>
                               </div>
                           {% endfor %}
                       {% endif %}
@@ -257,11 +285,7 @@
 
                 </div>
               </div>
-              <div id="template_details" style="display: none">
-                <!-- Details will be shown here -->
-              </div>
-              
-              <button onclick="confirmSelection()" type = "button" class="bg-green-500 hover:bg-green-700 p-2 text-white rounded mt-3">ยืนยัน</button>
+              <button onclick="confirmSelection()" type = "button" class="text-white rounded-full bg-green-500 hover:bg-green-700 p-3 px-8 mt-3 w-full">ยืนยัน</button>
             </div>
           </div>
         </div>
@@ -269,7 +293,7 @@
 
 
           <div class="flex justify-center p-4">
-            <textarea id="message" rows="4"
+            <textarea name='message'id="message" rows="4"
               class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 "
               placeholder="คำชี้แจง"></textarea>
           </div>
@@ -278,87 +302,93 @@
 
             </div>
           <div class="">
-            <div class="p-4 border">
+            <div class="p-4 border bg-gray-100 m-4 rounded">
               <div id="parent">
                 <!-- div แม่ -->
                 <!-- ฟิลด์แรกของแม่ -->
+                <div class="bg-purple-100 mb-5 rounded shadow-xl py-5 pb-16 p-3 h-auto mb-10">
                 <div id="static_field0"  class="main_field0">
                   <!-- div ลูก -->
                   <input type="text" id="inputField" name="static_field0" placeholder="หัวข้อหลัก" value='วัตถุประสงค์ของรายวิชา (CLO)'readonly
-                    class="border border-gray-400 bg-gray-50 h-10 w-1/3 rounded-lg p-2" ></input>
+                    class="border border-gray-400 bg-gray-50 h-10 w-1/3 rounded-lg p-2 " ></input>
                   <!-- ปุ่มเพิ่มลูก -->
-                  <button type="button" class="addSubField" onclick="addSubField(this)">
-
-                    <div class="bg-blue-500 hover:bg-blue-700 text-white mb-2 rounded-lg w-auto p-2 flex justify-center">
-                      + เพิ่มหัวข้อย่อย
-                    </div>
-                  </button>
+                  <button type="button" class="addSubField" onclick="addSubField(this)">+ เพิ่มหัวข้อย่อย</button>
+                  <div class="border border-b border-gray-400 my-2 mb-4 "></div>
                   <div class="subFields"></div>
 
                 </div>
+              </div>
 
                            <!-- ฟิลด์ที่สองของแม่ -->
             {% comment %} แผนการสอนเนื้อหาสาระ (C) {% endcomment %}
+            <div class="bg-blue-100 mb-5 rounded shadow-xl py-5 pb-16 p-3 h-auto mb-10">
             <div id="static_field1" class="main_field0">
               <!-- div ลูก -->
               <input type="text" name="static_field1" placeholder="หัวข้อหลัก" readonly value="แผนการสอนเนื้อหาสาระ (C)"
                 class="border border-gray-400 bg-gray-50 h-8 w-1/3 rounded p-2">
-
+                <div class="border border-b border-gray-400 mt-3 mb-4 "></div>
               <div class="subFields">
                 {%for c in fix_data.fix_c%}
                   {% for sub_item in c.sub_items.all %}
-                    <input type="text" name="sub_field_static_field1" placeholder="หัวข้อย่อย" readonly value="{{ sub_item.text }}"
-                    class="border border-gray-400 bg-gray-50 h-8 w-1/3 rounded p-2" style="margin-left: 40px;">
+                    <input class='ml-4'type="text" name="sub_field_static_field1" placeholder="หัวข้อย่อย" readonly value="{{ sub_item.text }}"
+                    class="border border-gray-400 bg-gray-50 h-8 mt-3 rounded p-2 " style="width: 90%; height: 40px; margin-left: 20px;">
                   {%endfor%}
                 {%endfor%}
               </div>
             </div>
-
-            <hr class="border-4 border-black my-4">
+          </div>
+            <!-- <hr class="border-4 border-black my-4"> -->
 
             <!-- ฟิลด์ที่สามของแม่ -->
             {% comment %} กิจกรรมการเรียนการสอน (L) {% endcomment %}
+            <div class="bg-red-100 mb-5 rounded shadow-xl py-5 pb-16 p-3 h-auto mb-10">
             <div id="static_field2" class="main_field0">
               <!-- div ลูก -->
               <input type="text" name="static_field2" placeholder="หัวข้อหลัก" readonly value="กิจกรรมการเรียนการสอน (L)"
                 class="border border-gray-400 bg-gray-50 h-8 w-1/3 rounded p-2">
+                <div class="border border-b border-gray-400 mt-3 mb-4 "></div>
 
               <div class="subFields">
                 {%for L in fix_data.fix_l%}
                   {% for sub_item in L.sub_items.all %}
                     <input type="text" name="sub_field_static_field2" placeholder="หัวข้อย่อย" readonly value="{{ sub_item.text }}"
-                    class="border border-gray-400 bg-gray-50 h-8 w-1/3 rounded p-2" style="margin-left: 40px;">
+                    class="border border-gray-400 bg-gray-50 h-8 mt-3 rounded p-2" style="width: 90%; height: 40px; margin-left: 20px;">
                   {%endfor%}
                 {%endfor%}
               </div>
             </div>
-
-            <hr class="border-4 border-black my-4">
+          </div>
+            <!-- <hr class="border-4 border-black my-4"> -->
 
             <!-- ฟิลด์ที่สี่ของแม่ -->
             {% comment %} การวัดและการประเมินการเรียนรู้ (E) {% endcomment %}
+            <div class="bg-yellow-100 mb-5 rounded shadow-xl py-5 pb-16 p-3 h-auto mb-10">
             <div id="static_field3" class="main_field0">
               <!-- div ลูก -->
               <input type="text" name="static_field3" placeholder="หัวข้อหลัก" readonly value="การวัดและการประเมินการเรียนรู้ (E)"
                 class="border border-gray-400 bg-gray-50 h-8 w-1/3 rounded p-2">
-   
+                <div class="border border-b border-gray-400 mt-3 mb-4 "></div>
+
               <div class="subFields">
                 {%for e in fix_data.fix_e%}
                   {% for sub_item in e.sub_items.all %}
                     <input type="text" name="sub_field_static_field3" placeholder="หัวข้อย่อย" readonly value="{{ sub_item.text }}"
-                    class="border border-gray-400 bg-gray-50 h-8 w-1/3 rounded p-2" style="margin-left: 40px;">
+                    class="border border-gray-400 bg-gray-50 h-8 mt-3 rounded p-2" style="width: 90%; height: 40px; margin-left: 20px;">
                   {%endfor%}
                 {%endfor%}
               </div>
             </div>
+          </div>
 
-
-            <hr class="border-4 border-black my-4">
+            <!-- <hr class="border-4 border-black my-4"> -->
 
               </div>
 
             </div>
-            <div class="p-1 text-lg">
+
+            <div class="bg-gray-100 p-4 m-4 rounded border">
+              <div class="bg-white mb-5 rounded shadow-xl py-5 pb-16 p-3 h-auto mb-10">
+            <div class="p-1 text-lg ">
               <h1>หัวข้อการประเมิน PLO</h1>
             </div>
             <button type="button" onclick="openPopup()"
@@ -368,6 +398,8 @@
               <div class="Main_item"></div>
               <div class="subFields"></div>
             </div>
+          </div>
+        </div>
 
           </div>
           <div class="flex justify-between">
@@ -379,8 +411,7 @@
 
     </div>
   </div>
-  </div>
-</div>
+  
 <!-- </div> -->
 </form>
 
@@ -433,10 +464,40 @@
       inputField.style.height = height + 'px';
   }
   
+  function checkHandle(checkboxId, parentId) {
+    var checkbox = document.getElementById(checkboxId);
+    var parentCheckbox = document.getElementById('item_' + parentId);
+  
+    // เมื่อ checkbox ลูกถูกเลือก, ให้เลือก checkbox แม่ด้วย
+    if (checkbox.checked) {
+      parentCheckbox.checked = true;
+    }
+  
+    // ตรวจสอบว่าควรจะยกเลิกการเลือก checkbox แม่หรือไม่ (ถ้าลูกทั้งหมดไม่ถูกเลือก)
+    else {
+      var allSiblingsChecked = document.querySelectorAll(`input[data-parent-id="${parentId}"]:checked`).length > 0;
+      if (!allSiblingsChecked) {
+        parentCheckbox.checked = false;
+      }
+    }
+  }
+
+  function handleParentCheckbox(parentId) {
+    var parentCheckbox = document.getElementById('item_' + parentId);
+    var childCheckboxes = document.querySelectorAll(`input[data-parent-id="${parentId}"]`);
+  
+    // ตั้งค่า checkbox ลูกทั้งหมดให้มีสถานะเดียวกันกับ checkbox แม่
+    childCheckboxes.forEach(function(checkbox) {
+      checkbox.checked = parentCheckbox.checked;
+    });
+  }
+
+  
+  
 </script>
 
 <script src="{% static "Func_Create_form.js"%}"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="{% static "show_pop.js"%}"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
 {% endblock %}

@@ -129,7 +129,7 @@
                         <li><a href="{% url 'form_detail' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">จัดการแบบประเมิน</a></li>
                       {%endif%}
                         {%if request.user|in_group:"หัวหน้าสาขา"%}
-                        <li><a href="#" class="block px-4  py-2 text-gray-800 hover:bg-gray-100">จัดการหัวข้อ O/PLO</a></li>
+                        <li><a href="/manage_template" class="block px-4  py-2 text-gray-800 hover:bg-gray-100">จัดการหัวข้อ O/PLO</a></li>
                       {%endif%}
                     </ul>
                 </div>

@@ -17,7 +17,7 @@
         <div class="flex flex-wrap">
         {% for data in form%}
         <div class="w-full md:w-2/3  px-2 my-3 pl-16 justify-center">
-            <div class="bg-gray-100 border rounded shadow-lg p-4 mx-4">
+            <div class="bg-gray-200 border rounded shadow-lg p-4 mx-4">
         <div class="form-card">
             
           <input
@@ -32,10 +32,8 @@
                 class="toggle-label block overflow-hidden h-8 rounded-full bg-gray-300 cursor-pointer w-14"
             ></label>
         </div>
-        <div>Create by: <a class="bg-purple-500 text-white w-auto p-1">{{ data.created_by }}</a> </div>
-        <div>tamplate ถูกใช้งาน: {{data.is_active}}</div>
-        <div> Form ID: {{ data.id }}</div>
-        {{ data.semester }}/{{ data.year_number }}
+        <p class=" text-gray-500 md:text-lg dark:text-gray-400">ถูกสร้างโดย  {{ user_profile.prefix }} {{ data.created_by.first_name}} {{ data.created_by.last_name}} </p>
+        <p class=" text-gray-500 md:text-lg dark:text-gray-400">เทอม/ปีการศึกษา : {{ data.semester }}/{{ data.year_number }}</p>
                 <a href="{% url 'edit_template' form_id=data.id %}">
                     <div>
                     <button onclick="viewForm({{data.id}}) " class="font-semibold text-white bg-green-600 hover:bg-green-900 ml-2 p-1 mt-3">จัดการแบบฟอร์ม {{data.semester}}/{{data.year_number}} </button>

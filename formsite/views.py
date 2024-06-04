@@ -4,7 +4,7 @@ from .models import *
 from .models import Form as form_id
 import time
 import pandas as pd
-from .forms import Plo_form
+from .forms import Plo_form, UpdateTemplateForm
 from evaluate.forms import PLOsForm, Form, ClosForm, CSVUploadForm
 from django.contrib.auth.models import User, Group
 from rest_framework import routers, serializers, viewsets, status
@@ -100,18 +100,19 @@ def create_plo(request):
                  #  นอกเหนือจาก 0 บันทีกลง PLO   
                     main_fields = request.POST.get(name_main, '') 
                     if main_fields:
-                         main_fields = f'PLO{i} ' + main_fields
+                         main_fields = f'PLO{i}: ' + main_fields
                     main_field = TemplateData.objects.create(text=main_fields, form=create_form)
     
                             
                     name_sub = 'sub_field_' + str(name_main)
                     sub_fields = request.POST.getlist(name_sub)
-
+                    
+                    sub_count = 1
                     for sub_field_text in sub_fields:
-                        sub_count = 1
                         if sub_field_text:
-                            data = f'i.{sub_count} ' + sub_field_text
+                            data = f'{i}.{sub_count} ' + sub_field_text
                         TemplateData.objects.create(text=data, parent=main_field, form=create_form)
+                        sub_count+=1
 
         return redirect('/manage_template')
     else:
@@ -143,11 +144,11 @@ def edit_template(request, form_id):
     template = Teamplates.objects.filter(id=form_id)
     tem = get_object_or_404(Teamplates, id=form_id)
     
-    if  not tem.department == user_profile.department:
+    if not tem.department == user_profile.department:
         return redirect('/manage_template')
-        
-
-    return render(request, 'edit_template.html', {'template': template})
+    
+    update = UpdateTemplateForm(instance=tem, start_date=tem.start_date, end_date=tem.end_date)
+    return render(request, 'edit_template.html', {'template': template, 'update':update})
 
 #อัพเดตข้อมูล PLO&O ใน Temlplate ที่มีอยู่ก่อน ลบ
 def delete_update_template_data(request):
@@ -162,15 +163,26 @@ def delete_update_template_data(request):
             CLO.objects.filter(id=data_id).update(text=text)
         return JsonResponse({'status': 'success', 'message': 'Data updated successfully'})
     
-    elif request.method == 'DELETE' :
+    elif request.method == 'DELETE':
         data_id = request.GET.get('data_id')
         data_type = request.GET.get('type')  
       
         if data_type == 'TemplateData':
+            parent_template = TemplateData.objects.get(id=data_id).parent
             TemplateData.objects.filter(id=data_id).delete()
-            print("delete",data_id)
+            print("delete", data_id)
+            
+            # Update the sequence of the children
+            if parent_template:
+                children = TemplateData.objects.filter(parent=parent_template).order_by('id')
+                for index, child in enumerate(children, start=1):
+                    parent_number = ''.join(filter(str.isdigit, parent_template.text.split(' ')[0]))
+                    child.text = f'{parent_number}.{index} ' + ' '.join(child.text.split(' ')[1:])
+                    child.save()
+
         elif data_type == 'CLO':
             CLO.objects.filter(id=data_id).delete()
+
         return JsonResponse({'status': 'success', 'message': 'Delete successfully'})
     
     else:
@@ -179,31 +191,53 @@ def delete_update_template_data(request):
 #เพิ่มข้อมูล PLO&O ใน Temlplate ที่มีอยู่ก่อน
 def addnew_template_data(request):
     if request.method == 'POST':
-    
         if request.POST.get('type') == "Newparent":
-            template_in = get_object_or_404(Teamplates, id=request.POST.get('form_id')) 
-    
-            TemplateData.objects.create(form = template_in, text ="")
+            template_in = get_object_or_404(Teamplates, id=request.POST.get('form_id'))
+
+            # ตรวจสอบจำนวน TemplateData ที่มีอยู่แล้วใน form
+            count = TemplateData.objects.filter(form=template_in, parent__isnull=True).count()
+            main_fields = f'PLO{count + 1}: '
+
+            TemplateData.objects.create(form=template_in, text=main_fields)
             return JsonResponse({'status': 'success', 'message': 'Data updated successfully'})
-        
+
         elif request.POST.get('type') != "Newparent":
-            parent_id = request.POST.get('data_id').split('_')[2] 
+            parent_id = request.POST.get('data_id').split('_')[2]
             text = request.POST.get('text')
             print(request.POST.get('text'))
             data_type = request.POST.get('type')
-            if text is not None and text.strip() != "" :
-                tempalte_in = Teamplates.objects.get(id=request.POST.get('form_id'))
+            if text is not None and text.strip() != "":
+                template_in = Teamplates.objects.get(id=request.POST.get('form_id'))
+
                 if data_type == 'TemplateData':
+                    parent_template = TemplateData.objects.get(id=parent_id)
+                    # ตรวจสอบจำนวนลูกที่มีอยู่แล้วของแม่
+                    sub_count = TemplateData.objects.filter(parent=parent_template).count() + 1
+                    # ดึงเฉพาะตัวเลขจากข้อความของแม่
+                    parent_number = ''.join(filter(str.isdigit, parent_template.text.split(' ')[0]))
+                    data = f'{parent_number}.{sub_count} ' + text
+
                     # สร้างหรืออัพเดต TemplateData ใหม่
-                    TemplateData.objects.update_or_create(parent=TemplateData.objects.get(id=parent_id), text=text, form = tempalte_in)
+                    TemplateData.objects.update_or_create(
+                        parent=parent_template, text=data, form=template_in)
                 elif data_type == 'CLO':
+                    parent_clo = CLO.objects.get(id=parent_id)
+                    # ตรวจสอบจำนวนลูกที่มีอยู่แล้วของแม่
+                    sub_count = CLO.objects.filter(parent=parent_clo).count() + 1
+                    # ดึงเฉพาะตัวเลขจากข้อความของแม่
+                    parent_number = ''.join(filter(str.isdigit, parent_clo.text.split(' ')[0]))
+                    data = f'{parent_number}.{sub_count} ' + text
+
                     # สร้างหรืออัพเดต CLO ใหม่
-                    CLO.objects.update_or_create(parent=CLO.objects.get(id=parent_id), text=text, form =tempalte_in)
+                    CLO.objects.update_or_create(
+                        parent=parent_clo, text=data, form=template_in)
                 return JsonResponse({'status': 'success', 'message': 'Data updated successfully'})
             else:
                 return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+
     
 @login_required(login_url="sign_in") 
 @admin_required    
@@ -271,7 +305,13 @@ def report(request, form_id):
 
     user_eva = AuthorizedUser.objects.filter(form=form, done=True)
     user_all = AuthorizedUser.objects.filter(form=form)
-    context_user = {'user_eva':user_eva, 'user_all':user_all}
+    if len(user_all) > 0:  
+        sum_user= (len(user_eva) / len(user_all)) * 100
+    else:
+        sum_user= 0  
+    context_user = {'user_eva':user_eva, 'user_all':user_all,'sum_user':sum_user}
+    
+    print(sum_user)
     # สำหรับแต่ละ assessment item, กรอง sub_items และคำนวณค่าเฉลี่ย
     for item in assessment_items:
         sub_items_with_avg = item.sub_items.annotate(
@@ -311,42 +351,3 @@ def report(request, form_id):
     
     return render(request, 'report.html', {'form':form, 'assessment_items': assessment_items, 'plo':plo, 'overall_plo_average':overall_plo_average, 'comment':comment, 'context_user':context_user})
     
-'''
-def edit_template(request):
-    if request.method == 'POST':
-        #แก้ไข
-        if 'main_text' in request.POST and 'plo_id' in request.POST:
-            
-            plo_id = request.POST.get('plo_id')
-            new_text = request.POST.get('main_text')
-            try:
-                plo = get_object_or_404(TemplateData, id=plo_id)
-                plo.text = new_text
-                plo.save()
-                return redirect('manage_plos')
-            except TemplateData.DoesNotExist:
-                return HttpResponse("PLO does not exist.")
-        elif 'sub_text' in request.POST and 'sub_item_id' in request.POST:
-            
-            sub_item_id = request.POST.get('sub_item_id')
-            sub_text = request.POST.get('sub_text')
-            try:
-                sub_plo = get_object_or_404(TemplateData, id=sub_item_id)
-                sub_plo.text = sub_text
-                sub_plo.save()
-                return redirect('manage_plos')
-            except TemplateData.DoesNotExist:
-                return HttpResponse("Sub PLO does not exist.")
-        else:
-            return HttpResponse("Invalid form data.")
-        #แก้ไข
-    
-    elif request.method == 'GET':
-        year_number = request.GET.get('year_number')
-        school_year = request.GET.get('school_year')
-        plos_form = Teamplates.objects.filter(created_by=request.user)
-        return render(request, 'manage_plos.html', {'plos': plos_form})
-    else:
-        plos_form = TemplateData.objects.filter(parent__isnull=True)
-        return render(request, 'manage_plos.html', {'plos': plos_form})
-'''
